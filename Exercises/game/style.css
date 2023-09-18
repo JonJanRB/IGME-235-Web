@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+h1 {
+    color: red;
+    font-family: sans-serif;
+    border-bottom: 1px solid blue;
+}
+
+blockquote {
+    background-color: lightgray;
+    padding: 1rem;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body { background-color:lightblue; }
+
+h2
+{
+    color:rgb(9, 104, 0);
+    margin-left: 50px;
+}
+
+p
+{
+    margin-left: 100px;
+}
+
+img.over
+{
+    float: right;
+    margin: 0 12px;
+}
+
+body
+{
+    font-family: Arial, sans-serif;
+}
+
+h1, h2
+{
+    font-family: 'VT323', monospace;
+    font-size: 300%;
+}
+
+/* *{border: 1px solid gray} */
