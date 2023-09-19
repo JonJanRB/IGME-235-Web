@@ -1,0 +1,6 @@
+/* CSS HEX */
+--rich-black: #00030fff;
+--night: #060b23ff;
+--french-gray: #a6a9b9ff;
+--cambridge-blue: #93b48bff;
+--chili-red: #d64933ff;
