@@ -1,0 +1,18 @@
+h2, h3
+{
+    border-bottom: 2px solid red;
+}
+
+figure img
+{
+    float: right;
+    width: 40vm;
+}
+
+/* div.tet
+{
+    float: right;
+    width: 40vm;
+}
+
+div.tet  */
