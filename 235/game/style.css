@@ -3,7 +3,7 @@
 body
 {
     font-family: Arial, sans-serif;
-    background-color: rgb(8, 8, 24);
+    background-color: #340700;
     color: #a6a9b9ff;
 }
 
@@ -11,15 +11,15 @@ footer,
 header,
 blockquote
 {
-    background-color: rgb(14, 18, 37);
+    background-color: #0e1225;
 }
 
 
 h1
 {
-    color: #93B48B;
+    color: #33ff00;
     font-family: sans-serif;
-    border-bottom: 1px solid blue;
+    border-bottom: 1px solid #33ff00;
 }
 
 blockquote
@@ -34,7 +34,7 @@ html
 
 h2
 {
-    color: #93B48B;
+    color: #7cc26a;
     margin-left: 50px;
 }
 
@@ -46,7 +46,7 @@ p
 img.over
 {
     float: right;
-    margin: 0 12px;
+    margin: 12px;
 }
 
 h1,
@@ -83,4 +83,29 @@ a:active
 {
     color: #ff5f37;
     background-color: #c01a008c;
+}
+
+.bordered
+{
+    border: 1px solid #33ff00;
+}
+
+hr
+{
+    border-color: #33ff00;
+}
+
+main,
+header,
+footer
+{
+    border: 1px solid #ff2200;
+    margin: 20px auto;
+    width: 80vw;
+    padding: 2rem;
+}
+
+main
+{
+    background-color: #080818;
 }
