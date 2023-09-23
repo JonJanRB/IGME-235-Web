@@ -13,6 +13,7 @@ body
     color: var(--fg);
     background-color: var(--bg);
     font-family: 'Inconsolata', monospace;
+    font-size: 20px;
 }
 
 h1
