@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Special+Elite&display=swap');
+
+*
+{
+    background-color: black;
+    color: rgb(255, 192, 91);
+    font-family: 'Inconsolata', monospace;
+}
+
+h1
+{
+    color: rgb(255, 157, 0);
+    font-size: 4vw;
+}
+
+h2
+{
+    color: rgb(255, 171, 37);
+    font-size: 2vw;
+}
+
+h1, h2
+{
+    font-family: 'Special Elite', cursive;
+}
+
+strong
+{
+    color: rgb(155, 96, 0);
+    font-size: 1.25vw;
+}
+
+a
+{
+    color: rgb(77, 246, 255);
+}
+
+hr
+{
+    height: 1vh;
+    background-color: #482d00;
+    border: none;
+}
+
+blockquote
+{
+    border-color: #321f00;
+    padding: 1vw;
+    border-width: 0.3vw;
+    border-left-width: 1vw;
+    border-style: solid;
+}

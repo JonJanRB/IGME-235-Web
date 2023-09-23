@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Special+Elite&display=swap');
+
+body
+{
+    color: rgb(214, 214, 214);
+    background-color: rgb(26, 26, 26);
+    font-family: 'Inconsolata', monospace;
+}
+
+div.content-box
+{
+    /* float: right; */
+    border: 10px solid;
+    padding: 25px;
+    width: 50vw;
+}
