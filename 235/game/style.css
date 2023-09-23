@@ -1,25 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-h1 {
-    color: red;
+body
+{
+    font-family: Arial, sans-serif;
+    background-color: rgb(8, 8, 24);
+    color: #a6a9b9ff;
+}
+
+footer,
+header,
+blockquote
+{
+    background-color: rgb(14, 18, 37);
+}
+
+
+h1
+{
+    color: #93B48B;
     font-family: sans-serif;
     border-bottom: 1px solid blue;
 }
 
-blockquote {
-    background-color: lightgray;
+blockquote
+{
     padding: 1rem;
 }
 
-html {
+html
+{
     scroll-behavior: smooth;
 }
 
-body { background-color:lightblue; }
-
 h2
 {
-    color:rgb(9, 104, 0);
+    color: #93B48B;
     margin-left: 50px;
 }
 
@@ -34,15 +49,38 @@ img.over
     margin: 0 12px;
 }
 
-body
-{
-    font-family: Arial, sans-serif;
-}
-
-h1, h2
+h1,
+h2
 {
     font-family: 'VT323', monospace;
     font-size: 300%;
 }
 
-/* *{border: 1px solid gray} */
+
+a:link
+{
+    color: #ff2200
+}
+
+a:visited
+{
+    color: #7e1100
+}
+
+a:focus
+{
+    color: #D64933;
+    background-color: #3b08008c;
+}
+
+a:hover
+{
+    color: #ff8e7d;
+    background-color: #9714008c;
+}
+
+a:active
+{
+    color: #ff5f37;
+    background-color: #c01a008c;
+}
