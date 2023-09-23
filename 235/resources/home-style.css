@@ -1,9 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Special+Elite&display=swap');
 
+/* Variables */
+:root
+{
+    --fg: #d6d6d6;
+    --bg: #1a1a1a;
+    --content-bg: #141414;
+}
+
 body
 {
-    color: #d6d6d6;
-    background-color: #1a1a1a;
+    color: var(--fg);
+    background-color: var(--bg);
     font-family: 'Inconsolata', monospace;
 }
 
@@ -27,7 +35,7 @@ h2
 {
     border: 10px solid;
     border-radius: 10px;
-    background-color: #141414;
+    background-color: var(--content-bg);
 }
 
 .box-dimensions
@@ -72,4 +80,9 @@ a:hover
 a:active
 {
     color: #6200ff;
+}
+
+img
+{
+    border-radius: 30px;
 }
