@@ -16,9 +16,191 @@ div#wrapper
         "footer";
 }
 
-h1.game { grid-area: logo; }
-ul.menu { grid-area: menu; }
-#introduction { grid-area: intro; }
+@media screen and (min-width: 850px)
+{
+    div#wrapper
+    {
+        grid-template-areas:
+        "logo       intro"
+        "menu       menu"
+        "playground playground"
+        "footer     footer";
+
+        /* First column 500px, 2nd takes up the rest of the space */
+        grid-template-columns: 500px 1fr;
+        /* 435px row 1, rest equal fractional space */
+        grid-template-rows: 435px auto;
+    }
+}
+
+
+
+h1.game
+{
+    grid-area: logo;
+    width: auto;
+    height: auto;
+    background: url(../images/tetris-logo.png) no-repeat;
+    text-indent: -9999px;
+}
+ul.menu
+{
+    grid-area: menu;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+#introduction
+{
+    grid-area: intro;
+    margin: 2rem;
+}
 #tetgrid { grid-area: playground; }
 footer { grid-area: footer; }
 
+/* make links into block elements */
+.menu a {
+    display: block;
+    background: gray;
+    padding: 10px;
+    color: white;
+    text-decoration: none;
+
+    /* Transitions */
+    transition: transform 0.1s ease-in, background-color 0.5s linear;
+}
+
+.menu li {
+    width: 25%;
+}
+
+@media screen and (max-width: 550px) {
+	.menu li {
+		width: 100%;
+	}
+}
+
+.menu a:hover {
+	background: red;
+	color: yellow;
+
+    /* Transitions */
+    transform:scale(1.1);
+}
+
+
+/* Sub menu show/hide */
+ul.menu ul li {
+    width:100%;
+}
+ul.menu ul {
+    display:none;
+}
+ul.menu li:hover ul {
+    display:flex;
+}
+
+.menu .submenu li>a {
+    background:red;
+    color:yellow;
+}
+.menu .submenu>a:after {
+    content: "+";
+    padding-left:5px;
+}
+
+
+/* Interactive tet grid */
+#tetgrid {
+    display: grid;
+    grid-template-columns: repeat(6, 100px);
+    grid-template-rows: repeat(6, 100px);
+}
+
+/* This basically delegates grid items to their own box, it will not draw outside of its box */
+/* div.tet {
+    overflow: hidden
+} */
+
+/* If any rotation changes occur, they should happen over a 1 second duration */
+img {
+    transition-property: transform;
+    transition-duration: 0.5s;
+}
+/* Transition rotate when hover */
+img:hover {
+    /* I changed this from default instructions */
+    transform: rotate(-5deg) scale(1.2);
+}
+
+
+
+/* Two ways to span items through multiple rows and columns */
+#o {
+    grid-column: 1/3;
+    grid-row: 1/span 2;
+}
+
+
+#i {
+    /* from 3 to end */
+    grid-column: 3/-1; 
+    grid-row: span 1;
+}
+
+/* This messes with the red one from being interactive */
+/* #z img { */
+    /* the pivot point relative to the original image position (even after transformed) */
+    /* transform-origin: 0 0; */
+    /* transform:  translateX(205px) rotate(90deg); */
+    /* transform:  rotate(90deg) translateX(205px); */
+/* } */
+
+#z {
+    grid-column: 2/span 2;
+    grid-row: 2/span 3;
+
+    /* the pivot point relative to the original image position (even after transformed) */
+    transform-origin: 0 0;
+    transform:  translateX(205px) rotate(90deg);
+}
+
+
+/* The rest of the terominoes */
+#j
+{
+    grid-column: 3/span 3;
+    grid-row: 2/span 2;
+
+    transform-origin: 0 0;
+    transform:  translateX(205px) rotate(90deg);
+}
+
+#l
+{
+    grid-column: 1/4;
+    grid-row: 3/5;
+
+    transform-origin: 0 0;
+    transform: translateY(305px) rotate(-90deg);
+}
+
+#s
+{
+    grid-column: 5/span 3;
+    grid-row: 2/span 2;
+
+    transform-origin: 0 0;
+    transform: translateY(305px) rotate(-90deg);
+}
+
+#t
+{
+    grid-column: -4/span 3;
+    grid-row: 4/span 2;
+
+    transform-origin: 0 0;
+    transform: translateX(205px) rotate(90deg);
+}
