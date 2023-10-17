@@ -1,0 +1,20 @@
+body
+{
+    background-color: #002907;
+}
+
+.textWrapContent
+{
+    shape-outside: margin-box;
+}
+
+/* Pro tips */
+figure.proTip img
+{
+    border: 5px solid yellowgreen;
+}
+
+figure.proTip figcaption
+{
+    color: yellowgreen;
+}
