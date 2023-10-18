@@ -8,6 +8,7 @@
     --document-width: 989px;
     --document-height: 1416px;
     --main-text-color: #d6d6d6;
+    --wrapper-bg-color: #002907;
     --pro-tip-color: #a5c663;
     --normal-font: 'Archivo', sans-serif;
     --normal-font-size: 13px;
@@ -15,11 +16,12 @@
     --sub-header-color: #ee9246;
 
     /* Debug */
-    /* --hole-hitbox-color: #ff00003f;
-    --debug-source-overlay-opacity: 0.5; */
+    --hole-hitbox-color: #ff00003f;
+    --wrapper-bg-color: #00000000;
+    --debug-source-overlay-opacity: 0.5;
     /* Uncomment the above to view in debug mode */
-    --hole-hitbox-color: #ff000000;
-    --debug-source-overlay-opacity: 0;
+    /* --hole-hitbox-color: #ff000000;
+    --debug-source-overlay-opacity: 0; */
 }
 
 body
@@ -40,7 +42,7 @@ body
 #wrapper
 {
     padding: 0px;
-    background-color: #002907;
+    background-color: var(--wrapper-bg-color);
     display: grid;
     grid-template-rows: 14% 84% 2%;
     grid-template-areas:    "header"
@@ -180,14 +182,20 @@ figure.proTip
 
 #barney
 {
+    width: 210px;
+    position: relative;
+    left: 52px;
+    top: 551px;
+}
+
+#scientist
+{
     width: 283px;
     position: relative;
     left: 48px;
     top: 535px;
 }
 
-
-#barney,
 #scientist,
 #grunt,
 #vortigaunt,
@@ -304,7 +312,6 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     translate: 0px -1515px;
     width: var(--document-width);
     opacity: var(--debug-source-overlay-opacity);
-
-    width: var(--document-width);
+    
     margin: 20px auto 100px;
 }
