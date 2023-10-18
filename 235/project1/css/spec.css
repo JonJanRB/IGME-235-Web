@@ -10,8 +10,16 @@
     --main-text-color: #d6d6d6;
     --pro-tip-color: #a5c663;
     --normal-font: 'Archivo', sans-serif;
+    --normal-font-size: 13px;
     --sub-header-font: 'Federant', serif;
-    --hole-hitbox-color: #ff00003f;
+    --sub-header-color: #ee9246;
+
+    /* Debug */
+    /* --hole-hitbox-color: #ff00003f;
+    --debug-source-overlay-opacity: 0.5; */
+    /* Uncomment the above to view in debug mode */
+    --hole-hitbox-color: #ff000000;
+    --debug-source-overlay-opacity: 0;
 }
 
 body
@@ -32,7 +40,7 @@ body
 #wrapper
 {
     padding: 0px;
-    background-color: #00290700;
+    background-color: #002907;
     display: grid;
     grid-template-rows: 14% 84% 2%;
     grid-template-areas:    "header"
@@ -93,19 +101,25 @@ body
         #article
         {
             grid-area: articleArea;
-            margin: 0px 20px;
+            margin: 0px 21px;
+            padding-top: 3px;
         }
             #article p
             {
                 margin: 0px;
                 font-family: var(--normal-font);
-                font-size: 19px;
+                font-size: var(--normal-font-size);
+                line-height: 20.7px;
             }
             #article h2
             {
-                display: inline;
+                /* display: inline; */
                 font-family: var(--sub-header-font);
-                font-size: 19px;
+                margin-top: 6px;
+                margin-bottom: 2.5px;
+                font-size: 22px;
+                letter-spacing: -1.7px;
+                color: var(--sub-header-color);
             }
         #systemRequirments
         {
@@ -206,14 +220,14 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     /* use margin to position it, so weird */
     float: left;
     width: 188px;
-    height: 267px;
-    margin-top: 323px;
+    height: 265px;
+    margin-top: 329px;
 }
 #hole2
 {
     float: right;
-    width: 199px;
-    height: 278px;
+    width: 192px;
+    height: 265px;
     margin-top: -54px;
     margin-right: 101px;
 }
@@ -240,7 +254,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     float: right;
     clear: right;
     width: 206px;
-    height: 304px;
+    height: 290px;
     margin-top: 23px;
     margin-right: 100px;
 }
@@ -255,61 +269,6 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 }
 
 
-/* #gruntHole
-{
-    width: 205px;
-    height: 267px;
-    margin-top: -842px;
-    margin-right: -141px;
-    float: right;
-    shape-outside: border-box;
-    background-color: rgba(255, 0, 0, 0.247);
-}
-#vortigauntHole
-{
-    width: 205px;
-    height: 267px;
-    margin-top: 10px;
-    margin-left: -98px;
-    float: left;
-    shape-outside: border-box;
-    clear: left;
-    background-color: rgba(255, 0, 0, 0.247);
-}
-#revolverHole
-{
-    width: 205px;
-    height: 267px;
-    margin-top: 10px;
-    margin-left: -98px;
-    float: left;
-    shape-outside: border-box;
-    clear: left;
-    background-color: rgba(255, 0, 0, 0.247);
-}
-#houndeyeHole
-{
-    width: 205px;
-    height: 267px;
-    margin-top: 10px;
-    margin-left: -98px;
-    float: left;
-    shape-outside: border-box;
-    clear: left;
-    background-color: rgba(255, 0, 0, 0.247);
-}
-#ressonenceHole
-{
-    width: 205px;
-    height: 267px;
-    margin-top: 10px;
-    margin-left: -98px;
-    float: left;
-    shape-outside: border-box;
-    clear: left;
-    background-color: rgba(255, 0, 0, 0.247);
-} */
-
 /* Protip setup */
 .proTip img
 {
@@ -323,7 +282,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     color: var(--pro-tip-color);
     width: 105%;
     font-family: var(--normal-font);
-    font-size: 13px;
+    font-size: var(--normal-font-size);
     font-weight: bold;
     letter-spacing: -1px;
     line-height: 17px;
@@ -336,7 +295,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 
 
 /* TEMP DELETE */
-#overlayDelete
+#sourceOverlay
 {
     display: block;
     position: relative;
@@ -344,7 +303,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     /* top: calc(-130%); */
     translate: 0px -1515px;
     width: var(--document-width);
-    opacity: 0.5;
+    opacity: var(--debug-source-overlay-opacity);
 
     width: var(--document-width);
     margin: 20px auto 100px;
