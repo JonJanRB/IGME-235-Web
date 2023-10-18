@@ -9,33 +9,33 @@
 </head>
 
 <body>
-    <header>
-        <div id="logo">
-            <img src="media/logo.png" alt="PC Game Pro Pro Reviews">
-        </div>
-        <section>
-            <figure id="credit">
+    <div id="wrapper" class="standardGridTile">
+        <header>
+            <div id="logo" class="standardGridTile">
+                <img src="media/logo.png" alt="PC Game Pro Pro Reviews">
+            </div>
+            <figure id="credit" class="standardGridTile">
                 <img src="media/dan.png" alt="">
                 <figcaption>By Dan Elektro</figcaption>
             </figure>
-            <div id="gameInfoContainer">
-                <div id="gameInfo">
-                    <ul id="infoTopLeft">
+            <div id="gameInfoContainer" class="standardGridTile">
+                <div id="gameInfo" class="standardGridTile">
+                    <ul id="infoTopLeft" class="standardGridTile">
                         <li>Lorem ipsum dolor</li>
                         <li>Lorem ipsum dolor</li>
                         <li>Lorem ipsum dolor</li>
                     </ul>
-                    <ul id="infoTopRight">
+                    <ul id="infoTopRight" class="standardGridTile">
                         <li>Lorem ipsum dolor</li>
                         <li>Lorem ipsum dolor</li>
                         <li>Lorem ipsum dolor</li>
                     </ul>
-                    <ul id="infoBottomLeft">
+                    <ul id="infoBottomLeft" class="standardGridTile">
                         <li>Lorem ipsum dolor</li>
                         <li>Lorem ipsum dolor</li>
                     </ul>
                 </div>
-                <div id="briefCategoryRatings">
+                <div id="briefCategoryRatings" class="standardGridTile">
                     <figure>
                         <h6>Graphics</h6>
                         <img src="media/happy.png" alt="">
@@ -58,33 +58,21 @@
                     </figure>
                 </div>
             </div>
-        </section>
-    </header>
-    <main>
-        <aside id="systemRequirments">
-            <h3>System Requirements</h3>
-            <ul>
-                <li>Lorem, ipsum</li>
-                <li>Lorem, ipsum</li>
-                <li>Lorem, ipsum</li>
-                <li>Lorem, ipsum</li>
-                <li>Lorem, ipsum</li>
-                <li>Lorem, ipsum</li>
-            </ul>
-        </aside>
-        <article>
-            <h1>Hλlf-Life</h1> <!--This will appear as part of the header but is better here for semantic meaning?-->
-            <p>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
-                necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
-                iusto voluptatibus sunt ducimus possimus minus quisquam, fugit quas sint natus soluta voluptates consectetur,
-                impedit voluptas aut mollitia dignissimos non sed obcaecati. Excepturi non, facilis enim, veritatis minus incidunt
-                omnis consectetur repudiandae nostrum, recusandae quo earum voluptatibus illo perferendis laborum at magni ab modi
-                fuga nam impedit! Nostrum tenetur, temporibus dolore omnis laborum id ullam blanditiis, officia, eius atque
-                ratione. Provident, corrupti corporis, eveniet facilis, iste placeat nam culpa voluptatibus quisquam fuga ipsum?
-            </p>
-            <section>
-                <h2>Blinded by Science</h2>
+            <h1>Hλlf-Life</h1>
+        </header>
+        <div id="mainContent">
+            <!--Ok but tell me why I can't use the article element as a grid cell???-->
+            <div id="article" class="standardGridTile">
+                <!-- This is weird and not semantic but I couldn't figure out a better way -->
+                <div id="wordWrapHoles">
+                    <div id="railHole"></div>
+                    <div id="barneyHole"></div>
+                    <div id="scientistHole"></div>
+                    <div id="gruntHole"></div>
+                    <div id="vortigauntHole"></div>
+                    <div id="revolverHole"></div>
+                    <div id="houndeyeHole"></div>
+                </div>
                 <p>
                     Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
                     necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
@@ -94,31 +82,98 @@
                     fuga nam impedit! Nostrum tenetur, temporibus dolore omnis laborum id ullam blanditiis, officia, eius atque
                     ratione. Provident, corrupti corporis, eveniet facilis, iste placeat nam culpa voluptatibus quisquam fuga ipsum?
                 </p>
-            </section>
-            <section>
-                <h2>Context Winner</h2>
-                <p>
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
-                    necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
-                    iusto voluptatibus sunt ducimus possimus minus quisquam, fugit quas sint natus soluta voluptates consectetur,
-                    impedit voluptas aut mollitia dignissimos non sed obcaecati. Excepturi non, facilis enim, veritatis minus incidunt
-                    omnis consectetur repudiandae nostrum, recusandae quo earum voluptatibus illo perferendis laborum at magni ab modi
-                    fuga nam impedit! Nostrum tenetur, temporibus dolore omnis laborum id ullam blanditiis, officia, eius atque
-                    ratione. Provident, corrupti corporis, eveniet facilis, iste placeat nam culpa voluptatibus quisquam fuga ipsum?
-                </p>
-            </section>
-            <section>
-                <h2>A New Life Form</h2>
-                <p>
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
-                    necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
-                    iusto voluptatibus sunt ducimus possimus minus quisquam, fugit quas sint natus soluta voluptates consectetur,
-                    impedit voluptas aut mollitia dignissimos non sed obcaecati.
-                </p>
-            </section>
-        </article>
+                <section>
+                    <h2>Blinded by Science</h2>
+                    <p>
+                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
+                        necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
+                        iusto voluptatibus sunt ducimus possimus minus quisquam, fugit quas sint natus soluta voluptates consectetur,
+                        impedit voluptas aut mollitia dignissimos non sed obcaecati. Excepturi non, facilis enim, veritatis minus incidunt
+                        omnis consectetur repudiandae nostrum, recusandae quo earum voluptatibus illo perferendis laborum at magni ab modi
+                        fuga nam impedit! Nostrum tenetur, temporibus dolore omnis laborum id ullam blanditiis, officia, eius atque
+                        ratione. Provident, corrupti corporis, eveniet facilis, iste placeat nam culpa voluptatibus quisquam fuga ipsum?
+                    </p>
+                </section>
+                <section>
+                    <h2>Context Winner</h2>
+                    <p>
+                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
+                        necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
+                        iusto voluptatibus sunt ducimus possimus minus quisquam, fugit quas sint natus soluta voluptates consectetur,
+                        impedit voluptas aut mollitia dignissimos non sed obcaecati. Excepturi non, facilis enim, veritatis minus incidunt
+                        omnis consectetur repudiandae nostrum, recusandae quo earum voluptatibus illo perferendis laborum at magni ab modi
+                        fuga nam impedit! Nostrum tenetur, temporibus dolore omnis laborum id ullam blanditiis, officia, eius atque
+                        ratione. Provident, corrupti corporis, eveniet facilis, iste placeat nam culpa voluptatibus quisquam fuga ipsum?
+                    </p>
+                </section>
+                <section>
+                    <h2>A New Life Form</h2>
+                    <p>
+                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eveniet voluptas commodi, reiciendis iusto porro
+                        necessitatibus iste doloribus, vitae, aspernatur maiores inventore sunt quis. Sapiente amet, tenetur magnam
+                        iusto voluptatibus sunt ducimus possimus minus quisquam, fugit quas sint natus soluta voluptates consectetur,
+                        impedit voluptas aut mollitia dignissimos non sed obcaecati.
+                    </p>
+                </section>
+            </div>
+            <aside id="systemRequirments" class="standardGridTile">
+                <h3>System Requirements</h3>
+                <ul>
+                    <li>Lorem, ipsum</li>
+                    <li>Lorem, ipsum</li>
+                    <li>Lorem, ipsum</li>
+                    <li>Lorem, ipsum</li>
+                    <li>Lorem, ipsum</li>
+                    <li>Lorem, ipsum</li>
+                </ul>
+            </aside>
+            <aside id="categoryRatings" class="standardGridTile">
+                <ul>
+                    <li>
+                        <h4>Graphics</h4>
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
+                            ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
+                        </p>
+                    </li>
+                    <li>
+                        <h4>Sound</h4>
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
+                            ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
+                        </p>
+                    </li>
+                    <li>
+                        <h4>Control</h4>
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
+                            ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
+                        </p>
+                    </li>
+                    <li>
+                        <h4>Fun Factor</h4>
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
+                            ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
+                        </p>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <footer>
+            <div id="footerArticleInfo" class="standardGridTile">
+                Gamepro February 1999
+            </div>
+            <div id="footerPage" class="standardGridTile">
+                64
+            </div>
+            <div id="footerContactInfo" class="standardGridTile">
+                <a href="https://gamepro.com">www.gamepro.com</a>
+                <a href="mailto:comments.ganepro@gamepro.com">comments.ganepro@gamepro.com</a>
+            </div>
+        </footer>
         <div id="imageContent">
-            <figure class="textWrapContent proTip" id="rail">
+            <figure class="textWrapContent proTip standardGridTile" id="rail">
                 <img src="media/railboss.png" alt="Shooting a large alien with a shotgot">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -128,7 +183,7 @@
                     quis.
                 </figcaption>
             </figure>
-            <figure class="textWrapContent proTip" id="barney">
+            <figure class="textWrapContent proTip standardGridTile" id="barney">
                 <img src="media/barney-headcrab.png" alt="Security gaurd shooting a crab looking alien">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -138,7 +193,7 @@
                     quis.
                 </figcaption>
             </figure>
-            <figure class="textWrapContent proTip" id="scientist">
+            <figure class="textWrapContent proTip standardGridTile" id="scientist">
                 <img src="media/here-this-will-help.png" alt="Scientist healing player">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -148,7 +203,7 @@
                     quis.
                 </figcaption>
             </figure>
-            <figure class="textWrapContent proTip" id="grunt">
+            <figure class="textWrapContent proTip standardGridTile" id="grunt">
                 <img src="media/grunt.png" alt="Soldier grunt shooting player">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -158,7 +213,7 @@
                     quis.
                 </figcaption>
             </figure>
-            <figure class="textWrapContent proTip" id="vortigaunt">
+            <figure class="textWrapContent proTip standardGridTile" id="vortigaunt">
                 <img src="media/vortigaunt.png" alt="Alien breaking out of a wooden door">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -168,7 +223,7 @@
                     quis.
                 </figcaption>
             </figure>
-            <figure class="textWrapContent proTip" id="revolver">
+            <figure class="textWrapContent proTip standardGridTile" id="revolver">
                 <img src="media/the-part-where-you-get-the-revolver.png" alt="Tentical aliens with the player having a grenade">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -178,7 +233,7 @@
                     quis.
                 </figcaption>
             </figure>
-            <figure class="textWrapContent proTip" id="houndeye">
+            <figure class="textWrapContent proTip standardGridTile" id="houndeye">
                 <img src="media/houndeyes.png" alt="Dog looking alien with many eyes in front of player">
                 <figcaption>
                     PROTIP: Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus delectus accusantium
@@ -189,51 +244,7 @@
                 </figcaption>
             </figure>
         </div>
-        <aside id="categoryRatings">
-            <ul>
-                <li>
-                    <h4>Graphics</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
-                        ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
-                    </p>
-                </li>
-                <li>
-                    <h4>Sound</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
-                        ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
-                    </p>
-                </li>
-                <li>
-                    <h4>Control</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
-                        ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
-                    </p>
-                </li>
-                <li>
-                    <h4>Fun Factor</h4>
-                    <p>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Pariatur,
-                        ea nihil perferendis tenetur odit hic alias at quibusdam ut facere.
-                    </p>
-                </li>
-            </ul>
-        </aside>
-    </main>
-    <footer>
-        <div id="footerArticleInfo">
-            Gamepro February 1999
-        </div>
-        <div id="footerPage">
-            64
-        </div>
-        <div id="footerContactInfo">
-            <a href="https://gamepro.com">www.gamepro.com</a>
-            <a href="mailto:comments.ganepro@gamepro.com">comments.ganepro@gamepro.com</a>
-        </div>
-    </footer>
+    </div>
 </body>
 
 </html>

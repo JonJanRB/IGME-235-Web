@@ -1,20 +1,171 @@
 body
 {
-    background-color: #002907;
+    background-color: #0f0f0f;
+    color: whitesmoke;
 }
+
+/* --Grid layout-- */
+
+.standardGridTile
+{
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#wrapper
+{
+    padding: 0px;
+    background-color: #002907;
+    display: grid;
+    grid-template-rows: 14% 84% 2%;
+    grid-template-areas:    "header"
+                            "content"
+                            "footer";
+
+    /* The wrapper should be a static size so it looks like the document */
+    /* 50% */
+    width: 989px;
+    height: 1416px;
+    /* Center and make it look like real magazine page :D */
+    margin: 20px auto 100px;
+    border: 5px solid gray;
+    box-shadow: 20px 20px 20px rgb(0, 0, 0);
+
+    
+}
+/* ------Wrapper Grid */
+    header
+    {
+        grid-area: header;
+        
+
+        display: grid;
+        grid-template-rows: 60% 40%;
+        grid-template-columns: 55% 5% 40%;
+        grid-template-areas:    "logo   author  gameInfo"
+                                "title  title   title";
+        }
+    /* ------Header Grid */
+        #logo
+        {
+            grid-area: logo;
+        }
+        #credit
+        {
+            grid-area: author;
+        }
+        #gameInfoContainer
+        {
+            grid-area: gameInfo;
+        }
+        h1
+        {
+            grid-area: title;
+        }
+
+    #mainContent
+    {
+        grid-area: content;
+
+        display: grid;
+        grid-template-columns: 15% 65% 20%;
+        grid-template-rows: 100%;
+        grid-template-areas: "specs articleArea rating";
+    }
+    /* ------Content Grid */
+        #article
+        {
+            grid-area: articleArea;
+            /* overflow: visible; */
+            shape-outside: polygon(50 0, 100% 0, 100% 100%, 0 100%);
+        }
+        #systemRequirments
+        {
+            grid-area: specs;
+        }
+        #categoryRatings
+        {
+            grid-area: rating;
+        }
+
+    footer
+    {
+        grid-area: footer;
+
+        display: grid;
+        grid-template-columns: 48% 1fr 48%;
+        grid-template-areas: "footerInfo pageNumber contactInfo";
+    }
+    /* ------Footer Grid */
+        #footerArticleInfo
+        {
+            grid-area: footerInfo;
+        }
+        #footerPage
+        {
+            grid-area: pageNumber;
+        }
+        #footerContactInfo
+        {
+            grid-area: contactInfo;
+            justify-self: self-end;
+        }
+
+/* --Figures-- */
+
 
 .textWrapContent
 {
-    shape-outside: margin-box;
+    position: relative;
 }
 
-/* Pro tips */
-figure.proTip img
+figure
+{
+    width: 300px;
+    /* overflow: visible; */
+    float: left;
+    position: relative;
+
+
+    /* shape-outside: margin-box; */
+    left: -100px;
+    top: 500px;
+}
+
+/* Images and their Holes in the text that wrap */
+
+#rail
+{
+
+}
+#railHole
+{
+    /* I got to use like margin to position it, so weird */
+    width: 100px;
+    height: 100px;
+    margin-top: 500px;
+    float: left;
+    shape-outside: border-box;
+}
+
+
+/* Protip setup */
+.proTip img
 {
     border: 5px solid yellowgreen;
+    width: 90%;
+    margin: 5px;
 }
 
-figure.proTip figcaption
+.proTip figcaption
 {
     color: yellowgreen;
+    width: 90%;
+}
+
+
+/* Other text */
+h2
+{
+    display: inline;
 }

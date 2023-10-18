@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .grid-container
+        {
+            display: grid;
+            grid-template-columns: 100px 1fr 1fr; 
+            grid-template-rows: auto; 
+            gap: 20px; 
+            grid-template-areas: "hole text image";
+            overflow: hidden;
+        }
+
+        .image
+        {
+            grid-area: image; 
+            position: absolute;
+            top: 0; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 1; 
+        }
+
+        .text 
+        {
+            grid-area: text; 
+        }   
+        
+        /* https://stackoverflow.com/questions/52867877/wrapping-two-columns-of-text-around-an-image-shape-from-both-sides-html-css */
+        .hole
+        {
+            /* grid-area: text; */
+            width: 100px;
+            height: 100px;
+            background-color: violet;
+            float: left;
+            shape-outside: border-box; /* Define the shape of the image */
+        }   
+
+
+        /* div.box {
+        border:1px solid red;
+        margin:5px;
+        font-size: 0;
+        max-width: 600px;
+        --R:100px; 
+        --m:5px;   
+        --t:10px;  
+        }
+
+        div.box p {
+        width: 50%;
+        margin:0;
+        padding:0 var(--m);
+        display: inline-block;
+        vertical-align:top;
+        font-size: initial;
+        text-align: justify;
+        }
+
+        div.box p:before {
+        content: "";
+        width: var(--R);
+        height: calc(2*var(--R));
+        padding:var(--m) 0 var(--m) var(--m);
+        margin-top:var(--t);
+        background:var(--img) content-box;
+        background-size:200% 100%;
+        shape-outside: circle(var(--R) at var(--d,right) calc(-1*var(--m)) top calc(50% + var(--t)/2));
+        float: right;
+        border-radius: 500px 0 0 500px;
+        margin-right:calc(-1*var(--m));
+        }
+
+        div.box p:last-child:before {
+        float: left;
+        padding:var(--m) var(--m) var(--m) 0;
+        --d:left;
+        background-position:right;
+        border-radius:0 500px 500px 0;
+        margin-left:calc(-1*var(--m));
+        margin-right:0;
+        }
+
+        *,*::before,*::after {
+        box-sizing:border-box;
+        } */
+
+
+    </style>
+</head>
+<body>
+    <div class="grid-container">
+        <div class="text">
+            <div class="hole"></div>
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Enim deserunt veniam, omnis doloribus placeat aperiam earum architecto, doloremque animi nihil illo. Soluta sit nesciunt sed, corporis necessitatibus porro natus et, voluptatibus eligendi corrupti quos earum excepturi, repellendus nihil illum nam ipsa minima dignissimos veritatis explicabo? Impedit at illum explicabo amet unde mollitia reiciendis optio porro reprehenderit eveniet, blanditiis beatae error. Ad provident enim impedit incidunt sit corporis fuga soluta ipsa omnis. Aliquam, doloremque impedit distinctio in molestiae culpa saepe, officia expedita provident iste vero excepturi molestias eligendi dolore voluptatibus animi totam quam? Voluptatum nemo, iste veniam sequi molestiae fuga, aspernatur, odit ipsam eveniet eaque inventore? Enim nulla assumenda, nisi qui alias libero natus, consequatur numquam blanditiis incidunt iusto, ducimus similique reprehenderit? Cupiditate eius, a aut eos quam voluptate veritatis optio et reiciendis? Atque fugit quis repellat molestias itaque amet maxime, cupiditate a earum officia praesentium, aliquam nobis modi doloremque! Quo ducimus dicta incidunt provident, praesentium autem cum voluptates, aliquam ad optio illo. Deleniti minima explicabo aliquam, ea suscipit maiores consequatur vel provident corporis. Laborum, soluta enim quaerat provident rerum suscipit hic, ullam corrupti, animi dolores maxime. A quas non aspernatur nam enim, saepe explicabo quidem sed molestias expedita iusto eos facilis rem voluptatum. Pariatur dolores consectetur blanditiis quis culpa ipsa adipisci harum veniam aliquam magnam, ducimus fugit incidunt fugiat voluptas voluptatem at error itaque inventore nisi porro earum magni ullam? Quam inventore corrupti repellendus ratione eos est dolore alias quis non architecto dolores error incidunt aliquid recusandae magnam quaerat quo vel, provident tenetur ea quod. Aliquid facere distinctio quas necessitatibus magni minima sapiente amet nesciunt libero veritatis exercitationem debitis recusandae aperiam atque illo cum obcaecati accusamus sunt cumque, fuga unde itaque voluptatibus! Aut natus, temporibus labore eius provident, ea repellat expedita, veniam optio possimus placeat. Recusandae, molestiae deserunt quibusdam eum odio qui id molestias nostrum illo quasi repudiandae voluptatum nam, inventore aspernatur obcaecati tempore iste numquam sed dolor atque! Alias ab quam libero nesciunt molestiae? Pariatur voluptates veniam culpa nesciunt maiores asperiores! Ut nobis, minus nulla quam rem voluptate fugiat aliquam unde nam rerum, temporibus quo tenetur suscipit enim. Recusandae nemo repudiandae enim quidem a laboriosam, commodi optio totam ex velit ipsam. Pariatur non sapiente nostrum! Molestiae exercitationem ea iure fuga, illum nostrum suscipit temporibus aliquam? Doloremque perspiciatis libero nam vero minima voluptates sed consectetur aspernatur nobis, tempore reprehenderit, quibusdam, excepturi saepe? Pariatur veniam, dolores eligendi quasi harum cumque aspernatur quibusdam, sapiente ducimus similique rem nobis quod soluta asperiores dignissimos vitae ratione. Odio fugiat rerum earum maiores eveniet maxime vitae impedit laboriosam itaque unde temporibus, repellendus, magni, quis vero dolores veniam. Quia recusandae veniam vel unde molestiae debitis officia, corporis distinctio quae amet natus, voluptates aliquid architecto reprehenderit nisi. Repudiandae atque perspiciatis iste. At iusto ea perspiciatis reiciendis nostrum consectetur dolorem, odio aliquid tenetur sit quo numquam corrupti optio exercitationem provident non vitae placeat delectus, alias beatae minus harum. Vel velit quasi reprehenderit fugiat quam qui assumenda voluptatibus facere soluta ex iste ipsam consequuntur ea eius, inventore minima quas doloribus?</p>
+        </div>
+        <div class="image">
+          <img src="dan.png" alt="Your Image" />
+        </div>
+      </div>    
+
+      <!-- <div class="box" style="--img:url(https://i.picsum.photos/id/1011/400/400.jpg)">
+        <p>
+          Lorem ipsum dolor sit amet, consect etur adipisicing elit. Ex sapiente iste   asp ernatur, illum esse veniam eligendi, dolor conse quuntur iure, cumque laud antium quidem ratione perfe rendis minima digniss <br><br>Sed, placeat.Lorem ipsum dolor sit amet, consectetur adipis icing elit. Ex sap iente iste repudi andae aspe rnatur, illum esse veniam eligendi, dolor conseq uuntur iure, 
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, consect etur adipisicing elit. Ex sapiente iste   asp ernatur, illum esse veniam eligendi, dolor conse quuntur iure, cumque laud antium quidem ratione perfe rendis minima digniss <br><br>Sed, placeat.Lorem ipsum dolor sit amet, consectetur adipis icing elit. Ex sap iente iste repudi andae aspe rnatur, illum esse veniam eligendi, dolor conseq uuntur iure, 
+        </p>
+      </div>
+      <div class="box" style="--img:url(https://i.picsum.photos/id/248/400/400.jpg);--R:80px;--m:10px;--t:30px;">
+        <p>
+          Lorem ipsum dolor sit amet, consect etur adipisicing elit. Ex sapiente iste   asp ernatur, illum esse veniam eligendi, dolor conse quuntur iure, cumque laud antium quidem ratione perfe rendis minima digniss <br><br>Sed, placeat.Lorem ipsum dolor sit amet, consectetur adipis icing elit. Ex sap iente iste repudi andae aspe rnatur, illum esse veniam eligendi, dolor conseq uuntur iure, 
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, consect etur adipisicing elit. Ex sapiente iste   asp ernatur, illum esse veniam eligendi, dolor conse quuntur iure, cumque laud antium quidem ratione perfe rendis minima digniss <br><br>Sed, placeat.Lorem ipsum dolor sit amet, consectetur adipis icing elit. Ex sap iente iste repudi andae aspe rnatur, illum esse veniam eligendi, dolor conseq uuntur iure, 
+        </p>
+      
+      </div>
+      <div class="box" style="--img:url(https://i.picsum.photos/id/1074/400/400.jpg);--R:150px;--m:2px;--t:30px;">
+        <p>
+          Lorem ipsum dolor sit amet, consect etur adipisicing elit. Ex sapiente iste   asp ernatur, illum esse veniam eligendi, dolor conse quuntur iure, cumque laud antium quidem ratione perfe rendis minima digniss <br><br>Sed, placeat.Lorem ipsum dolor sit amet, consectetur adipis icing elit. Ex sap iente iste repudi andae aspe rnatur, illum esse veniam eligendi, dolor conseq uuntur iure,  illum esse veniam eligendi, dolor conseq uuntur iure, 
+        </p>
+        <p>
+          Lorem ipsum dolor sit amet, consect etur adipisicing elit. Ex sapiente iste   asp ernatur, illum esse veniam eligendi, dolor conse quuntur iure, cumque laud antium quidem ratione perfe rendis minima digniss <br><br>Sed, placeat.Lorem ipsum dolor sit amet, consectetur adipis icing elit. Ex sap iente iste repudi andae aspe rnatur, illum esse veniam eligendi, dolor conseq uuntur iure,  illum esse veniam eligendi, dolor conseq uuntur iure, 
+        </p>
+      
+      </div> -->
+</body>
+</html>
