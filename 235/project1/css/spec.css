@@ -1,6 +1,7 @@
 /* Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&display=swap');
-
+/* @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Federant&display=swap');
 /* Variables */
 :root
 {
@@ -8,7 +9,9 @@
     --document-height: 1416px;
     --main-text-color: #d6d6d6;
     --pro-tip-color: #a5c663;
-    --pro-tip-font: 'Archivo', sans-serif;
+    --normal-font: 'Archivo', sans-serif;
+    --sub-header-font: 'Federant', serif;
+    --hole-hitbox-color: #ff00003f;
 }
 
 body
@@ -82,7 +85,7 @@ body
         grid-area: content;
 
         display: grid;
-        grid-template-columns: 15% 65% 20%;
+        grid-template-columns: 14.5% 1fr 21%;
         grid-template-rows: 100%;
         grid-template-areas: "specs articleArea rating";
     }
@@ -90,7 +93,20 @@ body
         #article
         {
             grid-area: articleArea;
+            margin: 0px 20px;
         }
+            #article p
+            {
+                margin: 0px;
+                font-family: var(--normal-font);
+                font-size: 19px;
+            }
+            #article h2
+            {
+                display: inline;
+                font-family: var(--sub-header-font);
+                font-size: 19px;
+            }
         #systemRequirments
         {
             grid-area: specs;
@@ -137,10 +153,7 @@ figure.proTip
 {
     overflow: visible;
 }
-/* Images and their Holes in the text that wrap */
-/* Basically in order to have text wrap around images, I am manually baking invisble holes
-into the text grid area. Why? Because the images need to be positioned over other grid cells
-too and unless I want to make my main grid have like 100 rows and columns, this will have to do */
+
 
 #rail
 {
@@ -149,28 +162,153 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     left: 48px;
     top: 535px;
 }
-#railHole
+
+
+#barney
 {
-    /* I got to use like margin to position it, so weird */
-    width: 205px;
-    height: 267px;
-    margin-top: 335px;
-    float: left;
-    shape-outside: border-box;
-    
+    width: 283px;
+    position: relative;
+    left: 48px;
+    top: 535px;
 }
+
 
 #barney,
 #scientist,
 #grunt,
 #vortigaunt,
 #revolver,
-#houndeye
+#houndeye,
+#ressonence
 {
     display: none;
 }
 
 
+
+/* Images and their Holes in the text that wrap */
+/* Basically in order to have text wrap around images, I am manually baking invisble holes
+into the text grid area. Why? Because the images need to be positioned over other grid cells
+too and unless I want to make my main grid have like 100 rows and columns, this will have to do */
+
+#wordWrapHoles
+{
+    margin: 0px;
+}
+#wordWrapHoles div
+{
+    background-color: var(--hole-hitbox-color);
+    shape-outside: border-box;
+}
+
+#hole1
+{
+    /* use margin to position it, so weird */
+    float: left;
+    width: 188px;
+    height: 267px;
+    margin-top: 323px;
+}
+#hole2
+{
+    float: right;
+    width: 199px;
+    height: 278px;
+    margin-top: -54px;
+    margin-right: 101px;
+}
+#hole3
+{
+    float: right;
+    clear: right;
+    width: 205px;
+    height: 267px;
+    margin-top: -200px;
+    margin-right: -144px;
+}
+#hole4
+{
+    float: left;
+    clear: left;
+    width: 205px;
+    height: 497px;
+    margin-top: 10px;
+    margin-left: -85px;
+}
+#hole5
+{
+    float: right;
+    clear: right;
+    width: 206px;
+    height: 304px;
+    margin-top: 23px;
+    margin-right: 100px;
+}
+#hole6
+{
+    float: right;
+    clear: right;
+    width: 137px;
+    height: 172px;
+    margin-top: 0px;
+    margin-right: 100px;
+}
+
+
+/* #gruntHole
+{
+    width: 205px;
+    height: 267px;
+    margin-top: -842px;
+    margin-right: -141px;
+    float: right;
+    shape-outside: border-box;
+    background-color: rgba(255, 0, 0, 0.247);
+}
+#vortigauntHole
+{
+    width: 205px;
+    height: 267px;
+    margin-top: 10px;
+    margin-left: -98px;
+    float: left;
+    shape-outside: border-box;
+    clear: left;
+    background-color: rgba(255, 0, 0, 0.247);
+}
+#revolverHole
+{
+    width: 205px;
+    height: 267px;
+    margin-top: 10px;
+    margin-left: -98px;
+    float: left;
+    shape-outside: border-box;
+    clear: left;
+    background-color: rgba(255, 0, 0, 0.247);
+}
+#houndeyeHole
+{
+    width: 205px;
+    height: 267px;
+    margin-top: 10px;
+    margin-left: -98px;
+    float: left;
+    shape-outside: border-box;
+    clear: left;
+    background-color: rgba(255, 0, 0, 0.247);
+}
+#ressonenceHole
+{
+    width: 205px;
+    height: 267px;
+    margin-top: 10px;
+    margin-left: -98px;
+    float: left;
+    shape-outside: border-box;
+    clear: left;
+    background-color: rgba(255, 0, 0, 0.247);
+} */
 
 /* Protip setup */
 .proTip img
@@ -184,19 +322,16 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 {
     color: var(--pro-tip-color);
     width: 105%;
-    font-family: var(--pro-tip-font);
+    font-family: var(--normal-font);
     font-size: 13px;
+    font-weight: bold;
     letter-spacing: -1px;
     line-height: 17px;
     margin: -0.5% -1%;
 }
 
 
-/* Other text */
-h2
-{
-    display: inline;
-}
+
 
 
 
