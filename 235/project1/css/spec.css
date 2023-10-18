@@ -1,9 +1,14 @@
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&display=swap');
+
 /* Variables */
 :root
 {
     --document-width: 989px;
     --document-height: 1416px;
-    --main-text-color: whitesmoke;
+    --main-text-color: #d6d6d6;
+    --pro-tip-color: #a5c663;
+    --pro-tip-font: 'Archivo', sans-serif;
 }
 
 body
@@ -24,7 +29,7 @@ body
 #wrapper
 {
     padding: 0px;
-    background-color: #002907;
+    background-color: #00290700;
     display: grid;
     grid-template-rows: 14% 84% 2%;
     grid-template-areas:    "header"
@@ -126,9 +131,12 @@ body
     position: relative;
     /* Helpful: https://dzhavat.github.io/2020/02/03/simple-way-to-negate-a-number-in-css */
     top: calc(var(--document-height) * -1);
-    left: 0px;
 }
 
+figure.proTip
+{
+    overflow: visible;
+}
 /* Images and their Holes in the text that wrap */
 /* Basically in order to have text wrap around images, I am manually baking invisble holes
 into the text grid area. Why? Because the images need to be positioned over other grid cells
@@ -136,19 +144,20 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 
 #rail
 {
-    width: 300px;
+    width: 283px;
     position: relative;
-    left: 10%;
-    top: 10%;
+    left: 48px;
+    top: 535px;
 }
 #railHole
 {
     /* I got to use like margin to position it, so weird */
-    width: 100px;
-    height: 100px;
-    margin-top: 500px;
+    width: 205px;
+    height: 267px;
+    margin-top: 335px;
     float: left;
     shape-outside: border-box;
+    
 }
 
 #barney,
@@ -166,15 +175,20 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 /* Protip setup */
 .proTip img
 {
-    border: 5px solid yellowgreen;
-    width: 90%;
-    margin: 5px;
+    border: 2px solid var(--pro-tip-color);
+    width: 100%;
+    margin: 0px;
 }
 
 .proTip figcaption
 {
-    color: yellowgreen;
-    width: 90%;
+    color: var(--pro-tip-color);
+    width: 105%;
+    font-family: var(--pro-tip-font);
+    font-size: 13px;
+    letter-spacing: -1px;
+    line-height: 17px;
+    margin: -0.5% -1%;
 }
 
 
@@ -182,4 +196,21 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 h2
 {
     display: inline;
+}
+
+
+
+/* TEMP DELETE */
+#overlayDelete
+{
+    display: block;
+    position: relative;
+    z-index: -1;
+    /* top: calc(-130%); */
+    translate: 0px -1515px;
+    width: var(--document-width);
+    opacity: 0.5;
+
+    width: var(--document-width);
+    margin: 20px auto 100px;
 }
