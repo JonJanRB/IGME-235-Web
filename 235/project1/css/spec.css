@@ -10,35 +10,32 @@
     /* --document-width: 980px;
     --document-height: 1407px; */
     --main-text-color: #d6d6d6;
-    --wrapper-bg-color: #002907;
+    --wrapper-bg-color: #002907a6;
     --pro-tip-color: #a5c663;
     --normal-font: 'Archivo', sans-serif;
     --normal-font-size: 13px;
     --sub-header-font: 'Federant', serif;
     --sub-header-color: #ee9246;
 
+    --header-border-size: 1.5px;
+    --header-bg-color: #000000;
+    --header-radius: 5px;
+
+
     /* Debug */
     --hole-hitbox-color: #ff00003f;
     --wrapper-bg-color: #00000000;
     --debug-source-overlay-opacity: 0.5;
     /* Uncomment the above to view in debug mode */
-    /* --hole-hitbox-color: #ff000000;
-    --debug-source-overlay-opacity: 0; */
+    --hole-hitbox-color: #ff000000;
+    /* --debug-source-overlay-opacity: 0; */
 }
 
 body
 {
     background-color: #0f0f0f;
+    font-family: var(--normal-font);
     color: var(--main-text-color);
-}
-
-/* --Grid layout-- */
-
-.standardGridTile
-{
-    box-sizing: border-box;
-    overflow: hidden;
-    margin: 0px;
 }
 
 #wrapper
@@ -60,8 +57,20 @@ body
     border: 5px solid gray;
     box-shadow: 20px 20px 20px black;
 
-    
+    background-image: url("../media/edited-background.png");
+    /* background-image: url("../src/half-life-review.jpeg");
+    background-size: contain; */
 }
+
+/* #region --Grid layout-- */
+
+.standardGridTile
+{
+    box-sizing: border-box;
+    overflow: hidden;
+    margin: 0px;
+}
+
 /* ------Wrapper Grid */
     header
     {
@@ -70,7 +79,7 @@ body
 
         display: grid;
         grid-template-rows: 60% 40%;
-        grid-template-columns: 55% 5% 40%;
+        grid-template-columns: 54% 7% 41%;
         grid-template-areas:    "logo   author  gameInfo"
                                 "title  title   title";
         }
@@ -87,7 +96,7 @@ body
         {
             grid-area: gameInfo;
         }
-        h1
+        h2
         {
             grid-area: title;
         }
@@ -111,11 +120,10 @@ body
             #article p
             {
                 margin: 0px;
-                font-family: var(--normal-font);
                 font-size: var(--normal-font-size);
                 line-height: 20.7px;
             }
-            #article h2
+            #article h3
             {
                 /* display: inline; */
                 font-family: var(--sub-header-font);
@@ -157,7 +165,9 @@ body
             justify-self: self-end;
         }
 
-/* region --Figures-- */
+/* #endregion */
+
+/* #region --Figures-- */
 
 
 #imageContent
@@ -165,15 +175,20 @@ body
     position: relative;
     /* Helpful: https://dzhavat.github.io/2020/02/03/simple-way-to-negate-a-number-in-css */
     top: calc(var(--document-height) * -1);
+
+    /* Credit to chatgpt for how to select text behind div */
+    pointer-events: none;
 }
 
     #imageContent figure
     {
         overflow: visible;
         position: relative;
+        
+        pointer-events: auto;
     }
 
-    #imageContent img
+    #imageContent figure img
     {
         border: 2px solid var(--pro-tip-color);
         width: 100%;
@@ -184,7 +199,6 @@ body
     {
         color: var(--pro-tip-color);
         width: 105%;
-        font-family: var(--normal-font);
         font-size: var(--normal-font-size);
         font-weight: bold;
         letter-spacing: -1px;
@@ -195,66 +209,66 @@ body
 #rail
 {
     width: 283px;
-  height: 274px;
-  left: 48px;
-  top: 535px;
+    height: 274px;
+    left: 48px;
+    top: 535px;
 }
 
 
 #barney
 {
     width: 210px;
-  height: 236px;
-  left: 52px;
-  top: 551px;
+    height: 236px;
+    left: 52px;
+    top: 551px;
 }
 
 #scientist
 {
     width: 212px;
-  height: 237px;
-  left: 48px;
-  top: 578px;
+    height: 237px;
+    left: 48px;
+    top: 578px;
 }
 
 #grunt
 {
     width: 263px;
-  height: 271px;
-  left: 712px;
-  top: -528px;
+    height: 271px;
+    left: 712px;
+    top: -528px;
 }
 
 #vortigaunt
 {
     width: 191px;
-  height: 242px;
-  left: 781px;
-  top: -472px;
+    height: 242px;
+    left: 781px;
+    top: -472px;
 }
 
 #revolver
 {
     width: 285px;
-  height: 274px;
-  left: 465px;
-  top: -418px;
+    height: 274px;
+    left: 465px;
+    top: -418px;
 }
 
 #houndeye
 {
     width: 211px;
-  height: 234px;
-  left: 533px;
-  top: -404px;
+    height: 234px;
+    left: 533px;
+    top: -404px;
 }
 
 #ressonence
 {
     width: 211px;
-  height: 216px;
-  left: 475px;
-  top: -1552px;
+    height: 216px;
+    left: 475px;
+    top: -1552px;
 }
     #ressonence img
     {
@@ -265,8 +279,17 @@ body
         color: var(--main-text-color);
     }
 
-/* endregion */
+#gonarch
+{
+    overflow: visible;
+    position: relative;
+    margin: 0px;
+    width: 250px;
+    left: 277px;
+    top: -739px;
+}
 
+/* #endregion */
 
 /* #region --Holes (word wrap)--*/
 /* Images and their Holes in the text that wrap */
@@ -339,12 +362,140 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 
 /* #endregion */
 
+/* #region --Header-- */
+
+h2
+{
+    /* text-transform: uppercase; */ /* Problem with this is that lambda needs to be lowercase */
+    font-size: 55px;
+    color: white;
+    padding: 10px;
+    margin: 0px;
+    text-indent: 48px;
+    letter-spacing: 60px;
+}
+
+#logo h1
+{
+    background: url("../media/logo.png") no-repeat;
+    background-size: 290px;
+    background-position: left;
+    margin: 0px 40px;
+    width: auto;
+    height: 109px;
+    background-clip: border-box;
+    text-indent: -9999px;
+}
+
+#credit
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    height: fit-content;
+    border: var(--header-border-size) solid var(--main-text-color);
+    border-right-width: 0px;
+    border-top-width: 0px;
+    border-bottom-left-radius: var(--header-radius);
+    background-color: var(--header-bg-color);
+}
+    #credit img
+    {
+        width: 60px;
+        padding: 0px 6px;
+        border-bottom: var(--header-border-size) solid white;
+    }
+    #credit figcaption
+    {
+        font-size: var(--normal-font-size);
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+    }
 
 
-/* TEMP DELETE */
+#gameInfoContainer
+{
+    display: flex;
+    background-color: white;
+    color: var(--header-bg-color);
+
+    border: calc(var(--header-border-size) * 2) solid var(--header-bg-color);
+    border-bottom-left-radius: var(--header-radius);
+}
+    #gameInfo
+    {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
+        
+        width: 52%;
+        height: 80%;
+        align-self: self-end;
+    }
+        #gameInfo ul
+        {
+            list-style: none;
+            font-size: 10px;
+            font-weight: bold;
+            margin: 0px;
+            padding: 3px;
+            line-height: 13px;
+        }
+        .gameInfoTop
+        {
+            border-bottom: var(--header-border-size) solid var(--header-bg-color);
+        }
+    #briefCategoryRatings
+    {
+        display: flex;
+        align-items: end;
+        justify-content: space-evenly;
+        width: 43%;
+    }
+        /* All ratings */
+        #briefCategoryRatings figure
+        {
+            display: flex;
+            flex-direction: column;
+            margin: 0px;
+            padding: 0px;
+            width: 22%;
+        }
+            #briefCategoryRatings figure h6
+            {
+                margin: 0px;
+                font-weight: bold;
+                font-size: 9px;
+            }
+            #briefCategoryRatings figure img
+            {
+                border: var(--header-border-size) solid var(--header-bg-color);
+                margin: 5px 0px;
+            }
+            #briefCategoryRatings figure figcaption
+            {
+                font-size: 15px;
+                text-align: center;
+                margin: 0px;
+                padding: 5px 0px;
+                margin: 0px;
+
+                background-color: var(--header-bg-color);
+                color: white;
+                border-radius: var(--header-radius) var(--header-radius) 0px 0px;
+            }
+
+/* #endregion */
+
+
+/* debug */
 #sourceOverlay
 {
     display: block;
+    /* display: none; */
     position: relative;
     z-index: -1;
     /* top: calc(-130%); */
