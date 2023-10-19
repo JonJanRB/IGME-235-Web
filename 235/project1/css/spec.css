@@ -2,41 +2,42 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Federant&display=swap');
-/* Variables */
+/* #region --Variables-- */
 :root
 {
     --document-width: 989px;
     --document-height: 1416px;
+    /* --document-width: 980px;
+    --document-height: 1407px; */
     --main-text-color: #d6d6d6;
-    --wrapper-bg-color: #002907;
+    --wrapper-bg-color: #002907a6;
     --pro-tip-color: #a5c663;
     --normal-font: 'Archivo', sans-serif;
     --normal-font-size: 13px;
     --sub-header-font: 'Federant', serif;
     --sub-header-color: #ee9246;
 
+    --header-border-size: 1.5px;
+    --header-bg-color: #000000;
+    --header-radius: 5px;
+
+
     /* Debug */
     --hole-hitbox-color: #ff00003f;
     --wrapper-bg-color: #00000000;
     --debug-source-overlay-opacity: 0.5;
     /* Uncomment the above to view in debug mode */
-    /* --hole-hitbox-color: #ff000000;
-    --debug-source-overlay-opacity: 0; */
+    --hole-hitbox-color: #ff000000;
+    /* --debug-source-overlay-opacity: 0; */
 }
+
+/* #endregion */
 
 body
 {
     background-color: #0f0f0f;
+    font-family: var(--normal-font);
     color: var(--main-text-color);
-}
-
-/* --Grid layout-- */
-
-.standardGridTile
-{
-    box-sizing: border-box;
-    overflow: hidden;
-    margin: 0px;
 }
 
 #wrapper
@@ -45,9 +46,10 @@ body
     background-color: var(--wrapper-bg-color);
     display: grid;
     grid-template-rows: 14% 84% 2%;
-    grid-template-areas:    "header"
-                            "content"
-                            "footer";
+    grid-template-areas:
+        "header"
+        "content"
+        "footer";
 
     /* The wrapper should be a static size so it looks like the document */
     /* 50% */
@@ -57,9 +59,18 @@ body
     margin: 20px auto 100px;
     border: 5px solid gray;
     box-shadow: 20px 20px 20px black;
-
-    
+    background-image: url("../media/edited-background.png");
 }
+
+/* #region --Main grid layouts-- */
+
+.standardGridTile
+{
+    box-sizing: border-box;
+    overflow: hidden;
+    margin: 0px;
+}
+
 /* ------Wrapper Grid */
     header
     {
@@ -68,7 +79,7 @@ body
 
         display: grid;
         grid-template-rows: 60% 40%;
-        grid-template-columns: 55% 5% 40%;
+        grid-template-columns: 54% 7% 41%;
         grid-template-areas:    "logo   author  gameInfo"
                                 "title  title   title";
         }
@@ -85,7 +96,7 @@ body
         {
             grid-area: gameInfo;
         }
-        h1
+        h2
         {
             grid-area: title;
         }
@@ -109,11 +120,10 @@ body
             #article p
             {
                 margin: 0px;
-                font-family: var(--normal-font);
                 font-size: var(--normal-font-size);
                 line-height: 20.7px;
             }
-            #article h2
+            #article h3
             {
                 /* display: inline; */
                 font-family: var(--sub-header-font);
@@ -121,6 +131,7 @@ body
                 margin-bottom: 2.5px;
                 font-size: 22px;
                 letter-spacing: -1.7px;
+                word-spacing: 2.5px;
                 color: var(--sub-header-color);
             }
         #systemRequirments
@@ -132,30 +143,9 @@ body
             grid-area: rating;
         }
 
-    footer
-    {
-        grid-area: footer;
+/* #endregion */
 
-        display: grid;
-        grid-template-columns: 48% 1fr 48%;
-        grid-template-areas: "footerInfo pageNumber contactInfo";
-    }
-    /* ------Footer Grid */
-        #footerArticleInfo
-        {
-            grid-area: footerInfo;
-        }
-        #footerPage
-        {
-            grid-area: pageNumber;
-        }
-        #footerContactInfo
-        {
-            grid-area: contactInfo;
-            justify-self: self-end;
-        }
-
-/* --Figures-- */
+/* #region --Figures-- */
 
 
 #imageContent
@@ -163,18 +153,42 @@ body
     position: relative;
     /* Helpful: https://dzhavat.github.io/2020/02/03/simple-way-to-negate-a-number-in-css */
     top: calc(var(--document-height) * -1);
+
+    /* Credit to chatgpt for how to select text behind div */
+    pointer-events: none;
 }
 
-figure.proTip
-{
-    overflow: visible;
-}
+    #imageContent img,
+    #imageContent figure
+    {
+        overflow: visible;
+        position: relative;
+        
+        pointer-events: auto;
+    }
 
+    #imageContent figure img
+    {
+        border: 2px solid var(--pro-tip-color);
+        width: 100%;
+        margin: 0px;
+    }
+
+    #imageContent figcaption
+    {
+        color: var(--pro-tip-color);
+        width: 105%;
+        font-size: var(--normal-font-size);
+        font-weight: bold;
+        letter-spacing: -1px;
+        line-height: 15.5px;
+        margin: -0.7% -1%;
+    }
 
 #rail
 {
     width: 283px;
-    position: relative;
+    height: 274px;
     left: 48px;
     top: 535px;
 }
@@ -183,31 +197,80 @@ figure.proTip
 #barney
 {
     width: 210px;
-    position: relative;
+    height: 236px;
     left: 52px;
     top: 551px;
 }
 
 #scientist
 {
-    width: 283px;
-    position: relative;
+    width: 212px;
+    height: 237px;
     left: 48px;
-    top: 535px;
+    top: 578px;
 }
 
-#scientist,
-#grunt,
-#vortigaunt,
-#revolver,
-#houndeye,
+#grunt
+{
+    width: 261px;
+    height: 271px;
+    left: 712px;
+    top: -528px;
+}
+
+#vortigaunt
+{
+    width: 191px;
+    height: 242px;
+    left: 781px;
+    top: -472px;
+}
+
+#revolver
+{
+    width: 285px;
+    height: 274px;
+    left: 465px;
+    top: -418px;
+}
+
+#houndeye
+{
+    width: 211px;
+    height: 234px;
+    left: 533px;
+    top: -404px;
+}
+
 #ressonence
 {
-    display: none;
+    width: 211px;
+    height: 216px;
+    left: 475px;
+    top: -1552px;
+}
+    #ressonence img
+    {
+        border-color: var(--main-text-color);
+    }
+    #ressonence figcaption
+    {
+        color: var(--main-text-color);
+    }
+
+#gonarch
+{
+    overflow: visible;
+    position: relative;
+    margin: 0px;
+    width: 250px;
+    left: 277px;
+    top: -739px;
 }
 
+/* #endregion */
 
-
+/* #region --Holes (word wrap)--*/
 /* Images and their Holes in the text that wrap */
 /* Basically in order to have text wrap around images, I am manually baking invisble holes
 into the text grid area. Why? Because the images need to be positioned over other grid cells
@@ -243,7 +306,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 {
     float: right;
     clear: right;
-    width: 205px;
+    width: 191px;
     height: 267px;
     margin-top: -200px;
     margin-right: -144px;
@@ -276,42 +339,306 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     margin-right: 100px;
 }
 
+/* #endregion */
 
-/* Protip setup */
-.proTip img
+/* #region --Header-- */
+
+h2
 {
-    border: 2px solid var(--pro-tip-color);
+    /* text-transform: uppercase; */ /* Problem with this is that lambda needs to be lowercase */
+    font-size: 55px;
+    color: white;
+    padding: 10px;
+    margin: 0px;
+    text-indent: 48px;
+    letter-spacing: 60px;
+}
+
+#logo h1
+{
+    background: url("../media/logo.png") no-repeat;
+    background-size: 290px;
+    background-position: left;
+    margin: 0px 40px;
+    width: auto;
+    height: 109px;
+    background-clip: border-box;
+    text-indent: -9999px;
+}
+
+#credit
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    height: fit-content;
+    border: var(--header-border-size) solid var(--main-text-color);
+    border-right-width: 0px;
+    border-top-width: 0px;
+    border-bottom-left-radius: var(--header-radius);
+    background-color: var(--header-bg-color);
+}
+    #credit img
+    {
+        width: 60px;
+        padding: 0px 6px;
+        border-bottom: var(--header-border-size) solid white;
+    }
+    #credit figcaption
+    {
+        font-size: var(--normal-font-size);
+        color: white;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+
+#gameInfoContainer
+{
+    display: flex;
+    background-color: white;
+    color: var(--header-bg-color);
+
+    border: calc(var(--header-border-size) * 2) solid var(--header-bg-color);
+    border-bottom-left-radius: var(--header-radius);
+}
+    #gameInfo
+    {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
+        
+        width: 52%;
+        height: 80%;
+        align-self: self-end;
+    }
+        #gameInfo ul
+        {
+            list-style: none;
+            font-size: 10px;
+            font-weight: bold;
+            margin: 0px;
+            padding: 3px;
+            line-height: 13px;
+        }
+        .gameInfoTop
+        {
+            border-bottom: var(--header-border-size) solid var(--header-bg-color);
+        }
+    #briefCategoryRatings
+    {
+        display: flex;
+        align-items: end;
+        justify-content: space-evenly;
+        width: 43%;
+    }
+        /* All ratings */
+        #briefCategoryRatings figure
+        {
+            display: flex;
+            flex-direction: column;
+            margin: 0px;
+            padding: 0px;
+            width: 22%;
+        }
+            #briefCategoryRatings figure h6
+            {
+                margin: 0px;
+                font-weight: bold;
+                font-size: 9px;
+            }
+            #briefCategoryRatings figure img
+            {
+                border: var(--header-border-size) solid var(--header-bg-color);
+                margin: 5px 0px;
+            }
+            #briefCategoryRatings figure figcaption
+            {
+                font-size: 15px;
+                text-align: center;
+                margin: 0px;
+                padding: 5px 0px;
+                margin: 0px;
+
+                background-color: var(--header-bg-color);
+                color: white;
+                border-radius: var(--header-radius) var(--header-radius) 0px 0px;
+            }
+
+/* #endregion */
+
+/* #region --Left side-- */
+
+#systemRequirments
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin-top: 7.5px;
+}
+    #systemRequirments h4
+    {
+        background-color: white;
+        color: var(--header-bg-color);
+        text-align: right;
+        font-size: 12px;
+        line-height: 13px;
+        width: fit-content;
+        height: auto;
+        padding: 3%;
+        padding-left: 50%;
+        margin: 0px;
+    }
+    #systemRequirments ul
+    {
+        list-style: none;
+        padding: 0px;
+        width: 100%;
+        margin: 0px;
+        margin-top: 23px;
+    }
+    #systemRequirments ul li
+    {
+        border-bottom: var(--header-border-size) solid var(--pro-tip-color);
+        text-align: end;
+        font-size: 12px;
+        padding: 5px 0px 10px;
+        margin: 0px;
+    }
+    #systemRequirments ul :last-child
+    {
+        border-bottom-width: 0px;
+    }
+/* #endregion */
+
+/* #region --Right side-- */
+
+#categoryRatings ul
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
     width: 100%;
     margin: 0px;
+    list-style: none;
+    padding: 0px;
+    padding-bottom: 20px;
+    box-sizing: border-box;
 }
+        #categoryRatings ul li h5
+        {
+            background-color: var(--main-text-color);
+            color: var(--header-bg-color);
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 4px;
+            margin: 0px;
+        }
+            #categoryRatings ul li h5 span
+            {
+                float: right;
+            }
+        #categoryRatings ul li p
+        {
+            padding: 5px 0px;
+            margin: 0px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 19px;
+        }
 
-.proTip figcaption
+/* #endregion */
+
+/* #region --Footer-- */
+
+    footer
+    {
+        grid-area: footer;
+
+        display: grid;
+        grid-template-columns: 48% 1fr 48%;
+        grid-template-areas: "footerInfo pageNumber contactInfo";
+        justify-content: space-between;
+        align-content: center;
+
+        background-color: var(--header-bg-color);
+        height: 10px;
+        margin: 0px;
+        margin-bottom: 9px;
+        padding: 2px 10px;
+        padding-left: 40px;
+    }
+        footer div
+        {
+            font-size: 10px;
+
+            z-index: 1;
+            text-transform: uppercase;
+            font-weight: bold;
+            align-self: center;
+        }
+        #footerArticleInfo
+        {
+            grid-area: footerInfo;
+        }
+        #footerPage
+        {
+            grid-area: pageNumber;
+            background-color: white;
+            color: var(--header-bg-color);
+            border-radius: var(--header-radius);
+            padding: 4px 8px;
+            font-size: 14px;
+            text-align: center;
+            overflow: visible;
+        }
+        #footerContactInfo
+        {
+            grid-area: contactInfo;
+            justify-self: self-end;
+            word-spacing: 15px;
+            overflow: visible;
+        }
+a:link
+{
+    color: var(--sub-header-color);
+}
+a:visited
 {
     color: var(--pro-tip-color);
-    width: 105%;
-    font-family: var(--normal-font);
-    font-size: var(--normal-font-size);
-    font-weight: bold;
-    letter-spacing: -1px;
-    line-height: 17px;
-    margin: -0.5% -1%;
+}
+a:focus,
+a:hover
+{
+    border-bottom: calc(var(--header-border-size) * 2) solid var(--sub-header-color);
+    padding: 5px;
+    border-radius: var(--header-radius);
+}
+a:active
+{
+    color: var(--main-text-color);
 }
 
+/* #endregion */
 
-
-
-
-
-/* TEMP DELETE */
-#sourceOverlay
+/* #region debug */
+/* #sourceOverlay
 {
     display: block;
     position: relative;
     z-index: -1;
-    /* top: calc(-130%); */
     translate: 0px -1515px;
     width: var(--document-width);
     opacity: var(--debug-source-overlay-opacity);
     
     margin: 20px auto 100px;
-}
+
+    
+} */
+
+/* #endregion */

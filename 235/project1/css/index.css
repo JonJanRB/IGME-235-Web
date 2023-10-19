@@ -1,0 +1,300 @@
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+/* Variables */
+:root
+{
+    --contrast-color: #d6d6d6;
+    --ui-bg: #2c2c2c;
+    --bg: #1a1a1a;
+    --content-bg: #0f0f0f;
+    --hover-bg: #ffffff44;
+    --display-font: 'Inconsolata', monospace;
+    --main-font: 'Inconsolata', monospace;
+    --content-border-width: 0.2rem;
+    --content-border-radius: 1rem;
+    --style-border-radius: 5rem;
+    --content-border-padding: 1rem;
+
+    --subcontent-border-width: 0.1rem;
+    --subcontrast-color: #d6d6d6;
+
+
+    --link-hover-color: #d3cf00;
+    /* --main-font: 'Open Sans', sans-serif; */
+
+    /* Reset font size for consistant rem */
+    font-size: 15px;
+}
+
+*
+{
+    box-sizing: border-box;
+}
+
+body
+{
+    background-color: var(--ui-bg);
+    color: var(--contrast-color);
+    font-family: var(--main-font);
+
+    margin: 0rem;
+    padding: 0rem;
+}
+
+/* For tool tips, check this tutorial out https://www.w3schools.com/css/css_tooltip.asp */
+
+/* #region Links */
+a
+{
+    transition: scale 0.1s ease-out;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+a:link
+{
+    color: #ffae00;
+    text-decoration: none;
+}
+a:visited
+{
+    color: #ffe6b1;
+}
+a:focus,
+a:hover
+{
+    color: var(--link-hover-color);
+    text-decoration: underline;
+    scale: 1.1;
+    background-color: var(--hover-bg);
+}
+a:active
+{
+    color: #eeff00;
+}
+
+/* #endregion */
+
+/* #region Main Grid */
+
+#overlay
+{
+    display: grid;
+    grid-template-areas:    "sidebar header"
+                            "sidebar main";
+    grid-template-columns: 15rem 1fr;
+    grid-template-rows: 1fr 100vh;
+
+    position: fixed;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+/* #endregion */
+
+/* #region Header */
+
+header
+{
+    grid-area: header;
+
+    display: grid;
+    grid-template-columns: 4fr auto 5fr;
+    justify-items: center;
+    box-sizing: content-box;
+    background-color: var(--ui-bg);
+    height: 4rem;
+    padding-top: 2rem;
+    font-size: 1.5rem;
+
+    pointer-events: auto;
+
+    z-index: 1;
+}
+    header>a
+    {
+        width: min-content;
+        height: min-content;
+    }
+    #myIcon
+    {
+        background-color: var(--ui-bg);
+        border-radius: 100%;
+        padding: 1rem;
+        padding-top: 0rem;
+        margin-top: -1.5rem;
+
+    }
+        #myIcon img
+        {
+            width: 8rem;
+            transition: rotate 0.2s ease-out, scale 0.2s ease-out;
+        }
+            #myIcon img:focus,
+            #myIcon img:hover
+            {
+                rotate: 10deg;
+                scale: 0.95;
+            }
+            #myIcon img:active
+            {
+                transition: rotate 0.1s ease-out, scale 0.1s ease-out;
+                rotate: 40deg;
+                scale: 0.8;
+            }
+        #myIcon:hover
+        {
+            /* Override the normal link mode */
+            scale: 1;
+        }
+    #outgoingLinks
+    {
+        display: flex;
+        width: 100%;
+        justify-content: space-evenly;
+    }
+    #outgoingLinks a
+    {
+        /* Only counts as a link when mouse over the min content */
+        width: min-content;
+        height: min-content;
+    }
+
+/* #endregion */
+
+/* #region Sidebar */
+
+aside
+{
+    grid-area: sidebar;
+
+    background-color: var(--ui-bg);
+    padding-left: 2rem;
+    padding-top: 2rem;
+
+    align-content: center;
+
+    pointer-events: auto;
+}
+    aside h2
+    {
+        font-size: 2.5rem;
+        margin: 0rem;
+    }
+    aside ul
+    {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+        aside ul li
+        {
+            margin: 4rem 0rem;
+            font-size: 1.5rem;
+        }
+            aside ul li a
+            {
+                border: 0rem solid var(--link-hover-color);
+                border-top-right-radius: 0rem;
+                border-bottom-right-radius: 0rem;
+                transition: border-right-width 0.05s ease-out;
+            }
+            aside ul li a:hover
+            {
+                border-right-width: var(--content-border-width);
+            }
+
+
+
+/* #endregion */
+
+#content
+{
+    grid-area: main;
+    padding: 4rem;
+
+    pointer-events: all;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+
+    background-color: var(--bg);
+    border-top-left-radius: var(--style-border-radius);
+}
+
+/* #region Main */
+
+main
+{
+    min-height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+main article
+{
+    border: var(--content-border-width) solid var(--contrast-color);
+    background-color: var(--content-bg);
+    border-radius: var(--content-border-radius);
+    padding: var(--content-border-padding);
+    margin: var(--content-border-padding);
+
+    max-width: 30rem;
+    height: min-content;
+
+    transition: border-radius 0.2s ease-out, scale 0.2s ease-out;
+}
+    main article:hover
+    {
+        border-radius: 0rem;
+        scale: 1.05;
+    }
+    main article h3
+    {
+        font-size: 2rem;
+        margin: 0rem;
+        text-align: center;
+    }
+    main article img
+    {
+        max-width: 80%;
+        border: var(--subcontent-border-width) solid var(--subcontrast-color);
+        border-radius: var(--content-border-radius);
+        display: block;
+        margin: 1rem auto;
+    }
+    main article a
+    {
+        display: none;
+        text-align: center;
+    }
+#whiteSpace img
+{
+    border-width: 0rem;
+    border-radius: 0.5rem;
+    width: 10rem;
+}
+
+/* #endregion */
+
+/* #region Footer */
+
+footer
+{
+    border-top: var(--content-border-width) solid var(--contrast-color);
+    padding: var(--content-border-padding);
+    min-height: 70vh;
+}
+
+footer img
+{
+    float: left;
+    border-radius: var(--style-border-radius);
+    width: 20rem;
+    margin: var(--content-border-padding);
+}
+
+/* #endregion */
