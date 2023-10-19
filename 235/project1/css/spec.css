@@ -7,6 +7,8 @@
 {
     --document-width: 989px;
     --document-height: 1416px;
+    /* --document-width: 980px;
+    --document-height: 1407px; */
     --main-text-color: #d6d6d6;
     --wrapper-bg-color: #002907;
     --pro-tip-color: #a5c663;
@@ -243,7 +245,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
 {
     float: right;
     clear: right;
-    width: 205px;
+    width: 191px;
     height: 267px;
     margin-top: -200px;
     margin-right: -144px;
