@@ -157,7 +157,7 @@ body
             justify-self: self-end;
         }
 
-/* --Figures-- */
+/* region --Figures-- */
 
 
 #imageContent
@@ -167,50 +167,108 @@ body
     top: calc(var(--document-height) * -1);
 }
 
-figure.proTip
-{
-    overflow: visible;
-}
+    #imageContent figure
+    {
+        overflow: visible;
+        position: relative;
+    }
 
+    #imageContent img
+    {
+        border: 2px solid var(--pro-tip-color);
+        width: 100%;
+        margin: 0px;
+    }
+
+    #imageContent figcaption
+    {
+        color: var(--pro-tip-color);
+        width: 105%;
+        font-family: var(--normal-font);
+        font-size: var(--normal-font-size);
+        font-weight: bold;
+        letter-spacing: -1px;
+        line-height: 15.5px;
+        margin: -0.7% -1%;
+    }
 
 #rail
 {
     width: 283px;
-    height: 274px;
-    position: relative;
-    left: 48px;
-    top: 535px;
+  height: 274px;
+  left: 48px;
+  top: 535px;
 }
 
 
 #barney
 {
     width: 210px;
-    position: relative;
-    left: 52px;
-    top: 551px;
+  height: 236px;
+  left: 52px;
+  top: 551px;
 }
 
 #scientist
 {
-    width: 283px;
-    position: relative;
-    left: 48px;
-    top: 535px;
+    width: 212px;
+  height: 237px;
+  left: 48px;
+  top: 578px;
 }
 
-#scientist,
-#grunt,
-#vortigaunt,
-#revolver,
-#houndeye,
+#grunt
+{
+    width: 263px;
+  height: 271px;
+  left: 712px;
+  top: -528px;
+}
+
+#vortigaunt
+{
+    width: 191px;
+  height: 242px;
+  left: 781px;
+  top: -472px;
+}
+
+#revolver
+{
+    width: 285px;
+  height: 274px;
+  left: 465px;
+  top: -418px;
+}
+
+#houndeye
+{
+    width: 211px;
+  height: 234px;
+  left: 533px;
+  top: -404px;
+}
+
 #ressonence
 {
-    display: none;
+    width: 211px;
+  height: 216px;
+  left: 475px;
+  top: -1552px;
 }
+    #ressonence img
+    {
+        border-color: var(--main-text-color);
+    }
+    #ressonence figcaption
+    {
+        color: var(--main-text-color);
+    }
+
+/* endregion */
 
 
-/* #region */
+/* #region --Holes (word wrap)--*/
 /* Images and their Holes in the text that wrap */
 /* Basically in order to have text wrap around images, I am manually baking invisble holes
 into the text grid area. Why? Because the images need to be positioned over other grid cells
@@ -279,29 +337,7 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     margin-right: 100px;
 }
 
-
-/* Protip setup */
-.proTip img
-{
-    border: 2px solid var(--pro-tip-color);
-    width: 100%;
-    margin: 0px;
-}
-
-.proTip figcaption
-{
-    color: var(--pro-tip-color);
-    width: 105%;
-    font-family: var(--normal-font);
-    font-size: var(--normal-font-size);
-    font-weight: bold;
-    letter-spacing: -1px;
-    line-height: 15.5px;
-    margin: -0.7% -1%;
-}
-
-
-
+/* #endregion */
 
 
 
