@@ -602,15 +602,27 @@ h2
             grid-area: contactInfo;
             justify-self: self-end;
             word-spacing: 15px;
+            overflow: visible;
         }
-            a:link
-            {
-                color: var(--sub-header-color);
-            }
-            a:visited
-            {
-                color: var(--pro-tip-color);
-            }
+a:link
+{
+    color: var(--sub-header-color);
+}
+a:visited
+{
+    color: var(--pro-tip-color);
+}
+a:focus,
+a:hover
+{
+    border-bottom: calc(var(--header-border-size) * 2) solid var(--sub-header-color);
+    padding: 5px;
+    border-radius: var(--header-radius);
+}
+a:active
+{
+    color: var(--main-text-color);
+}
 
 /* #endregion */
 
