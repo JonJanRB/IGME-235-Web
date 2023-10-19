@@ -2,7 +2,7 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Federant&display=swap');
-/* Variables */
+/* #region --Variables-- */
 :root
 {
     --document-width: 989px;
@@ -31,6 +31,8 @@
     /* --debug-source-overlay-opacity: 0; */
 }
 
+/* #endregion */
+
 body
 {
     background-color: #0f0f0f;
@@ -44,9 +46,10 @@ body
     background-color: var(--wrapper-bg-color);
     display: grid;
     grid-template-rows: 14% 84% 2%;
-    grid-template-areas:    "header"
-                            "content"
-                            "footer";
+    grid-template-areas:
+        "header"
+        "content"
+        "footer";
 
     /* The wrapper should be a static size so it looks like the document */
     /* 50% */
@@ -56,13 +59,10 @@ body
     margin: 20px auto 100px;
     border: 5px solid gray;
     box-shadow: 20px 20px 20px black;
-
     background-image: url("../media/edited-background.png");
-    /* background-image: url("../src/half-life-review.jpeg");
-    background-size: contain; */
 }
 
-/* #region --Grid layout-- */
+/* #region --Main grid layouts-- */
 
 .standardGridTile
 {
@@ -131,6 +131,7 @@ body
                 margin-bottom: 2.5px;
                 font-size: 22px;
                 letter-spacing: -1.7px;
+                word-spacing: 2.5px;
                 color: var(--sub-header-color);
             }
         #systemRequirments
@@ -140,29 +141,6 @@ body
         #categoryRatings
         {
             grid-area: rating;
-        }
-
-    footer
-    {
-        grid-area: footer;
-
-        display: grid;
-        grid-template-columns: 48% 1fr 48%;
-        grid-template-areas: "footerInfo pageNumber contactInfo";
-    }
-    /* ------Footer Grid */
-        #footerArticleInfo
-        {
-            grid-area: footerInfo;
-        }
-        #footerPage
-        {
-            grid-area: pageNumber;
-        }
-        #footerContactInfo
-        {
-            grid-area: contactInfo;
-            justify-self: self-end;
         }
 
 /* #endregion */
@@ -180,6 +158,7 @@ body
     pointer-events: none;
 }
 
+    #imageContent img,
     #imageContent figure
     {
         overflow: visible;
@@ -233,7 +212,7 @@ body
 
 #grunt
 {
-    width: 263px;
+    width: 261px;
     height: 271px;
     left: 712px;
     top: -528px;
@@ -490,18 +469,164 @@ h2
 
 /* #endregion */
 
+/* #region --Left side-- */
 
-/* debug */
-#sourceOverlay
+#systemRequirments
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin-top: 7.5px;
+}
+    #systemRequirments h4
+    {
+        background-color: white;
+        color: var(--header-bg-color);
+        text-align: right;
+        font-size: 12px;
+        line-height: 13px;
+        width: fit-content;
+        height: auto;
+        padding: 3%;
+        padding-left: 50%;
+        margin: 0px;
+    }
+    #systemRequirments ul
+    {
+        list-style: none;
+        padding: 0px;
+        width: 100%;
+        margin: 0px;
+        margin-top: 23px;
+    }
+    #systemRequirments ul li
+    {
+        border-bottom: var(--header-border-size) solid var(--pro-tip-color);
+        text-align: end;
+        font-size: 12px;
+        padding: 5px 0px 10px;
+        margin: 0px;
+    }
+    #systemRequirments ul :last-child
+    {
+        border-bottom-width: 0px;
+    }
+/* #endregion */
+
+/* #region --Right side-- */
+
+#categoryRatings ul
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+    width: 100%;
+    margin: 0px;
+    list-style: none;
+    padding: 0px;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+}
+        #categoryRatings ul li h5
+        {
+            background-color: var(--main-text-color);
+            color: var(--header-bg-color);
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 4px;
+            margin: 0px;
+        }
+            #categoryRatings ul li h5 span
+            {
+                float: right;
+            }
+        #categoryRatings ul li p
+        {
+            padding: 5px 0px;
+            margin: 0px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 19px;
+        }
+
+/* #endregion */
+
+/* #region --Footer-- */
+
+    footer
+    {
+        grid-area: footer;
+
+        display: grid;
+        grid-template-columns: 48% 1fr 48%;
+        grid-template-areas: "footerInfo pageNumber contactInfo";
+        justify-content: space-between;
+        align-content: center;
+
+        background-color: var(--header-bg-color);
+        height: 10px;
+        margin: 0px;
+        margin-bottom: 9px;
+        padding: 2px 10px;
+        padding-left: 40px;
+    }
+        footer div
+        {
+            font-size: 10px;
+
+            z-index: 1;
+            text-transform: uppercase;
+            font-weight: bold;
+            align-self: center;
+        }
+        #footerArticleInfo
+        {
+            grid-area: footerInfo;
+        }
+        #footerPage
+        {
+            grid-area: pageNumber;
+            background-color: white;
+            color: var(--header-bg-color);
+            border-radius: var(--header-radius);
+            padding: 4px 8px;
+            font-size: 14px;
+            text-align: center;
+            overflow: visible;
+        }
+        #footerContactInfo
+        {
+            grid-area: contactInfo;
+            justify-self: self-end;
+            word-spacing: 15px;
+        }
+            a:link
+            {
+                color: var(--sub-header-color);
+            }
+            a:visited
+            {
+                color: var(--pro-tip-color);
+            }
+
+/* #endregion */
+
+/* #region debug */
+/* #sourceOverlay
 {
     display: block;
-    /* display: none; */
     position: relative;
     z-index: -1;
-    /* top: calc(-130%); */
     translate: 0px -1515px;
     width: var(--document-width);
     opacity: var(--debug-source-overlay-opacity);
     
     margin: 20px auto 100px;
-}
+
+    
+} */
+
+/* #endregion */
