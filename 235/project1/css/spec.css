@@ -176,6 +176,7 @@ figure.proTip
 #rail
 {
     width: 283px;
+    height: 274px;
     position: relative;
     left: 48px;
     top: 535px;
@@ -209,7 +210,7 @@ figure.proTip
 }
 
 
-
+/* #region */
 /* Images and their Holes in the text that wrap */
 /* Basically in order to have text wrap around images, I am manually baking invisble holes
 into the text grid area. Why? Because the images need to be positioned over other grid cells
@@ -295,8 +296,8 @@ too and unless I want to make my main grid have like 100 rows and columns, this 
     font-size: var(--normal-font-size);
     font-weight: bold;
     letter-spacing: -1px;
-    line-height: 17px;
-    margin: -0.5% -1%;
+    line-height: 15.5px;
+    margin: -0.7% -1%;
 }
 
 
