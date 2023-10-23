@@ -19,7 +19,8 @@
             </a>
             <div id="internalLinks">
                 <a href="spec.html" class="mobileOptional">Spec</a>
-                <a href="doc.html" class="mobileOptional">Documentation</a>
+                <a href="prototype-index.html" class="mobileOptional">Prototype</a>
+                <a href="doc.html" class="mobileOptional">Doc</a>
                 <a href="media/portfolio/resume.pdf">Resume</a>
             </div>
             <div id="title">
@@ -139,14 +140,35 @@
         let highlightElement = document.querySelector(contentId);
         if(highlightElement)
         {
-            let originalColor = highlightElement.style.borderColor;
             highlightElement.style.borderColor = "#d3cf00";
             setTimeout(() =>
             {
                 highlightElement.style = "";
-            }, 1000);
+            }, 500);
         }
     }
+
+    // function maximizeArticle(contentId)
+    // {
+    //     let maximizeElement = document.querySelector(contentId);
+    //     if(maximizeElement)
+    //     {
+    //         if(maximizeElement.style.position === "fixed")
+    //         {
+    //             maximizeElement.style = "";
+    //         }
+    //         else
+    //         {
+    //             maximizeElement.style.position = "fixed";
+    //             maximizeElement.style.margin = "auto";
+    //             maximizeElement.style.zIndex = "10";
+    //             maximizeElement.style.display = "block";
+    //             maximizeElement.style.width = "100vw";
+    //             maximizeElement.style.height = "100vh";
+    //         }
+            
+    //     }
+    // }
 
 </script>
 </html>

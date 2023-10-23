@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Open+Sans&display=swap');
         img
         {
             margin: 30px auto 0px;
+        }
+        *
+        {
+            font-family: 'Open Sans', sans-serif;
         }
     </style>
 </head>
@@ -16,7 +21,9 @@
         <h1>Documentation</h1>
         <h2>Quicklinks</h2>
         <ul>
+            <li><a href="src/half-life-review.jpeg">Spec Source (what I based it on)</a></li>
             <li><a href="spec.html">Spec</a></li>
+            <li><a href="prototype-index.html">Prototype</a></li>
             <li><a href="index.html">Portfolio</a></li>
         </ul>
         <section>
@@ -142,6 +149,10 @@
         </section>
         <section>
             <h2>Challenges and Extra Work</h2>
+            <img src="src/var.png" alt="Variables">
+            <p>
+                I used many variables and calculated stuff using them in order to make the styling more easily maintainable and customizable
+            </p>
             <img src="src/tooltip.png" alt="Tool Tip">
             <p>
                 A cool extra thing I did to make the site feel nicer was to add tool tips to logos and links
@@ -153,6 +164,11 @@
                 nav bar links. These may seem simple but in order to make the border look like it is moving towards the
                 text (inwards rather than outwards) I basically transitioned both the border and the padding.
             </p>
+            <img src="src/scrollable-nav.png" alt="Scrollable Navigation">
+            <p>
+                Also, in case I have more content to navigate to or the screen is too small, the navigation becomes scrollable
+                when there is not enough room without affecting the other elements around it.
+            </p>
             <img src="src/hamburger.png" alt="Hamburger Navigation">
             <p>
                 Getting the hamburger menu to be interactive required a bit of javascript. I based it off of the tutorial mentioned
@@ -160,9 +176,13 @@
                 out that for some reason the validator says the script tag is never closed but it definetly is so I don't know why
                 it is saying it isn't.
             </p>
-            <img src="src/var.png" alt="Variables">
+            <img src="src/highlight.png" alt="Navigation Highlighting">
             <p>
-                I also used many variables and calculated stuff using them in order to make the styling more easily maintainable and customizable
+                Something I noticed when having feedback was that oftentimes people would be confused if the content was at the same point
+                as another piece of content. Since the projects are using flexbox, wider screens will show multiple projects at once meaning
+                navigating to one at the same x position will result in the screen not moving. Using my knowledge and learning setTimeout
+                I made it so that when you navigate to content, it will make the border flash yellow to notify the user of which content it is
+                navigating to.
             </p>
             <img src="src/restate-hitboxes.png" alt="Hitboxes for images">
             <p>
