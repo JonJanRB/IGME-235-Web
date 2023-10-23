@@ -1,7 +1,7 @@
+/* #region Variables and Init*/
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Special+Elite&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
-/* Variables */
 :root
 {
     --contrast-color: #d6d6d6;
@@ -10,7 +10,7 @@
     --content-bg: #0f0f0f;
     --hover-bg: #ffffff44;
     --display-font: 'Inconsolata', monospace;
-    --main-font: 'Inconsolata', monospace;
+    --main-font: 'Open Sans', sans-serif;
     --content-border-width: 0.2rem;
     --content-border-radius: 1rem;
     --style-border-radius: 5rem;
@@ -21,7 +21,18 @@
 
 
     --link-hover-color: #d3cf00;
-    /* --main-font: 'Open Sans', sans-serif; */
+
+
+    --tool-tip-width: 10rem;
+    --tool-tip-spacing: 1rem;
+    --tool-text-color: white;
+    --tool-tip-bg:#000000bb;
+
+    --sub-header-color: #969696;
+    --nav-link-bg:#00000056;
+    --nav-link-padding-right: 2rem;
+
+    --mobile-header-height: 4rem;
 
     /* Reset font size for consistant rem */
     font-size: 15px;
@@ -42,7 +53,7 @@ body
     padding: 0rem;
 }
 
-/* For tool tips, check this tutorial out https://www.w3schools.com/css/css_tooltip.asp */
+/* #endregion */
 
 /* #region Links */
 a
@@ -77,22 +88,27 @@ a:active
 
 /* #region Main Grid */
 
-#overlay
+#wrapper
 {
     display: grid;
-    grid-template-areas:    "sidebar header"
+    grid-template-areas:    "header header"
                             "sidebar main";
     grid-template-columns: 15rem 1fr;
-    grid-template-rows: 1fr 100vh;
+    grid-template-rows: auto 1fr;
 
     position: fixed;
     pointer-events: none;
     top: 0;
     left: 0;
     width: 100%;
+    height: 100%;
     z-index: 1;
 }
 
+.overlay
+{
+    font-family: var(--display-font);
+}
 /* #endregion */
 
 /* #region Header */
@@ -102,59 +118,57 @@ header
     grid-area: header;
 
     display: grid;
-    grid-template-columns: 4fr auto 5fr;
+    grid-template-columns: 4fr auto 4fr;
     justify-items: center;
     box-sizing: content-box;
     background-color: var(--ui-bg);
-    height: 4rem;
-    padding-top: 2rem;
     font-size: 1.5rem;
+    height: 6rem;
+    align-items: center;
 
     pointer-events: auto;
 
     z-index: 1;
 }
-    header>a
+    #hamburgerMenu
+    {
+        display: none;
+    }
+    #title
+    {
+        text-align: center;
+
+    }
+        #title *
+        {
+            margin: 0rem;
+            padding: 0rem;
+            font-size: 2.5rem;
+        }
+        #title h2
+        {
+            color: var(--sub-header-color);
+            font-size: 2rem;
+        }
+    header a
     {
         width: min-content;
         height: min-content;
     }
-    #myIcon
-    {
-        background-color: var(--ui-bg);
-        border-radius: 100%;
-        padding: 1rem;
-        padding-top: 0rem;
-        margin-top: -1.5rem;
-
-    }
-        #myIcon img
-        {
-            width: 8rem;
-            transition: rotate 0.2s ease-out, scale 0.2s ease-out;
-        }
-            #myIcon img:focus,
-            #myIcon img:hover
-            {
-                rotate: 10deg;
-                scale: 0.95;
-            }
-            #myIcon img:active
-            {
-                transition: rotate 0.1s ease-out, scale 0.1s ease-out;
-                rotate: 40deg;
-                scale: 0.8;
-            }
-        #myIcon:hover
-        {
-            /* Override the normal link mode */
-            scale: 1;
-        }
     #outgoingLinks
     {
         display: flex;
         width: 100%;
-        justify-content: space-evenly;
+        justify-content: end;
+        align-items: center;
+        height: 100%;
+        padding-right: 2rem;
+    }
+    #outgoingLinks div
+    {
+        display: flex;
+        align-items: center;
+        height: 100%;
     }
     #outgoingLinks a
     {
@@ -172,44 +186,121 @@ aside
     grid-area: sidebar;
 
     background-color: var(--ui-bg);
-    padding-left: 2rem;
     padding-top: 2rem;
 
-    align-content: center;
+    align-items: center;
 
     pointer-events: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    translate: 0%;
 }
     aside h2
     {
         font-size: 2.5rem;
-        margin: 0rem;
-    }
-    aside ul
-    {
-        list-style-type: none;
-        padding: 0;
         margin: 0;
+        margin-left: 3rem;
+        width: 100%;
     }
-        aside ul li
+    aside nav
+    {
+        width: 100%;
+    }
+        aside ul
         {
-            margin: 4rem 0rem;
-            font-size: 1.5rem;
+            list-style-type: none;
+            padding: 0;
+            margin: 0 1rem;
         }
-            aside ul li a
+            aside ul li
             {
-                border: 0rem solid var(--link-hover-color);
-                border-top-right-radius: 0rem;
-                border-bottom-right-radius: 0rem;
-                transition: border-right-width 0.05s ease-out;
+                margin: 0.5rem 0;
+                font-size: 1.2rem;
             }
-            aside ul li a:hover
+            aside a
             {
-                border-right-width: var(--content-border-width);
+                border: 0 solid var(--link-hover-color);
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+                transition: border-right-width 0.1s ease-out, padding-right 0.1s ease-out;
+                padding: 0.5rem var(--nav-link-padding-right) 0.5rem 1rem;
+                display: block;
+                width: 90%;
             }
-
+            aside a:link
+            {
+                color: #ffae00;
+                text-decoration: none;
+            }
+            aside a:visited
+            {
+                color: #ffae00;
+            }
+            aside a:focus,
+            aside a:hover
+            {
+                scale: 1;
+                background-color: var(--nav-link-bg);
+                border-right-width: calc(var(--content-border-width) * 4);
+                padding-right: calc(var(--nav-link-padding-right) - calc(var(--content-border-width) * 4));
+            }
+            aside a:active
+            {
+                transition: border-right-width 0.05s ease-out, padding-right 0.05s ease-out;
+                color: #eeff00;
+                border-right-width: calc(var(--content-border-width) * 2);
+                padding-right: calc(var(--nav-link-padding-right) - calc(var(--content-border-width) * 2));
+            }
+    #myIcon
+    {
+        background-color: transparent;
+        border-radius: 100%;
+        padding: 0rem;
+        border: 0rem solid transparent;
+        width: auto;
+        margin-top: auto;
+        margin-bottom: 1rem;
+    }
+        #myIcon img
+        {
+            width: 7rem;
+            transition: rotate 0.2s ease-out, scale 0.2s ease-out;
+        }
+            #myIcon img:focus,
+            #myIcon img:hover
+            {
+                rotate: 10deg;
+                scale: 0.95;
+                border-right-width: 0rem;
+                padding-right: 0rem;
+            }
+            #myIcon img:active
+            {
+                transition: rotate 0.1s ease-out, scale 0.1s ease-out;
+                rotate: 40deg;
+                scale: 0.8;
+            }
+        #myIcon:hover
+        {
+            /* Override the normal link mode */
+            scale: 1;
+            border-right-width: 0rem;
+            padding-right: 0rem;
+        }
+        #myIcon:active
+        {
+            /* Override the normal link mode */
+            scale: 1;
+            border-right-width: 0rem;
+            padding-right: 0rem;
+        }
 
 
 /* #endregion */
+
+/* #region Main */
 
 #content
 {
@@ -223,8 +314,6 @@ aside
     background-color: var(--bg);
     border-top-left-radius: var(--style-border-radius);
 }
-
-/* #region Main */
 
 main
 {
@@ -251,6 +340,7 @@ main article
     {
         border-radius: 0rem;
         scale: 1.05;
+        z-index: 0;
     }
     main article h3
     {
@@ -298,3 +388,130 @@ footer img
 }
 
 /* #endregion */
+
+/* #region Helpful Things */
+
+/* For tool tips this helped: https://www.w3schools.com/css/css_tooltip.asp */
+
+.toolTipped
+{
+    position: relative;
+    display: inline-block;
+}
+
+.toolTip
+{
+    visibility: hidden;
+    z-index: 2;
+    position: absolute;
+    font: var(--display-font);
+    font-size: 1.5rem;
+    text-align: center;
+
+    background-color: var(--tool-tip-bg);
+    color: var(--contrast-color);
+    border-radius: var(--content-border-radius);
+    border: var(--subcontent-border-width) solid var(--hover-bg);
+    padding: calc(var(--content-border-padding) * 0.5)var(--content-border-padding);
+    width: max-content;
+    max-width: 10rem;
+
+    /* Basically center it so it simplifies positioning */
+    transform: translate(-50%, -50%);
+
+    pointer-events: none;
+}
+/* Tool tip shows up on the bottom */
+.toolTip, /* Default to show on the bottom */
+.ttBottom
+{
+    left: 50%;
+    top: calc(100% + var(--tool-tip-spacing));
+}
+
+.ttRight
+{
+    left: calc(150% + var(--tool-tip-spacing));
+    top: 50%;
+}
+
+.toolTipped:hover .toolTip
+{
+    visibility: visible;
+    scale: 1;
+}
+
+
+/* #endregion */
+
+/* #region Responsiveness */
+
+@media screen and (max-width: 850px)
+{
+    #wrapper
+    {
+        display: grid;
+        grid-template-areas:    "header"
+                                "main";
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+    }
+    aside
+    {
+        /* display: none; */
+        position: fixed;
+        translate: -100%;
+        transition: translate 0.5s ease-out;
+        margin-top: var(--mobile-header-height);
+        height: calc(100% - var(--mobile-header-height));
+        z-index: 1;
+        box-shadow: 0rem 2rem 4rem black;
+    }
+    header
+    {
+        height: var(--mobile-header-height);
+        grid-template-columns: auto 3.5fr auto 4fr;
+        z-index: 3;
+    }
+        #hamburgerMenu
+        {
+            display: block;
+            margin-left: 1rem;
+        }
+        header a
+        {
+            font-size: 1rem;
+        }
+        #title *
+        {
+            font-size: 1.5rem;
+        }
+        #title h2
+        {
+            font-size: 1rem;
+        }
+        #outgoingLinks
+        {
+            padding-right: 1rem;
+        }
+    #content
+    {
+        border-top-left-radius: 0;
+        padding: 0.5rem;
+    }
+        main article
+        {
+            border: 0 none transparent;
+            background-color: var(--content-bg);
+        
+            max-width: 100%;
+        }
+
+
+
+/* For hamburger menu: https://www.w3schools.com/howto/howto_js_mobile_navbar.asp */
+
+}
+
+/* #endregion */
+

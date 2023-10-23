@@ -8,30 +8,48 @@
     <link rel="icon" type="image/png" href="media/portfolio/favicon/favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="media/portfolio/favicon/favicon-16x16.png" sizes="16x16">
     <link rel="stylesheet" href="css/index.css">
+    <!-- Font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
-    <div id="overlay">
-        <header>
-            <a href="media/portfolio/resume.pdf">Resume</a>
-            <a href="#aboutMe" id="myIcon">
-                <img src="media/portfolio/logo.png" alt="Navigte to About Me">
+    <div id="wrapper">
+        <header class="overlay">
+            <a id="hamburgerMenu" onclick="toggleMenu();">
+                <i class="fa fa-bars"></i>
             </a>
+            <a href="media/portfolio/resume.pdf">Resume</a>
+            <div id="title">
+                <h1>Jonathan Jan</h1>
+                <h2>Portfolio</h2>
+            </div>
             <div id="outgoingLinks">
-                <a href="mailto:jjanrb@gmail.com">Email</a>
-                <a href="https://www.linkedin.com/in/jonjan/">LinkedIn</a>
-                <a href="https://github.com/JonJanRB">GitHub</a>
+                <div class="toolTipped">
+                    <a href="https://www.linkedin.com/in/jonjan/"><i class="fab fa-linkedin"></i></a>
+                    <span class="toolTip ttBottom">LinkedIn</span>
+                </div>
+                <div class="toolTipped">
+                    <a href="https://github.com/JonJanRB"><i class="fab fa-github"></i></a>
+                    <span class="toolTip ttBottom">GitHub</span>
+                </div>
+                <div class="toolTipped">
+                    <a href="mailto:jjanrb@gmail.com"><i class="fas fa-envelope"></i></a>
+                    <span class="toolTip ttBottom">Email</span>
+                </div>
             </div>
         </header>
-        <aside>
-            <h2>Navigate</h2>
+        <aside class="overlay">
+            <h2>Projects</h2>
             <nav>
                 <ul>
                     <li><a href="#buffScript">Buffscript</a></li>
                     <li><a href="#railGun">Railgun Editor</a></li>
                     <li><a href="#whiteSpace">Whitespace</a></li>
-                    <li><a href="#aboutMe">About Me</a></li>
                 </ul>
             </nav>
+            <a href="#aboutMe" id="myIcon" class="toolTipped">
+                <img src="media/portfolio/logo.png" alt="Navigte to About Me">
+                <span class="toolTip ttRight">About Me</span>
+            </a>
         </aside>
         <div id="content">
             <main>
@@ -82,4 +100,35 @@
         </div>
     </div>
 </body>
+<script>
+    function toggleMenu()
+    {
+        var sideBar = document.querySelector("aside");
+        if(sideBar.style.translate == "0%")
+        {
+            sideBar.style.translate = "-100%";
+        }
+        else
+        {
+            sideBar.style.translate = "0%";
+        }
+    }
+
+//https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
+addEventListener("resize", (event) => {});
+
+onresize = (event) =>
+{
+    var sideBar = document.querySelector("aside");
+    if(window.innerWidth >= 850)
+    {
+        sideBar.style.translate = "0%";
+    }
+    else
+    {
+        sideBar.style.translate = "-100%";
+    }
+};
+
+</script>
 </html>
