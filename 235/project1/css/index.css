@@ -473,6 +473,7 @@ footer img
         grid-template-columns: auto 3.5fr auto 4fr;
         z-index: 3;
     }
+        /* For hamburger menu: https://www.w3schools.com/howto/howto_js_mobile_navbar.asp */
         #hamburgerMenu
         {
             display: block;
@@ -506,10 +507,10 @@ footer img
         
             max-width: 100%;
         }
+}
 
-
-
-/* For hamburger menu: https://www.w3schools.com/howto/howto_js_mobile_navbar.asp */
+@media screen and (max-width: 420px)
+{
 
 }
 
