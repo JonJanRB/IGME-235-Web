@@ -14,8 +14,13 @@
 <body>
     <main style="margin: 10px auto; width: 1000px;">
         <h1>Documentation</h1>
+        <h2>Quicklinks</h2>
+        <ul>
+            <li><a href="spec.html">Spec</a></li>
+            <li><a href="index.html">Portfolio</a></li>
+        </ul>
         <section>
-            <h2>Goal</h2>
+            <h2>Spec Goal</h2>
             <p>
                 My goal currently was to recreate the source page as perfectly accurate as I could
                 so that I could learn more about CSS. I find that when I delve deep into something,
@@ -24,6 +29,16 @@
                 for other classes as well and still do so I was not able to hand this in on time.
                 Even still, I put in the effort I expect from myself because I think it is still
                 a valuable experince even if I don't get full credit.
+            </p>
+            <h2>Final Goal</h2>
+            <p>
+                The audience that I was targetting for the final product was employers.
+                My goal for the final product of this was to make a portfolio that was sleek and simple
+                to look at while being easy to use and understand. I wanted to make things feel satisfying
+                to interact with which is why I made most important things have some sort of animation
+                but I also didn't want it to be annoying or obnoxious so the animations are short and snappy.
+                I also had this idea of each project being in its own box since back when I did the 235 homepage
+                as you might be able to tell from how that one looks.
             </p>
         </section>
         <section>
@@ -47,6 +62,49 @@
             <p>
             This is where I got the gonarch from (alien at the bottom of the page)
             </p>
+            <h2>Helpful Resources</h2>
+            <a href="https://dzhavat.github.io/2020/02/03/simple-way-to-negate-a-number-in-css">
+                Negating Numbers
+            </a>
+            <p>
+                This helped me understand how to use the calc function in CSS which would come in handy
+            </p>
+            <a href="https://www.w3schools.com/css/css_tooltip.asp">
+                Tool Tip Tutorial
+            </a>
+            <p>
+                This is a w3schools tutorial on making a CSS only tooltip info popup thing. This was
+                helpful when I made my own which differs from the tutorial but the tutorial gave me a
+                basis for the idea and how I could go about it
+            </p>
+            <a href="https://www.w3schools.com/howto/howto_js_mobile_navbar.asp">
+                Mobile Navbar
+            </a>
+            <p>
+                This is another w3schools tutorial about making a navbar menu. I based my hamburger menu
+                off of this, though I deviated a lot from the original tutorial because of how I wanted it
+                to act.
+            </p>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event">
+                Resize Event
+            </a>
+            <p>
+                I used this combined with the hamburger menu to make sure that the navbar is onscreen when
+                the screen becomes wide enough to not need the menu popout anymore.
+            </p>
+            <a href="https://developer.mozilla.org/en-US/docs/Web/API/setTimeout">
+                Timeout
+            </a>
+            <p>
+                This helped for highlighting the content when navigating to it.
+            </p>
+            <h2>Fonts</h2>
+            <ul>
+                <li><a href="https://fonts.google.com/specimen/Archivo">Spec - Archivo</a></li>
+                <li><a href="https://fonts.google.com/specimen/Federant">Spec - Federant</a></li>
+                <li><a href="https://fonts.google.com/specimen/Inconsolata">Portfolio - Inconsolata</a></li>
+                <li><a href="https://fonts.google.com/specimen/Open+Sans">Portfolio - Open Sans</a></li>
+            </ul>
         </section>
         <section>
             <h2>Annotations and Screenshots</h2>
@@ -80,6 +138,37 @@
                 the footer would not until you scroll all the way down or navigate there using the side bar.
                 I think flex-box would be a good choice for the content boxes and media queries would be good for the header, footer, and
                 possibly side bar (maybe it will get too cramped and need to become a hamburger menu).
+            </p>
+        </section>
+        <section>
+            <h2>Challenges and Extra Work</h2>
+            <img src="src/tooltip.png" alt="Tool Tip">
+            <p>
+                A cool extra thing I did to make the site feel nicer was to add tool tips to logos and links
+                that did not have titles or text. This was challenging but fun and satisfying when it was done.
+            </p>
+            <img src="src/nav.png" alt="Navigation Link">
+            <p>
+                Another thing that is less noticable is the little right border that appears when hovering and clicking
+                nav bar links. These may seem simple but in order to make the border look like it is moving towards the
+                text (inwards rather than outwards) I basically transitioned both the border and the padding.
+            </p>
+            <img src="src/hamburger.png" alt="Hamburger Navigation">
+            <p>
+                Getting the hamburger menu to be interactive required a bit of javascript. I based it off of the tutorial mentioned
+                earlier but greatly modified and learned some javascript stuff to get it to work the way I wanted. I would like to point
+                out that for some reason the validator says the script tag is never closed but it definetly is so I don't know why
+                it is saying it isn't.
+            </p>
+            <img src="src/var.png" alt="Variables">
+            <p>
+                I also used many variables and calculated stuff using them in order to make the styling more easily maintainable and customizable
+            </p>
+            <img src="src/restate-hitboxes.png" alt="Hitboxes for images">
+            <p>
+                Lastly, I just want to restate that getting those images in the spec to work both semantically and visually was very challenging.
+                As shown earlier, it required the creation of basically hitboxes in order to wrap the single big text around all the different
+                images strewn throughout the page.
             </p>
         </section>
     </main>

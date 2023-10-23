@@ -1,6 +1,5 @@
 /* #region Variables and Init*/
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Special+Elite&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Open+Sans&display=swap');
 
 :root
 {
@@ -208,7 +207,7 @@ aside
     aside nav
     {
         width: 100%;
-        overflow-y: scroll;
+        overflow-y: auto;
     }
         aside nav h2
         {
@@ -343,7 +342,7 @@ main article
     max-width: 30rem;
     height: min-content;
 
-    transition: border-radius 0.2s ease-out, scale 0.2s ease-out;
+    transition: border-radius 0.2s ease-out, scale 0.2s ease-out, border-color 0.3s ease-out;
 }
     main article:hover
     {

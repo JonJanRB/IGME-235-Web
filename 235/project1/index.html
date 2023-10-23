@@ -45,9 +45,9 @@
             <nav>
                 <h2>Projects</h2>
                 <ul>
-                    <li><a href="#buffScript">Buffscript</a></li>
-                    <li><a href="#railGun">Railgun Editor</a></li>
-                    <li><a href="#whiteSpace">Whitespace</a></li>
+                    <li><a href="#buffScript" onclick="highlightNavigation('#buffScript')">Buffscript</a></li>
+                    <li><a href="#railGun" onclick="highlightNavigation('#railGun')">Railgun Editor</a></li>
+                    <li><a href="#whiteSpace" onclick="highlightNavigation('#whiteSpace')">Whitespace</a></li>
                 </ul>
             </nav>
             <a href="#aboutMe" id="myIcon" class="toolTipped">
@@ -107,7 +107,7 @@
 <script>
     function toggleMenu()
     {
-        var sideBar = document.querySelector("aside");
+        let sideBar = document.querySelector("aside");
         if(sideBar.style.translate == "0%")
         {
             sideBar.style.translate = "-100%";
@@ -118,21 +118,35 @@
         }
     }
 
-//https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
-addEventListener("resize", (event) => {});
+    //https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
+    addEventListener("resize", (event) => {});
 
-onresize = (event) =>
-{
-    var sideBar = document.querySelector("aside");
-    if(window.innerWidth >= 850)
+    onresize = (event) =>
     {
-        sideBar.style.translate = "0%";
-    }
-    else
+        let sideBar = document.querySelector("aside");
+        if(window.innerWidth >= 850)
+        {
+            sideBar.style.translate = "0%";
+        }
+        else
+        {
+            sideBar.style.translate = "-100%";
+        }
+    };
+    // https://developer.mozilla.org/en-US/docs/Web/API/setTimeout
+    function highlightNavigation(contentId)
     {
-        sideBar.style.translate = "-100%";
+        let highlightElement = document.querySelector(contentId);
+        if(highlightElement)
+        {
+            let originalColor = highlightElement.style.borderColor;
+            highlightElement.style.borderColor = "#d3cf00";
+            setTimeout(() =>
+            {
+                highlightElement.style = "";
+            }, 1000);
+        }
     }
-};
 
 </script>
 </html>
