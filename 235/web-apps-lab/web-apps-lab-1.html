@@ -1,23 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-   <meta charset="utf-8" />
-   <title>Hello-4</title>
-   <script>
-     "use strict";
-     // 1) Common JS Objects
-     let colors = ["red", "green", "blue"]; // Array literal
-     let person = {name:"Fred", age:20};   // Object literal
-     let month = new Date().getMonth(); 
-     let age = Math.round(20.999);
-     let age2 = Math.floor(20.999);
 
-     // add your new code here.
-      colors.push("black");
-      console.log("tets");
-      console.log(colors[colors.length - 1]);
-</script>
+<head>
+  <meta charset="utf-8" />
+  <title>Hello-4</title>
+  <script>
+    "use strict";
+  // 1) Common JS Objects
+  let colors = ["red", "green", "blue"]; // Array literal
+  let person = { name: "Fred", age: 20 };   // Object literal
+  let month = new Date().getMonth();
+  let age = Math.round(20.999);
+  let age2 = Math.floor(20.999);
+
+  // add your new code here.
+
+  //I combined the first 2 things here since .push() returns the new length
+  console.log(colors[colors.push("black") - 1]);
+
+  //in vs of: https://stackoverflow.com/questions/29285897/difference-between-for-in-and-for-of-statements
+  for (let color of colors)//Similar to a foreach loop in C#
+  {
+    console.log(color);
+
+  }
+
+  //Add new property on the fly
+  person.school = "RIT";
+  console.log(person.school);
+
+  //Returns miliseconds so *1000 for sec
+  console.log(Date.now() / 1000);
+
+  console.log(Math.PI);
+
+  console.log(Math.abs(-999));
+
+  console.log("Hello".toUpperCase());
+
+  </script>
 </head>
+
 <body>
 </body>
+
 </html>

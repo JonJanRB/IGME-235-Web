@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>DOM-3</title>
+	<style>
+		body{border:1px solid gray;}
+		p b{transform: rotate(20deg)}
+	</style>
+</head>
+<body>
+<h1>My Page</h1>
+<h2>Info</h2>
+<h2>Pictures</h2>
+<h2>More Info</h2>
+<p>Blah <b>Blah</b> Blah</p>
+<p>Blah <b>Blah</b> Blah</p>
+<p id="lastParagraph">Blah <b>Blah</b> Blah</p>
+<footer>Copyright &copy; <b>20XX</b></footer>
+<script>
+	
+    "use strict";
+
+    // add your own code here.
+
+    document.querySelector("h1").innerHTML = "My UFO Page";
+    document.querySelector("h2").innerHTML = "My UFO Info";
+    //Using css selector to grab specific index
+    document.querySelector("h2:nth-of-type(2)").innerHTML = "My UFO Pictures";
+    //Using the selector all and using its array structure
+    document.querySelectorAll("h2")[2].innerHTML = "";
+
+    document.body.style.fontFamily = "sans-serif";
+    document.body.style.color = "#FF2255";
+
+    const firstParagraph = document.querySelector("p");
+    firstParagraph.innerHTML = 'Report your UFO sightings here: <a href="https://nuforc.org/">https://nuforc.org/</a>';
+    firstParagraph.style.color = "green";
+    firstParagraph.style.fontWeight = "bold";
+    firstParagraph.style.fontSize = "2em";
+    firstParagraph.style.textTransform = "uppercase";
+    firstParagraph.style.textShadow = "3px 3px #A44";
+
+    document.querySelector("p:nth-of-type(2)").innerHTML = "";
+    document.querySelector("p:nth-of-type(3)").innerHTML = '<img src="https://s.abcnews.com/images/Politics/ufo-dod-navy-gty-jt-210604_1622833615977_hpMain_16x9_992.jpg" alt="cragy ufuoh omygah">';
+    document.querySelector("img").style.width = "500px";//It was too big
+    document.querySelector("footer").innerHTML = "&copy 2023 Jonathan Jan";
+
+	</script>
+</body>
+</html>
