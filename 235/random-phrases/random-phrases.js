@@ -1,4 +1,4 @@
-const phrases = 
+const PHRASES = 
 [
     "Listen to the music to help time your jumps",
     "Back for more are ya?",
@@ -62,3 +62,32 @@ const phrases =
     "It is only game...",
     "Unlock new icons and colors by completing achievements"
 ]
+
+window.onload = () =>
+{
+    document.querySelector("button").onclick = displayQuote;
+    displayQuote();
+};
+
+/**
+ * Generates a random index within phrases length and returns entry
+ * @returns string phrase
+ */
+let getRandomPhrase = () =>
+{
+    return PHRASES[Math.floor(Math.random() * PHRASES.length)];
+};
+
+/**
+ * Sets the phrase on the site to a random entry of phrases
+ * @param {string} phrase 
+ */
+let populatePhrase = phrase =>
+{
+    document.querySelector("article").innerHTML = phrase;
+};
+
+/**
+ * Displays the random phrase
+ */
+let displayQuote = () => populatePhrase(getRandomPhrase());
