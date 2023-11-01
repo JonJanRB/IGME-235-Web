@@ -1,0 +1,41 @@
+/* https://www.fontsquirrel.com/fonts/pusab */
+@import url(media/pusab_regular_macroman/stylesheet.css);
+
+:root
+{
+    --bg-color: #995533;
+    --font: 'pusabregular', sans-serif;
+}
+
+*
+{
+    font-family: var(--font);
+}
+
+body
+{
+    display: grid;
+    grid-template-areas:    "header"
+                            "main"
+                            "footer";
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto 1fr;
+    justify-items: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+
+    background-image: url("media/gdbg.jfif");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+main
+{
+    min-width: 500px;
+    min-height: 200px;
+    background-color: var(--bg-color);
+    border: 2px solid white;
+    border-radius: 25px;
+}
