@@ -1,3 +1,5 @@
+"use strict";
+
 const PHRASES = 
 [
     "Listen to the music to help time your jumps",
