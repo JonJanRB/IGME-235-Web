@@ -1,54 +1,104 @@
-"use strict";
+"use strict"
 
-// Tips: onchange, onclick
-// attribute selector: input[name='colorGroup']
-// get all the things (legend, radios, btn, para)
-// JQuery was made by a cs student at RIT !?
-
-let init = function()
-{
-    let buttons = document.querySelectorAll("input");
-    for(let button of buttons)
-    {
-        //These will both do the same thing and pass the Event obj as 1st param
-        button.onchange = select;
-        // button.addEventListener("change", selection);
-    }
-    document.querySelector("#colorButton").addEventListener("click", submit);
-}
-window.onload = init;
-// window.addEventListener("load", init); //Another way to do this
-
+let monsters = [];      // our array of monsters
 
 /**
+ * Our onload Event.
  * 
- * @param {Event} e 
  */
-let select = e =>
+window.onload = function ()
 {
-    document.querySelector("#info").innerHTML = `You have selected "${e.target.value}"!`;
-
-    //One way to store data in an html element
-    // e.target.dataset.selectedStatus = "selected";
+    makeSampleMonsters();
+    showMonsters();
 }
 
-
-//Another way to make function (I'm just playing around with these to get used to them)
-let submit = function()
+/**
+ * Create a set of Sample Monsters.
+ * 
+ */
+function makeSampleMonsters()
 {
-    let selectedColor;
+    let monster;
 
-    let buttons = document.querySelectorAll("input");
-    for(let button of buttons)
+    monster = makeGoomba("John", 20, 30, 100);
+    monsters.push(monster);
+    monster = makeGoomba("Fred", 30, 100, 150);
+    monsters.push(monster);
+    monster = makeGoomba("Alice", 40, 150, 200);
+    monsters.push(monster);
+}
+
+/**
+ * Function that shows our monsters (just Goombas for now)
+ * 
+ */
+function showMonsters()
+{
+    let goombaList = document.querySelector("#goombas");
+
+    for (let i = 0; i < monsters.length; i++)
     {
-        if(button.checked)
+        let liStr = "";
+        let li = document.createElement("li");
+
+        for (let key in monsters[i])
         {
-            selectedColor = button.value;
-            break;//More efficient
+            if (typeof monsters[i][key] !== "function")
+            {
+                liStr += `<b>${key}:</b> ${monsters[i][key]}<br />`;
+            }
+        }
+        li.innerHTML = liStr;
+        goombaList.appendChild(li);
+    }
+}
+
+/**
+ * create our base monster object with defaults.
+ * 
+ */
+function createBaseMonster()
+{
+    return {
+        name: "",
+        hp: 100,
+        speed: 10,
+        score: 100,
+        status: function ()
+        {
+            console.log("name: " + this.name + ", hp: " + this.hp + ", speed: " + this.speed + ", score: " + this.score);
         }
     }
-
-    document.querySelector("legend").style.color = selectedColor;
-    //This only changes the non element stuff within the element compared to innerHTML (if I understand right)
-    document.querySelector("#info").textContent = `Your FINAL CHOICE is "${selectedColor}"!`;
 }
+
+/**
+ * Create a Goomba.
+ * 
+ */
+function makeGoomba(name, hp, speed, score)
+{
+    let goomba = createBaseMonster();
+    goomba.name = name;
+    goomba.hp = hp;
+    goomba.speed = speed;
+    goomba.score = score;
+    goomba.takeDamage = function (dmgVal)
+    {
+        goomba.hp -= dmgVal;
+    }
+    goomba.powerUp = powerUp;
+
+    Object.seal(goomba);
+    return goomba;
+}
+
+/**
+ * Function that can be used inside a monster object.
+ * 
+ */
+function powerUp(val)
+{
+    this.speed += val;
+    this.hp += val
+    this.status();
+};
