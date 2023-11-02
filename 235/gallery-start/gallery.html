@@ -78,7 +78,7 @@
       </div>
        <p id="description">Choose an image.</p>
      <footer>
-        <p>For IGME-230 Web Site Design & Implementation</p>
+        <p>For IGME-235 Intro to Game Web Tech</p>
      </footer>
     </section>
      <script>
@@ -90,9 +90,28 @@
 
 	"use strict";
 
-	document.onload = () =>
+	window.onload = () =>
 	{
 		let navigationLinks = document.querySelectorAll("span");
+		for(let element of navigationLinks)
+		{
+			element.onclick = loadImageFromEvent;
+		}
+		loadImage(navigationLinks[0]);//Load the first image so there is no placeholder
+	};
+
+	let imageWrapper = document.querySelector("#imagewrapper");
+	
+	let loadImage = element =>
+	{
+		//Get rid of placeholder since this isn't a placeholder anymore
+		imageWrapper.innerHTML =
+			`<img src="images/${element.dataset.image}" alt="${element.title}" />`;
+	};
+
+	let loadImageFromEvent = e =>
+	{
+		loadImage(e.target);
 	};
 	</script>
 	   
