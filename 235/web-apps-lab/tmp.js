@@ -1,142 +1,66 @@
-"use strict"
+let cars = [
+	{make:"Toyota",	year:2015},
+	{make:"Jeep",	year:1946},
+	{make:"Ford",	year:2017},
+	{make:"Tesla",	year:2018},
+	{make:"Fiat",	year:1982},
+	{make:"Dodge",	year:1970},
+	{make:"Chevy",	year:1957},
+];
 
-let monsters = [];      // our array of monsters
+// For this exercise you will use Array.filter(), Array.sort(), and Array.map() on
+// the cars array above.
 
-/**
- * Our onload Event.
- * 
- */
-window.onload = function ()
-{
-    makeSampleMonsters();
-    showMonsters("goomba", "#goombas");
-    showMonsters("boo", "#boos");
-}
+/*
+ 1 - Create a new array named 'classicCars' that contains only those cars with a
+ .year of 1970 or earlier. Use Array.filter() on the cars array:
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter
+*/
 
-/**
- * Create a set of Sample Monsters.
- * 
- */
-function makeSampleMonsters()
-{
-    let monster;
+    //This lets you call a function that acts as a conditional
+    let classicCars = cars.filter(car => car.year <= 1970);
 
-    monster = makeGoomba("John", 20, 30, 100);
-    monsters.push(monster);
-    monster = makeGoomba("Fred", 30, 100, 150);
-    monsters.push(monster);
-    monster = makeGoomba("Alice", 40, 150, 200);
-    monsters.push(monster);
+/*
+ 2 - Create a new array named 'sortedByYear' that contains the contents of the
+ car array, sorted by .year, ascending (oldest to most recent)
+ Use Array.sort() on the cars array - and read about writing a comparison function here:
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+ 
+*/
 
-    //Boos
-    monsters.push(makeBoo("Boona", 5, 150, 100));
-    monsters.push(makeBoo("Scramboo", 10, 156, 110));
-    monsters.push(makeBoo("Sboonbo", 5, 140, 90));
-}
+    //Compares adjacent items in an array. You provide the "conditional" where any positive value means a > b, - a < b, or 0 a = b
+    // <0 => a < b
+    // >0 => a > b
+    // =0 => a = b
+    //Note: this also sorts the original array besides returning a sorted new one
+    let sortedByYear = cars.sort((a, b) => a.year - b.year);
 
-/**
- * Function that shows our monsters (just Goombas for now)
- * @param {string} monsterType 
- * @param {string} element 
- */
-function showMonsters(monsterType, element)
-{
-    let monsterList = document.querySelector(element);
+/*
+ 3 - Create a new array named 'newerYearsOnly' that contains only the .year property 
+ (not the entire car object) of those cars that are .year 2010 or newer. 
+ Use Array.map() on the cars array:
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map
+ 
+ This will give you a few undefined values. Use Array.filter() to get rid of these 
+ undefined values so that newerYearsOnly contains only years (Numbers)
+ 
+ Hint: you could use Number.isInteger() or the typeof operator:
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
+ https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof
+ 
+ You could do this additional filter on a separate filter on the different lines,
+ or as a "one-liner" by chaining the method calls.
+*/
 
-    for (let i = 0; i < monsters.length; i++)
-    {
-        if(monsters[i].type === monsterType)
-        {
-            let liStr = "";
-            let li = document.createElement("li");
+    //This is how I did it originally but I guess I was supposed to map first then filter
+    //I think this is both more concise and more faster since it requires only one loop with an if statement.
+    //Kind of like trimming before changing capitalization when sanitizing strings
+    let newerYearsOnlyMyWay = cars.filter(car => car.year > 2010).map(car => car.year);
 
-            for (let key in monsters[i])
-            {
-                if (typeof monsters[i][key] !== "function")
-                {
-                    liStr += `<b>${key}:</b> ${monsters[i][key]}<br />`;
-                }
-            }
-            li.innerHTML = liStr;
-            monsterList.appendChild(li);
-        }
-    }
-}
+    //For each index of an array, it will push the item returned by the function at that same
+    //index of the returned array. The function takes in the original item
+    let newerYearsOnly = cars.map(car => { if(car.year > 2010) return car.year; }).filter(year => Number.isInteger(year));
+    let newerYearsOnly2 = cars.map(car => { if(car.year > 2010) return car.year; }).filter(year => typeof year == "number");
 
-/**
- * create our base monster object with defaults.
- * 
- */
-function createBaseMonster()
-{
-    return {
-        name: "",
-        hp: 100,
-        speed: 10,
-        score: 100,
-        status: function ()
-        {
-            console.log("name: " + this.name + ", hp: " + this.hp + ", speed: " + this.speed + ", score: " + this.score);
-        },
-        type: "monster"
-    }
-}
 
-/**
- * Create a Goomba.
- * 
- */
-function makeGoomba(name, hp, speed, score)
-{
-    let goomba = createBaseMonster();
-    goomba.name = name;
-    goomba.hp = hp;
-    goomba.speed = speed;
-    goomba.score = score;
-    goomba.takeDamage = function (dmgVal)
-    {
-        goomba.hp -= dmgVal;
-    }
-    goomba.powerUp = powerUp;
-    goomba.type = "goomba";
-
-    Object.seal(goomba);
-    return goomba;
-}
-
-/**
- * Creates a Boo
- * @param {string} name 
- * @param {number} hp 
- * @param {number} speed 
- * @param {number} score 
- * @returns {object}
- */
-function makeBoo(name, hp, speed, score)
-{
-    let boo = createBaseMonster();
-    boo.name = name;
-    boo.hp = hp;
-    boo.speed = speed;
-    boo.score = score;
-    boo.takeDamage = function (dmgVal)
-    {
-        boo.hp -= dmgVal;
-    }
-    boo.powerUp = powerUp;
-    boo.type = "boo";
-
-    Object.seal(boo);
-    return boo;
-}
-
-/**
- * Function that can be used inside a monster object.
- * 
- */
-function powerUp(val)
-{
-    this.speed += val;
-    this.hp += val
-    this.status();
-};
+debugger;
