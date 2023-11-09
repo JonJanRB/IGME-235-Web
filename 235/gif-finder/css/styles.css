@@ -38,6 +38,12 @@ header h1
     flex-direction: column;
 }
 
+.result span
+{
+    /* Reorder element*/
+    order: -1;
+}
+
 /*.result {
     position: relative;
     height: 175px;
