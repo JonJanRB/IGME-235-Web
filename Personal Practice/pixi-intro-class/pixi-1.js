@@ -1,0 +1,71 @@
+// #1 - Create a new Pixi application
+// https://pixijs.download/release/docs/PIXI.Application.html
+const app = new PIXI.Application(
+    {
+        width: 600,
+        height: 400
+    }
+);
+
+// #2 - Append its "view" (a <canvas> tag that it created for us) to the DOM
+document.body.appendChild(app.view);
+// app.renderer.backgroundColor = 0xff00ff; //0x is hex
+
+
+// #1 - make a square
+// https://pixijs.download/release/docs/PIXI.Graphics.html
+const square = new PIXI.Graphics();
+square.beginFill(0xFF0000); 	// red in hexadecimal
+square.lineStyle(3, 0xFFFF00, 1); // lineWidth,color in hex, alpha
+square.drawRect(-20, -20, 40, 40); 	// x,y,width,height
+square.endFill();
+square.x = 25;
+square.y = 50;
+app.stage.addChild(square);  	// now you can see it
+
+// #2 make a circle
+let radius = 20;
+const circle = new PIXI.Graphics();
+circle.beginFill(0xFF0000);
+circle.drawCircle(0, 0, radius);
+circle.endFill();
+circle.x = 125;
+circle.y = 50;
+app.stage.addChild(circle);
+
+
+// #3 make a line
+const line = new PIXI.Graphics();
+line.lineStyle(4, 0xFF0000, 1);
+line.moveTo(0, 0);
+line.lineTo(590, 0);
+line.x = 5;
+line.y = 100;
+app.stage.addChild(line);
+
+
+// #4 make a shape
+const poly = new PIXI.Graphics();
+poly.lineStyle(3, 0x00FF00, 1);
+poly.beginFill(0xFF00FF);
+poly.moveTo(0, 0);
+poly.lineTo(-100, 100);
+poly.lineTo(100, 100);
+poly.lineTo(0, 0);
+poly.endFill();
+poly.x = 125;
+poly.y = 125;
+app.stage.addChild(poly);
+
+// #5 target shapes with button DOM events
+document.querySelector("#move").onclick = e => { square.x += 10; circle.x += 10; line.x += 10; poly.x += 10; };
+document.querySelector("#rotate").onclick = e =>
+{
+    let amt = Math.PI / 6; // 30 degrees
+    square.rotation += amt;
+    line.rotation += amt;
+    poly.rotation += amt;
+    // we can't see the rotation of the circle, so let's scale it up instead
+    circle.width += 5;
+    circle.height += 5;
+};
