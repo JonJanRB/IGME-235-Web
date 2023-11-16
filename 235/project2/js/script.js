@@ -20,6 +20,7 @@ const init = () =>
     animeContainer = document.querySelector("#containerAnime");
 
     populateSeasonal();
+    showCurrentSeason();
 }
 window.onload = init;
 
@@ -115,20 +116,12 @@ const onSeasonClick = e =>
  * @param {number} year year of the season
  * @param {string} season season time (winter, spring, etc)
  */
-const showSeason = (year, season) =>
-{
-    requestData
-    (
-        `seasons/${year}/${season}`,
-        /**
-         * Success function displays the requested season
-         * @param {Event} e the api response
-         */
-        e => setAnimeFromArray(parseResponseEvent(e).data),
-        onFail,
-        animeContainer
-    );
-}
+const showSeason = (year, season) => requestAndDisplay(`seasons/${year}/${season}`);
+
+/**
+ * Displays the current season of anime
+ */
+const showCurrentSeason = () => requestAndDisplay("seasons/now");
 
 //#endregion
 
@@ -214,6 +207,25 @@ const onFail = e =>
 {
     console.log("Error occured: ", e.target);
     seasonalContainer.innerHTML = "An error occured. Check console.";
+}
+
+/**
+ * Requests then displays the requested data
+ * @param {string} urlExtension 
+ */
+const requestAndDisplay = urlExtension =>
+{
+    requestData
+    (
+        urlExtension,
+        /**
+         * Success function displays the current season
+         * @param {Event} e the api response
+         */
+        e => setAnimeFromArray(parseResponseEvent(e).data),
+        onFail,
+        animeContainer
+    );
 }
 
 //#endregion
