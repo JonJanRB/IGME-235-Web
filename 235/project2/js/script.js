@@ -94,7 +94,7 @@ const populateSeasonal = () =>
             //code which is using event delegation and it seems cleaner and more reliable
             seasonalContainer.onclick = event =>
             {
-                if(event.target.classList.contains('seasonalButton'))
+                if(event.target.classList.contains("seasonalButton"))
                 {
                     onSeasonClick(event);
                 }
