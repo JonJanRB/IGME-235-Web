@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+/* Vars */
+:root
+{
+    --contrast-color: #d6d6d6;
+    --ui-bg: #2c2c2c;
+    --bg: #1a1a1a;
+    --main-font: 'Open Sans', sans-serif;
+
+    --side-width: 15rem;
+    --header-height: 5rem;
+
+    font-size: 20px;
+}
+
+/* Reset things */
+*
+{
+    margin: 0;
+    padding: 0;
+    height: auto;
+    width: auto;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+body
+{
+    background-color: var(--bg);
+    color: var(--contrast-color);
+    font-family: var(--main-font);
+
+    display: grid;
+    grid-template-areas:    "side   search"
+                            "side   content";
+    grid-template-columns: var(--side-width) 1fr;
+    grid-template-rows: var(--header-height) 1fr;
+
+    height: 100vh;
+    width: 100%;
+}
+
+header
+{
+    grid-area: search;
+    background-color: transparent;
+}
+
+aside
+{
+    grid-area: side;
+    background-color: var(--ui-bg);
+}
+
+main
+{
+    grid-area: content;
+}
