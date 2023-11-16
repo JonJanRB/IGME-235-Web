@@ -3,9 +3,14 @@
 //#region Initial Stuff
 
 const API_BASE_URL = "https://api.jikan.moe/v4/";
+const CURRENT_DATE = new Date();
 
-//The container to put the seasonal buttons in
+//The container to put the whole seasonal filter in
 let seasonalContainer;
+//The container to put the seasonal buttons in
+let seasonButtonContainer;
+//The parsed results of the seasons list requested from jikan
+let seasonListResponse;
 
 //The container to put the anime in
 let animeContainer;
@@ -19,7 +24,7 @@ const init = () =>
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
 
-    populateSeasonal();
+    populateSeasonalYears();
     showCurrentSeason();
 }
 window.onload = init;
@@ -29,11 +34,10 @@ window.onload = init;
 //#region Seasonal
 
 /**
- * adds buttons to view all seasons available
+ * Creates a dropdown for all seasonal years.
+ * Requests the season list and stores it for later use.
  */
-const populateSeasonal = () =>
-//Request inline like this
-requestData
+const populateSeasonalYears = () => requestData
 (
     "seasons",
     /**
@@ -43,75 +47,67 @@ requestData
     e =>
     {
         //The parsed json response from the api
-        const result = parseResponseEvent(e);
+        seasonListResponse = parseResponseEvent(e);
 
         //Check if there are no results or errors
-        if(!result || result.status == 404 || !result.data || result.data.length == 0)
+        if(!seasonListResponse || seasonListResponse.status == 404 ||
+            !seasonListResponse.data || seasonListResponse.data.length == 0)
         {
             seasonalContainer.innerHTML = "No seasons found.";
             return;
         }
 
         //Clear the conatiner
-        seasonalContainer.innerHTML = "";
+        clearElement(seasonalContainer);
+
+        //Create the button container as soon as we know there is valid data
+        seasonButtonContainer = document.createElement("div");
 
         //The year dropdown
         const dropdownYear = document.createElement("select");
 
-        //Format the results
-        for(const seasonYear of result.data)
+        //Add listener for changes in the year
+        dropdownYear.onchange = e => populateSeasonFilter(e.target.value);
+
+        //Add all the years to a dropdown menu
+        for(let i = 0; i < seasonListResponse.data.length; i++)
         {
             const yearOption = document.createElement("option");
-            yearOption.value = seasonYear.year;
-            yearOption.innerText = seasonYear.year;
+            const year = seasonListResponse.data[i].year;
+            //Make the value the index for easy retrival later
+            yearOption.value = i;
+            yearOption.innerText = year;
+            dropdownYear.append(yearOption);
 
-            //Old
-
-            //Header
-            //So funny thing, I can't use innerHTML here because it removes the
-            //onclick events that I add below
-            // seasonalContainer.innerHTML += `<h3>${seasonYear.year}</h3>`;
-            const header = document.createElement("h4");
-            header.textContent = seasonYear.year;
-            seasonalContainer.append(header);
-
-            //Add each season of current year
-            for(const seasonType of seasonYear.seasons)
+            //Check for the current year
+            if(year == CURRENT_DATE.getFullYear())
             {
-                //Create a button with the data needed to make it functional
-                const seasonButton = document.createElement("button");
-                seasonButton.type = "button";
-                seasonButton.classList.add("seasonalButton");
-                seasonButton.dataset.year = seasonYear.year;
-                seasonButton.dataset.season = seasonType;
-                seasonButton.innerText = seasonType;
-                //Request based on season
-                //Old way of doing event listeners before I did event delegation
-                // seasonButton.onclick = onSeasonClick;
-                seasonalContainer.append(seasonButton);
-                
+                dropdownYear.value = i;
+                //Trigger the event rather than hard coding it in
+                //[AI] Thanks to github copilot for this one
+                dropdownYear.dispatchEvent(new Event("change"));
             }
         }
-        //ChatGPT suggested using event delegation and it seems
+
+        //Append the elements
+        seasonalContainer.append(dropdownYear);
+        seasonalContainer.append(seasonButtonContainer);
+
+        //[AI] ChatGPT suggested using event delegation and it seems
         //cleaner and more reliable than the above code
         //https://javascript.info/event-delegation
         //Make all seasonal buttons call their click function on click
-        seasonalContainer.onclick = event =>
+        seasonButtonContainer.onclick = e =>
         {
+            const seasonButton = e.target;
             //Could also use event.target.matches("button.seasonalButton")
-            if(event.target.classList.contains("seasonalButton"))
-                onSeasonClick(event);
+            if(seasonButton.classList.contains("seasonalButton"))
+                showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
         };
     },
-    onFail,
+    genericFail,
     seasonalContainer
 );
-
-const onSeasonClick = e =>
-{
-    console.log("object");
-    showSeason(e.target.dataset.year, e.target.dataset.season);
-};
 
 /**
  * Displays the specified season ith the specified parameters
@@ -124,6 +120,30 @@ const showSeason = (year, season) => requestAndDisplay(`seasons/${year}/${season
  * Displays the current season of anime
  */
 const showCurrentSeason = () => requestAndDisplay("seasons/now");
+
+/**
+ * Populates the seasonal filter based on the specified year
+ * @param {number} yearIndex The index of the array gotten from the parsed data
+ */
+const populateSeasonFilter = yearIndex =>
+{
+    const seasonYear = seasonListResponse.data[yearIndex];
+
+    clearElement(seasonButtonContainer);
+
+    //Add each season of current year
+    for(const seasonType of seasonYear.seasons)
+    {
+        //Create a button with the data needed to make it functional
+        const seasonButton = document.createElement("button");
+        seasonButton.type = "button";
+        seasonButton.classList.add("seasonalButton");
+        seasonButton.dataset.year = seasonYear.year;
+        seasonButton.dataset.season = seasonType;
+        seasonButton.innerText = seasonType;
+        seasonButtonContainer.append(seasonButton);
+    }
+}
 
 //#endregion
 
@@ -168,8 +188,7 @@ const parseResponseEvent = e => JSON.parse(e.target.responseText);
  */
 const setAnimeFromArray = animes =>
 {
-    //Clear container
-    animeContainer.innerHTML = "";
+    clearElement(animeContainer);
     for(let anime of animes)
     {
         animeContainer.append(createAnimeElement(anime));
@@ -205,7 +224,7 @@ const createAnimeElement = anime =>
  * Fail function
  * @param {Event} e 
  */
-const onFail = e =>
+const genericFail = e =>
 {
     console.log("Error occured: ", e.target);
     seasonalContainer.innerHTML = "An error occured. Check console.";
@@ -225,9 +244,15 @@ const requestAndDisplay = urlExtension =>
          * @param {Event} e the api response
          */
         e => setAnimeFromArray(parseResponseEvent(e).data),
-        onFail,
+        genericFail,
         animeContainer
     );
 }
+
+/**
+ * Clears all inner html of the specified element
+ * @param {Element} element element to clear
+ */
+const clearElement = element => element.innerHTML = "";
 
 //#endregion
