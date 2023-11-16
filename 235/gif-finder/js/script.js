@@ -38,6 +38,8 @@ function searchButtonClicked()
     //update the UI
     document.querySelector("#status").innerHTML = "<b>Searching for '" + displayTerm + "'</b>";
 
+    console.log(url);
+
     //request data
     getData(url);
 }
