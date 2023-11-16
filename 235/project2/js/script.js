@@ -32,78 +32,80 @@ window.onload = init;
  * adds buttons to view all seasons available
  */
 const populateSeasonal = () =>
-{    
-    //Request inline like this
-    requestData
-    (
-        "seasons",
-        /**
-         * Success function adds all listed seasons to sidebar
-         * @param {Event} e the api response
-         */
-        e =>
+//Request inline like this
+requestData
+(
+    "seasons",
+    /**
+     * Success function adds all listed seasons to sidebar
+     * @param {Event} e the api response
+     */
+    e =>
+    {
+        //The parsed json response from the api
+        const result = parseResponseEvent(e);
+
+        //Check if there are no results or errors
+        if(!result || result.status == 404 || !result.data || result.data.length == 0)
         {
-            //The parsed json response from the api
-            const result = parseResponseEvent(e);
+            seasonalContainer.innerHTML = "No seasons found.";
+            return;
+        }
 
-            //Check if there are no results or errors
-            if(!result || result.status == 404 || !result.data || result.data.length == 0)
+        //Clear the conatiner
+        seasonalContainer.innerHTML = "";
+
+        //The year dropdown
+        const dropdownYear = document.createElement("select");
+
+        //Format the results
+        for(const seasonYear of result.data)
+        {
+            const yearOption = document.createElement("option");
+            yearOption.value = seasonYear.year;
+            yearOption.innerText = seasonYear.year;
+
+            //Old
+
+            //Header
+            //So funny thing, I can't use innerHTML here because it removes the
+            //onclick events that I add below
+            // seasonalContainer.innerHTML += `<h3>${seasonYear.year}</h3>`;
+            const header = document.createElement("h4");
+            header.textContent = seasonYear.year;
+            seasonalContainer.append(header);
+
+            //Add each season of current year
+            for(const seasonType of seasonYear.seasons)
             {
-                seasonalContainer.innerHTML = "No seasons found.";
-                return;
+                //Create a button with the data needed to make it functional
+                const seasonButton = document.createElement("button");
+                seasonButton.type = "button";
+                seasonButton.classList.add("seasonalButton");
+                seasonButton.dataset.year = seasonYear.year;
+                seasonButton.dataset.season = seasonType;
+                seasonButton.innerText = seasonType;
+                //Request based on season
+                //Old way of doing event listeners before I did event delegation
+                // seasonButton.onclick = onSeasonClick;
+                seasonalContainer.append(seasonButton);
+                
             }
-
-            //Clear the conatiner
-            seasonalContainer.innerHTML = "";
-
-            //Format the results
-            for(const seasonYear of result.data)
-            {
-                //Header
-                seasonalContainer.innerHTML += `<h3>${seasonYear.year}</h3>`;
-
-                //Add each season of current year
-                for(const seasonType of seasonYear.seasons)
-                {
-                    //Create a button with the data needed to make it functional
-                    const seasonButton = document.createElement("button");
-                    seasonButton.type = "button";
-                    seasonButton.classList.add("seasonalButton");
-                    seasonButton.dataset.year = seasonYear.year;
-                    seasonButton.dataset.season = seasonType;
-                    seasonButton.innerText = seasonType;
-                    //Request based on season
-                    // seasonButton.onclick = onSeasonClick;
-                    seasonalContainer.append(seasonButton);
-                    // console.log(document.querySelector(".seasonalButton").onclick);
-                    // console.log(onSeasonClick);
-                }
-            }
-            // const seasonalButtons = document.querySelectorAll(".seasonalButton");
-            // for(let button of seasonalButtons)
-            // {
-            //     button.onclick = onSeasonClick;
-            // }
-            // console.log(document.querySelector(".seasonalButton"));
-            // console.log(document.querySelector(".seasonalButton").onclick);
-
-            //For some reason, adding onclick to the button above would
-            //turn null after a few iterations. The code directly above
-            //this does work but I don't want to have to go through another
-            //loop just to do the same thing I just did. ChatGPT suggested this
-            //code which is using event delegation and it seems cleaner and more reliable
-            seasonalContainer.onclick = event =>
-            {
-                if(event.target.classList.contains("seasonalButton"))
-                {
-                    onSeasonClick(event);
-                }
-            };
-        },
-        onFail,
-        seasonalContainer
-    );
-}
+        }
+        //ChatGPT suggested using event delegation and it seems
+        //cleaner and more reliable than the above code
+        //https://javascript.info/event-delegation
+        //Make all seasonal buttons call their click function on click
+        seasonalContainer.onclick = event =>
+        {
+            //Could also use event.target.matches("button.seasonalButton")
+            if(event.target.classList.contains("seasonalButton"))
+                onSeasonClick(event);
+        };
+    },
+    onFail,
+    seasonalContainer
+);
 
 const onSeasonClick = e =>
 {
@@ -193,7 +195,7 @@ const createAnimeElement = anime =>
     
     //Summary
     animeElement.innerHTML += `<p>${anime.synopsis}</p>`;
-    animeElement.innerHTML += `<a href="${anime.url}">View in MAL</a>`;
+    animeElement.innerHTML += `<a href="${anime.url}" target="_blank">View in MAL</a>`;
     
     //Return the element
     return animeElement;

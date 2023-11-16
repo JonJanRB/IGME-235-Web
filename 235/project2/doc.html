@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Open+Sans&display=swap');
+        img
+        {
+            margin: 30px auto 0px;
+        }
+        *
+        {
+            font-family: 'Open Sans', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <main style="margin: 10px auto; width: 1000px;">
+        <h1>Documentation</h1>
+        <h2>Quicklinks</h2>
+        <ul>
+            <li><a href="">Bloosdeas</a></li>
+        </ul>
+        <section>
+            <h2>Weird quirk of dom manipulation I encountered</h2>
+            <p>
+                Something I found to be frustrating was that using the innerHTML property of an elment
+                was not good to use since it basically cleared the events of anything in it. This was
+                confusing to figure out since it was not immediatly obvous of what was causing the buttons
+                I was adding events to to have their onclick events become null. Not even AI knew what was
+                going wrong so I figured it out on my own since its advice was not very helpful.
+            </p>
+        </section>
+    </main>
+</body>
+</html>
