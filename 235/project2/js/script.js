@@ -4,11 +4,21 @@
 
 const API_BASE_URL = "https://api.jikan.moe/v4/";
 
+//The container to put the seasonal buttons in
+let seasonalContainer;
+
+//The container to put the anime in
+let animeContainer;
+
 /**
  * Initialization function
  */
 const init = () =>
 {
+    //Initialize "constant" element values
+    seasonalContainer = document.querySelector("#containerSeasonal");
+    animeContainer = document.querySelector("#containerAnime");
+
     populateSeasonal();
 }
 window.onload = init;
@@ -21,25 +31,22 @@ window.onload = init;
  * adds buttons to view all seasons available
  */
 const populateSeasonal = () =>
-{
-    //The container to put the seasonal buttons in
-    const seasonalContainer = document.querySelector("#containerSeasonal");
-    
+{    
     //Request inline like this
     requestData
     (
         "seasons",
         /**
-         * Success function
-         * @param {Event} e 
+         * Success function adds all listed seasons to sidebar
+         * @param {Event} e the api response
          */
-        (e) =>
+        e =>
         {
             //The parsed json response from the api
-            const result = JSON.parse(e.target.responseText);
+            const result = parseResponseEvent(e);
 
-            //Check if there are no results
-            if(!result || !result.data || result.data.length == 0)
+            //Check if there are no results or errors
+            if(!result || result.status == 404 || !result.data || result.data.length == 0)
             {
                 seasonalContainer.innerHTML = "No seasons found.";
                 return;
@@ -60,29 +67,66 @@ const populateSeasonal = () =>
                     //Create a button with the data needed to make it functional
                     const seasonButton = document.createElement("button");
                     seasonButton.type = "button";
-                    seasonButton.classList += "seasonalButton";
+                    seasonButton.classList.add("seasonalButton");
                     seasonButton.dataset.year = seasonYear.year;
                     seasonButton.dataset.season = seasonType;
                     seasonButton.innerText = seasonType;
                     //Request based on season
-                    seasonButton.onclick = () =>
-                    {
-                        //TODO
-                    }
+                    // seasonButton.onclick = onSeasonClick;
                     seasonalContainer.append(seasonButton);
+                    // console.log(document.querySelector(".seasonalButton").onclick);
+                    // console.log(onSeasonClick);
                 }
             }
+            // const seasonalButtons = document.querySelectorAll(".seasonalButton");
+            // for(let button of seasonalButtons)
+            // {
+            //     button.onclick = onSeasonClick;
+            // }
+            // console.log(document.querySelector(".seasonalButton"));
+            // console.log(document.querySelector(".seasonalButton").onclick);
+
+            //For some reason, adding onclick to the button above would
+            //turn null after a few iterations. The code directly above
+            //this does work but I don't want to have to go through another
+            //loop just to do the same thing I just did. ChatGPT suggested this
+            //code which is using event delegation and it seems cleaner and more reliable
+            seasonalContainer.onclick = event =>
+            {
+                if(event.target.classList.contains('seasonalButton'))
+                {
+                    onSeasonClick(event);
+                }
+            };
         },
-        /**
-         * Fail function
-         * @param {Event} e 
-         */
-        (e) =>
-        {
-            console.log("Error occured: ", e.target);
-            seasonalContainer.innerHTML = "An error occured. Check console.";
-        },
+        onFail,
         seasonalContainer
+    );
+}
+
+const onSeasonClick = e =>
+{
+    console.log("object");
+    showSeason(e.target.dataset.year, e.target.dataset.season);
+};
+
+/**
+ * Displays the specified season ith the specified parameters
+ * @param {number} year year of the season
+ * @param {string} season season time (winter, spring, etc)
+ */
+const showSeason = (year, season) =>
+{
+    requestData
+    (
+        `seasons/${year}/${season}`,
+        /**
+         * Success function displays the requested season
+         * @param {Event} e the api response
+         */
+        e => setAnimeFromArray(parseResponseEvent(e).data),
+        onFail,
+        animeContainer
     );
 }
 
@@ -114,6 +158,62 @@ const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
     //open connection and send the request
     xhr.open("GET", API_BASE_URL + urlExtension);
     xhr.send();
+}
+
+/**
+ * Parses the api response specified event
+ * @param {Event} e the api response event
+ * @returns {object} the parsed object from the api
+ */
+const parseResponseEvent = e => JSON.parse(e.target.responseText);
+
+/**
+ * Adds anime to the content from the specified array of anime
+ * @param {Array} animes 
+ */
+const setAnimeFromArray = animes =>
+{
+    //Clear container
+    animeContainer.innerHTML = "";
+    for(let anime of animes)
+    {
+        animeContainer.append(createAnimeElement(anime));
+    }
+}
+
+/**
+ * Creates an anime element from the specified anime object
+ * @param {object} anime object that jikan returns as an anime
+ * @returns {Element} the element
+ */
+const createAnimeElement = anime =>
+{
+    const animeElement = document.createElement("article");
+    animeElement.classList.add("anime");
+    
+    //Titles
+    animeElement.innerHTML += `<h4>${anime.title}</h4><h5>${anime.title_english}</h5>`;
+
+    //Cover image
+    animeElement.innerHTML +=
+        `<img src="${anime.images.jpg.image_url}" alt='Cover image for "${anime.title}"'>`;
+    
+    //Summary
+    animeElement.innerHTML += `<p>${anime.synopsis}</p>`;
+    animeElement.innerHTML += `<a href="${anime.url}">View in MAL</a>`;
+    
+    //Return the element
+    return animeElement;
+}
+
+/**
+ * Fail function
+ * @param {Event} e 
+ */
+const onFail = e =>
+{
+    console.log("Error occured: ", e.target);
+    seasonalContainer.innerHTML = "An error occured. Check console.";
 }
 
 //#endregion
