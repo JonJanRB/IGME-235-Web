@@ -1,6 +1,6 @@
-"use strict";
-
 //#region Initial Stuff
+
+"use strict";
 
 const API_BASE_URL = "https://api.jikan.moe/v4/";
 const CURRENT_DATE = new Date();
@@ -26,6 +26,21 @@ const init = () =>
 
     populateSeasonalYears();
     showCurrentSeason();
+
+    document.body.append(createElement
+    (
+        "div",
+        { id: "identity", innerText: "Hello world" },
+        ["class1", "class2"],
+        { sick: "byouin" },
+        { custom: "woahhh" }
+    ));
+
+    document.body.append(createElement
+    (
+        "div",
+        { id: "identity2", innerText: "Hello world 2" }
+    ));
 }
 window.onload = init;
 
@@ -150,6 +165,51 @@ const populateSeasonFilter = yearIndex =>
 
 //#endregion
 
+//#region Anime Content
+
+/**
+ * Adds anime to the content from the specified array of anime
+ * @param {Array} animes 
+ */
+const setAnimeFromArray = animes =>
+{
+    clearElement(animeContainer);
+    for(let anime of animes)
+    {
+        animeContainer.append(createAnimeElement(anime));
+    }
+}
+
+/**
+ * Creates an anime element from the specified anime object
+ * @param {object} anime object that jikan returns as an anime
+ * @returns {HTMLElement} the element
+ */
+const createAnimeElement = anime =>
+{
+    //Create an article with the anime class
+    const ani = createElement("article", {}, ["anime"]);
+    
+    //Titles
+    tryAppend(ani, "h4", [anime.title], { innerText: anime.title });
+    tryAppend(ani, "h5", [anime.title_english], { innerText: anime.title_english });
+
+    //Cover image
+    tryAppend(ani, "img", [anime.images.jpg.image_url, anime.title],
+        { src: anime.images.jpg.image_url, alt: 'Cover image for "${anime.title}"' });
+    
+    //Summary
+    tryAppend(ani, "p", [anime.synopsis], { innerText: anime.synopsis });
+
+    //Link to MAL
+    tryAppend(ani, "a", [anime.url], { href: anime.url, target: "_blank", innerText: "View in MAL" });
+    
+    //Return the element
+    return ani;
+}
+
+//#endregion
+
 //#region Helper Functions
 
 /**
@@ -157,7 +217,7 @@ const populateSeasonFilter = yearIndex =>
  * @param {string} urlExtension the url extension to request from (anime/{id})
  * @param {Function} onSuccess runs on successful get
  * @param {Function} onFail runs on failed get
- * @param {Element} loadingContainer the container to add a loading animation to
+ * @param {HTMLElement} loadingContainer the container to add a loading animation to
  */
 const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
 {
@@ -184,44 +244,6 @@ const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
  * @returns {object} the parsed object from the api
  */
 const parseResponseEvent = e => JSON.parse(e.target.responseText);
-
-/**
- * Adds anime to the content from the specified array of anime
- * @param {Array} animes 
- */
-const setAnimeFromArray = animes =>
-{
-    clearElement(animeContainer);
-    for(let anime of animes)
-    {
-        animeContainer.append(createAnimeElement(anime));
-    }
-}
-
-/**
- * Creates an anime element from the specified anime object
- * @param {object} anime object that jikan returns as an anime
- * @returns {Element} the element
- */
-const createAnimeElement = anime =>
-{
-    const animeElement = document.createElement("article");
-    animeElement.classList.add("anime");
-    
-    //Titles
-    animeElement.innerHTML += `<h4>${anime.title}</h4><h5>${anime.title_english}</h5>`;
-
-    //Cover image
-    animeElement.innerHTML +=
-        `<img src="${anime.images.jpg.image_url}" alt='Cover image for "${anime.title}"'>`;
-    
-    //Summary
-    animeElement.innerHTML += `<p>${anime.synopsis}</p>`;
-    animeElement.innerHTML += `<a href="${anime.url}" target="_blank">View in MAL</a>`;
-    
-    //Return the element
-    return animeElement;
-}
 
 /**
  * Fail function
@@ -252,51 +274,69 @@ requestData
 
 //#endregion
 
-//#region Element extensions
+//#region Element Extensions
 
 /**
- * Appends the specified innner element 
- * @param {*} data the data you want to validate and put in the inner element
- * @param {string} innerElementType the type of element you want to create and customize
- * @param {object} attributes an object that contains key value pairs of attributes
- * to add to the inner element
- * @param {Element} outerElement the element to append the inner element to
- * @returns 
- */
-const tryAppend = (data, innerElementType, attributes, outerElement) =>
-{
-    const innerElement = createElement(innerElementType, attributes);
-    if(!data) return false;
-
-    innerElementType.append(data);
-    outerElement.append();
-}
-
-/**
- * Creates an element from the specified type and standard attributes. Non-standard attributes
- * and datasets need to be added outside
+ * Creates an element from the specified type and standard attributes. Non-standard attributes,
+ * datasets, classes, etc need to be added outside
  * @param {string} elementType the type of element to create
  * @param {object} attributes an object that contains key value pairs of attributes.
  * Only works with standard attributes,
- * @returns the created element
+ * @param {Array} classes a list of classes to add if needed
+ * @param {object} datasets a list of datasets to add if needed
+ * @param {object} nonStandardAttributes a list of non-standard attributes to add if needed
+ * @returns {HTMLElement} the created element
  */
-const createElement = (elementType, attributes) =>
+const createElement = (elementType, attributes,
+    classes = [], datasets = {}, nonStandardAttributes = {}) =>
 {
     //Create the element from the specified type
     const element = document.createElement(elementType);
     
     //Add the attributes based on the object properties
-    for(let attribute in attributes)
-    {
-        //Use bracket notation to access the property (weird)
-        element[attribute] = attributes[attribute];
-    }
+    //Use bracket notation to access the property (weird)
+    for(let attribute in attributes) element[attribute] = attributes[attribute];
+
+    //Add classes
+    for(let className of classes) element.classList.add(className);
+
+    //Add datasets
+    for(let dataName in datasets) element.dataset[dataName] = datasets[dataName];
+
+    //Add nonstandards
+    for(let attribute in nonStandardAttributes)
+        element.setAttribute(attribute, nonStandardAttributes[attribute]);
+
     return element;
 }
 
 /**
+ * Appends the specified innner element to the outer element only if the specified data is valid
+ * @param {Array} data the data you want to validate
+ * @param {string} innerElementType the type of element you want to create and customize
+ * @param {object} attributes an object that contains key value pairs of attributes
+ * to add to the inner element
+ * @param {HTMLElement} outerElement the element to append the inner element to
+ * @param {Array} classes a list of classes to add if needed
+ * @param {object} datasets a list of datasets to add if needed
+ * @param {object} nonStandardAttributes a list of non-standard attributes to add if needed
+ * @returns {boolean} TRUE when the data is valid
+ */
+const tryAppend = (outerElement, innerElementType, data, attributes,
+    classes = [], datasets = {}, nonStandardAttributes = {}) =>
+{
+    //If any data included is null, it will not create the element
+    for(let dataPeice of data) if(dataPeice === null) return false;
+
+    //Append the element to the parent (outer element)
+    outerElement.append(
+        createElement(innerElementType, attributes, classes, datasets, nonStandardAttributes));
+    return true;
+}
+
+/**
  * Clears all inner html of the specified element
- * @param {Element} element element to clear
+ * @param {HTMLElement} element element to clear
  */
 const clearElement = element => element.innerHTML = "";
 
