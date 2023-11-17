@@ -14,17 +14,38 @@
         <button type="button" id="buttonSearch">Search</button>
     </header>
     <aside>
+        <!-- <details>
+            <summary>Filter</summary>
+            <section id="containerFilter">
+                <details>
+                    <summary>Genre</summary>
+                    <section id="containerGenre"></section>
+                </details>
+                <details>
+                    <summary>Rating</summary>
+                    <section id="containerRating"></section>
+                </details>
+                <details>
+                    <summary>Seasonal</summary>
+                    <section id="containerSeasonal"></section>
+                </details>
+            </section>
+        </details>
+        <details id="containerSort">
+            <summary>Sort</summary>
+            <section id="containerFilter"></section>
+        </details> -->
         <h2>Filter:</h2>
-        <div id="containerFilter">
+        <div id="containerFilter" class="foldable">
             <h3>Genre:</h3>
-            <section id="containerGenre"></section>
+            <section id="containerGenre" class="foldable"></section>
             <h3>Rating:</h3>
-            <section id="containerRating"></section>
+            <section id="containerRating" class="foldable"></section>
             <h3>Seasonal:</h3>
-            <section id="containerSeasonal"></section>
+            <section id="containerSeasonal" class="foldable"></section>
         </div>
         <h2>Sort:</h2>
-        <div id="containerSort">
+        <div id="containerSort" class="foldable">
         </div>
     </aside>
     <main>

@@ -64,19 +64,22 @@ const populateSeasonalYears = () => requestData
         seasonButtonContainer = document.createElement("div");
 
         //The year dropdown
-        const dropdownYear = document.createElement("select");
-
-        //Add listener for changes in the year
-        dropdownYear.onchange = e => populateSeasonFilter(e.target.value);
+        const dropdownYear = createElement("select",
+        {
+            //Add listener for changes in the year
+            onchange: e => populateSeasonFilter(e.target.value)
+        });
 
         //Add all the years to a dropdown menu
         for(let i = 0; i < seasonListResponse.data.length; i++)
         {
-            const yearOption = document.createElement("option");
             const year = seasonListResponse.data[i].year;
             //Make the value the index for easy retrival later
-            yearOption.value = i;
-            yearOption.innerText = year;
+            const yearOption = createElement("option",
+            {
+                value: i,
+                innerText: year
+            });
             dropdownYear.append(yearOption);
 
             //Check for the current year
@@ -235,18 +238,60 @@ const genericFail = e =>
  * @param {string} urlExtension 
  */
 const requestAndDisplay = urlExtension =>
+requestData
+(
+    urlExtension,
+    /**
+     * Success function displays the current season
+     * @param {Event} e the api response
+     */
+    e => setAnimeFromArray(parseResponseEvent(e).data),
+    genericFail,
+    animeContainer
+);
+
+//#endregion
+
+//#region Element extensions
+
+/**
+ * Appends the specified innner element 
+ * @param {*} data the data you want to validate and put in the inner element
+ * @param {string} innerElementType the type of element you want to create and customize
+ * @param {object} attributes an object that contains key value pairs of attributes
+ * to add to the inner element
+ * @param {Element} outerElement the element to append the inner element to
+ * @returns 
+ */
+const tryAppend = (data, innerElementType, attributes, outerElement) =>
 {
-    requestData
-    (
-        urlExtension,
-        /**
-         * Success function displays the current season
-         * @param {Event} e the api response
-         */
-        e => setAnimeFromArray(parseResponseEvent(e).data),
-        genericFail,
-        animeContainer
-    );
+    const innerElement = createElement(innerElementType, attributes);
+    if(!data) return false;
+
+    innerElementType.append(data);
+    outerElement.append();
+}
+
+/**
+ * Creates an element from the specified type and standard attributes. Non-standard attributes
+ * and datasets need to be added outside
+ * @param {string} elementType the type of element to create
+ * @param {object} attributes an object that contains key value pairs of attributes.
+ * Only works with standard attributes,
+ * @returns the created element
+ */
+const createElement = (elementType, attributes) =>
+{
+    //Create the element from the specified type
+    const element = document.createElement(elementType);
+    
+    //Add the attributes based on the object properties
+    for(let attribute in attributes)
+    {
+        //Use bracket notation to access the property (weird)
+        element[attribute] = attributes[attribute];
+    }
+    return element;
 }
 
 /**

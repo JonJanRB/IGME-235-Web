@@ -25,13 +25,26 @@
             <li><a href="">All parts with ai assistance are marked with a comment starting with "[AI]"</a></li>
         </ul>
         <section>
-            <h2>Weird quirk of dom manipulation I encountered</h2>
+            <h2 id="innerHTMLHell">Weird quirk of dom manipulation I encountered</h2>
             <p>
                 Something I found to be frustrating was that using the innerHTML property of an elment
                 was not good to use since it basically cleared the events of anything in it. This was
                 confusing to figure out since it was not immediatly obvous of what was causing the buttons
                 I was adding events to to have their onclick events become null. Not even AI knew what was
                 going wrong so I figured it out on my own since its advice was not very helpful.
+            </p>
+            <h2>Creating Elements</h2>
+            <img src="src/create-element.png" alt="Create Element function">
+            <p>
+                Something I found frustrating and a bit harder to read was making elements with attributes.
+                It was quick and easy with innerHTML, but I avoided that because of the loss of data described
+                <a href="#innerHTMLHell">above</a>. When adding attributes using the element variable, is meant
+                I would have to define it, then set each attribute individually with its own code statement.
+                <br>
+                I wanted a way to create an element with a single code statement that could not lose any data in the process.
+                So, I made a function that took in everything. It basically uses the bracket syntax to set properties based
+                on the object you provide which would be key-value pairs of the attributes to set. You can even set the inner
+                text using that object so it makes creating elements much more concise, easier to read, and quicker to write.
             </p>
         </section>
     </main>
