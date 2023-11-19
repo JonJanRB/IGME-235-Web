@@ -31,18 +31,12 @@ body
     background-color: var(--bg);
     color: var(--contrast-color);
     font-family: var(--main-font);
-}
 
-/* #overlay
-{
     display: grid;
-    grid-template-areas: "side   search";
+    grid-template-areas: "side   search" "side   main";
     grid-template-columns: var(--side-width) 1fr;
     grid-template-rows: var(--header-height) 1fr;
-
-
-    background-color: transparent;
-} */
+}
 
 header
 {
@@ -54,6 +48,7 @@ header
     width: max-content;
     margin-left: auto;
     margin-right: auto;
+    z-index: 1;
 }
 
 aside
@@ -61,7 +56,7 @@ aside
     grid-area: side;
     background-color: var(--ui-bg);
     position: fixed;
-    top: 0;
+    top: -10px;
     width: var(--side-width);
     height: 100vh;
     overflow-y: hidden;
@@ -69,7 +64,8 @@ aside
 
 main
 {
-    padding-left: var(--side-width);
+    grid-area: main;
+    /* padding-left: var(--side-width); */
 }
 
 #containerAnime
@@ -134,4 +130,9 @@ button
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     margin: 0.25rem;
+}
+
+input
+{
+    width: auto;
 }
