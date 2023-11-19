@@ -31,32 +31,45 @@ body
     background-color: var(--bg);
     color: var(--contrast-color);
     font-family: var(--main-font);
+}
 
+/* #overlay
+{
     display: grid;
-    grid-template-areas:    "side   search"
-                            "side   content";
+    grid-template-areas: "side   search";
     grid-template-columns: var(--side-width) 1fr;
     grid-template-rows: var(--header-height) 1fr;
 
-    height: 100vh;
-    width: 100%;
-}
+
+    background-color: transparent;
+} */
 
 header
 {
     grid-area: search;
     background-color: transparent;
+    position: sticky;
+    top: 0;
+    height: var(--header-height);
+    width: max-content;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 aside
 {
     grid-area: side;
     background-color: var(--ui-bg);
+    position: fixed;
+    top: 0;
+    width: var(--side-width);
+    height: 100vh;
+    overflow-y: hidden;
 }
 
 main
 {
-    grid-area: content;
+    padding-left: var(--side-width);
 }
 
 #containerAnime
@@ -107,3 +120,18 @@ main
         {
             font-size: 0.75rem;
         }
+
+
+input,
+select,
+option,
+button
+{
+    background-color: var(--bg);
+    color: var(--contrast-color);
+    border: 0.1rem solid var(--contrast-color);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    margin: 0.25rem;
+}
