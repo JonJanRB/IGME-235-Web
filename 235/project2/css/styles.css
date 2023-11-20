@@ -4,13 +4,14 @@
 :root
 {
     --contrast-color: #d6d6d6;
-    --sub-color: #828282;
+    --sub-color: #686868;
     --ui-bg: #2c2c2c;
+    --transparent-ui-bg: #1a1a1adf;
     --bg: #1a1a1a;
     --main-font: 'Open Sans', sans-serif;
 
     --side-width: 15rem;
-    --header-height: 5rem;
+    --header-height: 3.5rem;
 
     font-size: 20px;
 }
@@ -41,15 +42,21 @@ body
 header
 {
     grid-area: search;
-    background-color: transparent;
+    background-color: var(--transparent-ui-bg);
+    box-shadow: 0rem 1rem 1rem var(--transparent-ui-bg);  
     position: sticky;
     top: 0;
     height: var(--header-height);
-    width: max-content;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
     z-index: 1;
 }
+
+    #containerSearch
+    {
+        margin: 0 auto;
+        width: max-content;
+        height: var(--header-height);
+    }
 
 aside
 {
@@ -60,6 +67,7 @@ aside
     width: var(--side-width);
     height: 100vh;
     overflow-y: hidden;
+    z-index: 2;
 }
 
 main
@@ -131,6 +139,33 @@ button
     font-size: 0.75rem;
     margin: 0.25rem;
 }
+
+    select,
+    button
+    {
+        cursor: pointer;
+        transition: scale 0.1s ease-out;
+    }
+        select:hover,
+        button:hover
+        {
+            background-color: var(--sub-color);
+            color: white;
+        }
+        button:hover
+        {
+            scale: 1.1;
+        }
+        button:active
+        {
+            transition: scale 0.01s ease-out;
+            scale: 0.9;
+        }
+        select:hover
+        {
+            scale: 0.9;
+        }
+    
 
 input
 {
