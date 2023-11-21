@@ -9,60 +9,66 @@
         img
         {
             margin: 30px auto 0px;
+            width: 100%;
+            max-width: max-content;
         }
         *
         {
             font-family: 'Open Sans', sans-serif;
         }
+        body
+        {
+            margin: 10px auto;
+            width: 80%;
+            max-width: 1000px;
+        }
     </style>
 </head>
 <body>
-    <main style="margin: 10px auto; width: 1000px;">
-        <h1>Documentation</h1>
-        <h2>Quicklinks</h2>
-        <ul>
-            <li><a href="">Bloosdeas</a></li>
-            <li><a href="">All parts with ai assistance are marked with a comment starting with "[AI]"</a></li>
-        </ul>
-        <section>
-            <h2 id="innerHTMLHell">Weird quirk of dom manipulation I encountered</h2>
-            <p>
-                Something I found to be frustrating was that using the innerHTML property of an elment
-                was not good to use since it basically cleared the events of anything in it. This was
-                confusing to figure out since it was not immediatly obvous of what was causing the buttons
-                I was adding events to to have their onclick events become null. Not even AI knew what was
-                going wrong so I figured it out on my own since its advice was not very helpful.
-            </p>
-            <h2>Creating Elements</h2>
-            <img src="src/create-element.png" alt="Create Element function">
-            <p>
-                Something I found frustrating and a bit harder to read was making elements with attributes.
-                It was quick and easy with innerHTML, but I avoided that because of the loss of data described
-                <a href="#innerHTMLHell">above</a>. When adding attributes using the element variable, is meant
-                I would have to define it, then set each attribute individually with its own code statement.
-                <br>
-                I wanted a way to create an element with a single code statement that could not lose any data in the process.
-                So, I made a function that took in everything. It basically uses the bracket syntax to set properties based
-                on the object you provide which would be key-value pairs of the attributes to set. You can even set the inner
-                text using that object so it makes creating elements much more concise, easier to read, and quicker to write.
-                <br>
-                It even works with adding classes, datasets, and non-standard attributes.
-            </p>
-            <img src="src/create-element-showcase.png" alt="Create Element function showcase">
-            <p>
-                This image shows everything working as intended allowing for all the major things to be created for an element
-                with only a single code statement.
-            </p>
-            <h2>Try Appending Elements</h2>
-            <p>
-                I noticed that sometimes there was data from the api that was null such as alternate titles. A normal person would
-                probably just make an if statement for the thing that could be null and call it a day, but I decided I wanted to make
-                an easy way to do this in one line that worked for any element rather than hard coding it every time. In that vain,
-                I made a function called `tryAppend` which will create an element and append it to a parent element only if the specified data
-                is present. If any of the included data is invalid, it will not create or append the element at all.
-                This way, the HTML doesn't have any tags that are empty shells or contain the word "null" meaning it is more semantic and clean.
-            </p>
-        </section>
-    </main>
+    <h1>Documentation</h1>
+    <h2>Quicklinks</h2>
+    <ul>
+        <li><a href="">Bloosdeas</a></li>
+        <li><a href="">All parts with ai assistance are marked with a comment starting with "[AI]"</a></li>
+    </ul>
+    <section>
+        <h2 id="innerHTMLHell">Weird quirk of dom manipulation I encountered</h2>
+        <p>
+            Something I found to be frustrating was that using the innerHTML property of an elment
+            was not good to use since it basically cleared the events of anything in it. This was
+            confusing to figure out since it was not immediatly obvous of what was causing the buttons
+            I was adding events to to have their onclick events become null. Not even AI knew what was
+            going wrong so I figured it out on my own since its advice was not very helpful.
+        </p>
+        <h2>Creating Elements</h2>
+        <img src="src/create-element.png" alt="Create Element function">
+        <p>
+            Something I found frustrating and a bit harder to read was making elements with attributes.
+            It was quick and easy with innerHTML, but I avoided that because of the loss of data described
+            <a href="#innerHTMLHell">above</a>. When adding attributes using the element variable, is meant
+            I would have to define it, then set each attribute individually with its own code statement.
+            <br>
+            I wanted a way to create an element with a single code statement that could not lose any data in the process.
+            So, I made a function that took in everything. It basically uses the bracket syntax to set properties based
+            on the object you provide which would be key-value pairs of the attributes to set. You can even set the inner
+            text using that object so it makes creating elements much more concise, easier to read, and quicker to write.
+            <br>
+            It even works with adding classes, datasets, and non-standard attributes.
+        </p>
+        <img src="src/create-element-showcase.png" alt="Create Element function showcase">
+        <p>
+            This image shows everything working as intended allowing for all the major things to be created for an element
+            with only a single code statement.
+        </p>
+        <h2>Try Appending Elements</h2>
+        <p>
+            I noticed that sometimes there was data from the api that was null such as alternate titles. A normal person would
+            probably just make an if statement for the thing that could be null and call it a day, but I decided I wanted to make
+            an easy way to do this in one line that worked for any element rather than hard coding it every time. In that vain,
+            I made a function called `tryAppend` which will create an element and append it to a parent element only if the specified data
+            is present. If any of the included data is invalid, it will not create or append the element at all.
+            This way, the HTML doesn't have any tags that are empty shells or contain the word "null" meaning it is more semantic and clean.
+        </p>
+    </section>
 </body>
 </html>
