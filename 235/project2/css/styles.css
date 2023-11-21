@@ -163,10 +163,6 @@ button
             transition: scale 0.01s ease-out;
             scale: 0.9;
         }
-        select:hover
-        {
-            scale: 0.9;
-        }
     
 
 input
