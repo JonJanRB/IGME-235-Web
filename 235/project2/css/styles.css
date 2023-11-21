@@ -112,6 +112,8 @@ main
         .anime img
         {
             max-width: 10rem;
+            border-radius: 1rem;
+            margin: 0.5rem auto;
         }
         .anime p
         {

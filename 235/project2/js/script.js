@@ -12,6 +12,9 @@ let seasonButtonContainer;
 //The parsed results of the seasons list requested from jikan
 let seasonListResponse;
 
+//The the search bar element
+let searchBar;
+
 //The container to put the anime in
 let animeContainer;
 
@@ -23,6 +26,7 @@ const init = () =>
     //Initialize "constant" element values
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
+    searchBar = document.querySelector("#searchBar");
 
     populateSeasonalYears();
     showCurrentSeason();
@@ -41,6 +45,8 @@ const init = () =>
         "div",
         { id: "identity2", innerText: "Hello world 2" }
     ));
+
+    setupSearch();
 }
 window.onload = init;
 
@@ -162,6 +168,34 @@ const populateSeasonFilter = yearIndex =>
         seasonButtonContainer.append(seasonButton);
     }
 }
+
+//#endregion
+
+//#region Searching
+
+/**
+ * sets the search bar up
+ */
+const setupSearch = () =>
+{
+    /**
+     * searches when enter is released
+     * @param {Event} e the key up event
+     */
+    searchBar.onkeyup = e => { if(e.code === "Enter") search(e.target.value) }
+};
+
+/**
+ * Searches using the search term and filters
+ * @param {string} searchTerm the term to search for
+ * @param {object} filters an object containing filters
+ * @param {object} sorting an object containing the sorting
+ */
+const search = (searchTerm, filters, sorting) => requestAndDisplay
+(
+    //I kind of want ot have sorting be an enum
+    "anime?q=" + searchTerm
+);
 
 //#endregion
 
