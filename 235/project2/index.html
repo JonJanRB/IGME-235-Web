@@ -10,24 +10,27 @@
 <body>
     <header>
         <div id="containerSearch">
-            <p>Search Anime:</p>
             <input id="searchBar" type="text" size="50" maxlength="50" autofocus placeholder="Search anime..." />
             <!-- <button type="button" id="buttonSearch">Search</button> -->
         </div>
     </header>
     <aside>
-        <h2>Filter:</h2>
-        <div id="containerFilter" class="foldable">
-            <h3>Genre:</h3>
-            <section id="containerGenre" class="foldable"></section>
-            <h3>Rating:</h3>
-            <section id="containerRating" class="foldable"></section>
-            <h3>Seasonal:</h3>
-            <section id="containerSeasonal" class="foldable"></section>
-        </div>
-        <h2>Sort:</h2>
-        <div id="containerSort" class="foldable">
-        </div>
+        <section>
+            <h2>Filter:</h2>
+            <div id="containerFilter" class="foldable">
+                <h3>Genre:</h3>
+                <section id="containerGenre" class="foldable"></section>
+                <h3>Rating:</h3>
+                <section id="containerRating" class="foldable"></section>
+                <h3>Seasonal:</h3>
+                <section id="containerSeasonal" class="foldable"></section>
+            </div>
+        </section>
+        <section>
+            <h2>Sort:</h2>
+            <div id="containerSort" class="foldable">
+            </div>
+        </section>
     </aside>
     <main>
         <section id="containerAnime"></section>

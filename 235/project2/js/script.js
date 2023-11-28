@@ -30,22 +30,6 @@ const init = () =>
 
     populateSeasonalYears();
     showCurrentSeason();
-
-    document.body.append(createElement
-    (
-        "div",
-        { id: "identity", innerText: "Hello world" },
-        ["class1", "class2"],
-        { sick: "byouin" },
-        { custom: "woahhh" }
-    ));
-
-    document.body.append(createElement
-    (
-        "div",
-        { id: "identity2", innerText: "Hello world 2" }
-    ));
-
     setupSearch();
 }
 window.onload = init;
