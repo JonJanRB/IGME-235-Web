@@ -23,6 +23,8 @@ let animeContainer;
  */
 const init = () =>
 {
+    setupFoldables();
+
     //Initialize "constant" element values
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
@@ -33,6 +35,86 @@ const init = () =>
     setupSearch();
 }
 window.onload = init;
+
+/**
+ * Sets up the foldable elements
+ */
+const setupFoldables = () =>
+{
+    const foldables = document.querySelectorAll(".foldable");
+    const foldableHeaders = document.querySelectorAll(".foldableHeader");
+
+    for(const header of foldableHeaders)
+    {
+        header.append(createElement("p", { innerText: "▼" }));
+
+        //Styling state
+        header.onclick = e =>
+        {
+            //Only do it if it is folded
+            if(e.target.classList.contains("folded"))
+            {
+                //Get the parent foldable element
+                const foldableParent = e.target.closest(".foldable");
+                const foldableParentClassList = foldableParent.classList;
+
+                //Get all the sibling foldables and fold them
+                const localFoldables = foldableParent.parentElement.querySelectorAll(".foldable");
+                for(const localFoldable of localFoldables)
+                {
+                    if(localFoldable != foldableParent)
+                    {
+                        localFoldable.classList.remove("unfolded");
+                        localFoldable.classList.add("folded");
+                    }
+                }
+
+                //Then unfold the clicked one
+                toggleFoldable(foldableParentClassList);
+            }
+        }
+    }
+
+    for(const foldable of foldables)
+    {
+        const foldableee = document.createElement("div");
+        //Add states for styling
+        foldable.onmouseenter = e =>
+        {
+            if(e.target.classList.contains("folded"))
+            {
+                e.target.classList.add("foldPeek");
+            }
+        }
+        foldable.onmouseleave = e =>
+        {
+            e.target.classList.remove("foldPeek");
+        }
+    }
+}
+
+/**
+ * Toggles the state of the specified foldable element's class list
+ * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
+ */
+const toggleFoldable = foldableParentClassList =>
+{
+    createElement("div", { innerText: "▼" }).classList;
+    //Transition to unfolded
+    if(foldableParentClassList.contains("folded"))
+    {
+        foldableParentClassList.remove("folded");
+        foldableParentClassList.add("unfolded");
+        //Also remove the peek state if possible
+        foldableParentClassList.remove("foldPeek");
+    }
+    //Transition to folded
+    else if(foldableParentClassList.contains("unfolded"))
+    {
+        foldableParentClassList.remove("unfolded");
+        foldableParentClassList.add("folded");
+    }
+}
 
 //#endregion
 
@@ -209,8 +291,14 @@ const createAnimeElement = anime =>
     const ani = createElement("article", {}, ["anime"]);
     
     //Titles
-    tryAppend(ani, "h4", [anime.title], { innerText: anime.title });
-    tryAppend(ani, "h5", [anime.title_english], { innerText: anime.title_english });
+
+    //Create a header group
+    const titleGroup = document.createElement("hgroup");
+    //Add headers to the group
+    tryAppend(titleGroup, "h2", [anime.title], { innerText: anime.title });
+    tryAppend(titleGroup, "h3", [anime.title_english], { innerText: anime.title_english });
+    //Add the group to the article
+    ani.append(titleGroup);
 
     //Cover image
     tryAppend(ani, "img", [anime.images.jpg.image_url, anime.title],
@@ -220,8 +308,14 @@ const createAnimeElement = anime =>
     tryAppend(ani, "p", [anime.synopsis], { innerText: anime.synopsis });
 
     //Link to MAL
-    tryAppend(ani, "a", [anime.url], { href: anime.url, target: "_blank", innerText: "View in MAL" });
-    
+    // tryAppend(ani, "a", [anime.url], { href: anime.url, target: "_blank", innerText: "View in MAL" });
+    let dragged = false;
+    ani.onclick = e =>
+    {
+        console.log(e.target.dataset.dragged);
+        if(!e.target.dataset.dragged) window.open(anime.url, "_blank");
+    }
+
     //Return the element
     return ani;
 }

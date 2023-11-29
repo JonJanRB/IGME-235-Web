@@ -6,13 +6,22 @@
     --contrast-color: #d6d6d6;
     --sub-color: #686868;
     --ui-bg: transparent;
-    /* --ui-bg: #2c2c2c; */
+    --footer-bg: #2c2c2c;
     --transparent-ui-bg: #1a1a1adf;
     --bg: #1a1a1a;
     --main-font: 'Open Sans', sans-serif;
 
     --side-width: 18rem;
     --header-height: 3.5rem;
+    --footer-height: 2rem;
+
+    --ui-border: 0.05rem solid var(--sub-color);
+
+    --font-huge: 2rem;
+    --font-big: 1.25rem;
+    --font-medium: 1rem;
+    --font-small: 0.75rem;
+    --font-tiny: 0.6rem;
 
     font-size: 20px;
 }
@@ -36,16 +45,15 @@ body
 
     display: grid;
     grid-template-areas:    "side   search"
-                            "side   main";
+                            "side   main"
+                            "footer footer";
     grid-template-columns: var(--side-width) 1fr;
-    grid-template-rows: var(--header-height) 1fr;
+    grid-template-rows: var(--header-height) 1fr var(--footer-height);
 }
 
 header
 {
-    grid-area: search;
-    background-color: var(--transparent-ui-bg);
-    box-shadow: 0rem 1rem 1rem var(--transparent-ui-bg);  
+    grid-area: search; 
     position: sticky;
     top: 0;
     height: var(--header-height);
@@ -56,6 +64,11 @@ header
     align-items: center;
     justify-content: center;
 }
+    .shadowUI
+    {
+        background-color: var(--transparent-ui-bg);
+        box-shadow: 0 0 1rem 1rem var(--transparent-ui-bg); 
+    }
     #searchBar
     {
         width: 1rem;
@@ -70,32 +83,28 @@ aside
     grid-area: side;
     background-color: var(--ui-bg);
     position: fixed;
-    top: -10px;
     width: var(--side-width);
-    height: 100vh;
+    height: calc(100% - var(--footer-height));
     overflow-y: hidden;
     z-index: 2;
-    padding: 1rem;
+    padding: 0.5rem 1rem;
 
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: center;
 }
-    aside>section
+    .uiDivider
     {
-        height: min-content;
-        flex-grow: 1;
-        flex-shrink: 1;
-        overflow-y: auto;
-        border: 0.05rem solid var(--sub-color);
-        border-radius: 0.25rem;
-        margin: 0.1rem;
-        padding: 0.5rem;
+        border-top: var(--ui-border);
     }
     aside h3
     {
-        font-size: 1rem;
+        font-size: var(--font-big);
+    }
+    aside h4
+    {
+        font-size: var(--font-medium);
         margin-top: 0.5rem;
         color: var(--sub-color);
     }
@@ -104,8 +113,7 @@ aside
 main
 {
     grid-area: main;
-    /* padding-left: var(--side-width); */
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 #containerAnime
@@ -119,7 +127,7 @@ main
 }
     .anime
     {
-        border: 0.3rem solid var(--contrast-color);
+        border: 0.1rem solid var(--contrast-color);
         border-radius: 1rem;
         padding: 1rem;
         display: flex;
@@ -132,14 +140,24 @@ main
         min-height: 30rem;
         max-height: fit-content;
         margin: 0.5rem;
+
+        transition: border-radius 0.2s ease-out, scale 0.2s ease-out;
     }
-        .anime h4
+        .anime:hover
         {
-            font-size: 1rem;
+            border-radius: 0rem;
+            scale: 1.05;
+            z-index: 1;
+            cursor: pointer;
         }
-        .anime h5
+
+        .anime h2
         {
-            font-size: 0.75rem;
+            font-size: var(--font-medium);
+        }
+        .anime h3
+        {
+            font-size: var(--font-small);
             color: var(--sub-color);
         }
         .anime img
@@ -150,7 +168,7 @@ main
         }
         .anime p
         {
-            font-size: 0.6rem;
+            font-size: var(--font-tiny);
             max-height: 5rem;
             min-height: 1rem;
             overflow-y: auto;
@@ -158,7 +176,7 @@ main
         }
         .anime a
         {
-            font-size: 0.75rem;
+            font-size: var(--font-small);
         }
 
 
@@ -172,7 +190,7 @@ button
     border: 0.1rem solid var(--contrast-color);
     border-radius: 0.5rem;
     padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    font-size: var(--font-small);
     margin: 0.25rem;
 }
 
@@ -203,3 +221,116 @@ input
 {
     width: auto;
 }
+
+footer
+{
+    grid-area: footer;
+    background-color: var(--footer-bg);
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    position: fixed;
+    bottom: 0rem;
+    right: 0rem;
+    width: 100%;
+    height: var(--footer-height);
+    padding: 0 0.5rem;
+    z-index: 2;
+}
+    footer h1,
+    footer p
+    {
+        margin: 0 0.5rem;
+    }
+    footer h1
+    {
+        font-size: var(--font-big);
+    }
+    footer p
+    {
+        font-size: var(--font-medium);
+        color: var(--sub-color);
+    }
+    footer #footerEnd
+    {
+        margin-left: auto;
+    }
+
+
+
+.foldable
+{
+    height: auto;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow-y: hidden;
+    border: var(--ui-border);
+    border-radius: 0.25rem;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    padding-top: 0;
+
+    transition: border-color 0.25s ease-out, height 0.25s ease-out;
+}
+    .foldable:hover
+    {
+        border-color: var(--foooter-color);
+    }
+
+    .foldableHeader
+    {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: right;
+        align-items: center;
+        overflow-x: hidden;
+        padding: 0.5rem 0;
+    }
+        .foldableHeader h2
+        {
+            font-size: var(--font-big);
+            text-align: end;
+            display: inline;
+        }
+        .foldableHeader p
+        {
+            margin-left: 0.5rem;
+            font-size: var(--font-big);
+            color: var(--sub-color);
+
+            transition: rotate 0.25s ease-out, translate 0.25s ease-out;
+        }
+
+    .foldableBody
+    {
+        height: max-content;
+        transition: height 0.25s ease-out, width 0.25s ease-out;
+        margin: 0 auto;
+        overflow-y: auto;
+    }
+    /* Fold states */
+        /* Folded */
+        .folded .foldableHeader p
+        {
+            rotate: -90deg;
+        }
+        .folded .foldableBody
+        {
+            height: 0;
+            width: 0;
+        }
+        /* Peek */
+        .foldPeek .foldableHeader p
+        {
+            translate: -0.1rem;
+        }
+        .foldPeek .foldableBody
+        {
+            height: 0.1rem;
+            width: 100%;
+        }

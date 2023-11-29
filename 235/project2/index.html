@@ -8,36 +8,56 @@
     <script src="js/script.js"></script>
 </head>
 <body>
-    <header>
+    <header class="shadowUI">
         <input id="searchBar" type="text" size="50" maxlength="50" autofocus placeholder="Search anime..." />
     </header>
     <aside>
-        <section>
-            <h2>Filter:</h2>
-            <div id="containerFilter" class="foldable">
-                <h3>Genre</h3>
-                <section id="containerGenre" class="foldable"></section>
+        <section class="foldable folded">
+            <div class="foldableHeader">
+                <h2 title="Search anime with the constraints set here">Advanced Search</h2>
+            </div>
+            <div class="foldableBody">
+                <div class="uiDivider">
+                    <h3>Filter:</h3>
+                    <div id="containerFilter">
+                        <h4>Genre</h4>
+                        <section id="containerGenre"></section>
+                    </div>
+                </div>
+                <div class="uiDivider">
+                    <h3>Sort:</h3>
+                    <div id="containerSort">
+                        <h4>Rating</h4>
+                        <section id="containerRating"></section>
+                        <h4>Popularity</h4>
+                        <section id="containerPopularity"></section>
+                    </div>
+                </div>
             </div>
         </section>
-        <section>
-            <h2>Sort:</h2>
-            <div id="containerSort" class="foldable">
-                <h3>Rating</h3>
-                <section id="containerRating" class="foldable"></section>
-                <h3>Popularity</h3>
-                <section id="containerRating" class="foldable"></section>
+        <section class="foldable unfolded">
+            <div class="foldableHeader">
+                <h2 title="Display pre-made lists unaffected by searching">Lists</h2>
             </div>
-        </section>
-        <section>
-            <h2>Alternate Search:</h2>
-            <div id="containerSort" class="foldable">
-                <h3>Seasonal</h3>
-                <section id="containerSeasonal" class="foldable"></section>
+            <div class="foldableBody">
+                <div class="uiDivider">
+                    <h3>Seasonal:</h3>
+                    <section id="containerSeasonal"></section>
+                </div>
+                <div class="uiDivider">
+                    <h3>Top:</h3>
+                    <section id="containerTopAnime"></section>
+                </div>
             </div>
         </section>
     </aside>
     <main>
         <section id="containerAnime"></section>
     </main>
+    <footer>
+        <h1>Anime Searcher</h1>
+        <p>Powered by <a href="https://jikan.moe/">Jikan</a></p>
+        <p id="footerEnd">Created by <a href="../project1/">Jonathan Jan</a></p>
+    </footer>
 </body>
 </html>
