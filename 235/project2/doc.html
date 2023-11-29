@@ -9,8 +9,22 @@
         img
         {
             margin: 30px auto 0px;
+        }
+        img.landscape
+        {
             width: 100%;
             max-width: max-content;
+        }
+        img.portrait
+        {
+            height: 70vh;
+            max-height: max-content;
+            float: left;
+            margin: 0px 30px 0px 0px;
+        }
+        h2
+        {
+            clear: both;
         }
         *
         {
@@ -41,7 +55,7 @@
             going wrong so I figured it out on my own since its advice was not very helpful.
         </p>
         <h2>Creating Elements</h2>
-        <img src="src/create-element.png" alt="Create Element function">
+        <img src="src/create-element.png" alt="Create Element function" class="landscape">
         <p>
             Something I found frustrating and a bit harder to read was making elements with attributes.
             It was quick and easy with innerHTML, but I avoided that because of the loss of data described
@@ -55,7 +69,7 @@
             <br>
             It even works with adding classes, datasets, and non-standard attributes.
         </p>
-        <img src="src/create-element-showcase.png" alt="Create Element function showcase">
+        <img src="src/create-element-showcase.png" alt="Create Element function showcase" class="landscape">
         <p>
             This image shows everything working as intended allowing for all the major things to be created for an element
             with only a single code statement.
@@ -68,6 +82,15 @@
             I made a function called `tryAppend` which will create an element and append it to a parent element only if the specified data
             is present. If any of the included data is invalid, it will not create or append the element at all.
             This way, the HTML doesn't have any tags that are empty shells or contain the word "null" meaning it is more semantic and clean.
+        </p>
+        <h2>Foldable Things</h2>
+        <img src="src/multiple-folds.png" alt="Multiple folds showcase" class="portrait">
+        <p>
+            I created a foldable mechanism that allowed for sections to be folded and unfolded. For styling, I basically created a finite state
+            machine accros both css and javascript and I think it turned out pretty well. Something to note is that it is not hard coded, it
+            supports any number of foldable sections, works with nested foldable sections, and can allow for multiple foldables to be open at once
+            (even though I limited it to only have one unfolded at a time since I think it makes it easier for the user to understand that the filters
+            and sorting won't work on the "Lists" section).
         </p>
     </section>
 </body>

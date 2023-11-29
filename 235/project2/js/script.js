@@ -51,27 +51,22 @@ const setupFoldables = () =>
         //Styling state
         header.onclick = e =>
         {
-            //Only do it if it is folded
-            if(e.target.classList.contains("folded"))
-            {
-                //Get the parent foldable element
-                const foldableParent = e.target.closest(".foldable");
-                const foldableParentClassList = foldableParent.classList;
+            //Get the parent foldable element
+            const foldableParent = e.target.closest(".foldable");
+            const foldableParentClassList = foldableParent.classList;
 
+            //Only do it if it is folded
+            if(foldableParentClassList.contains("folded"))
+            {
                 //Get all the sibling foldables and fold them
                 const localFoldables = foldableParent.parentElement.querySelectorAll(".foldable");
                 for(const localFoldable of localFoldables)
                 {
-                    if(localFoldable != foldableParent)
-                    {
-                        localFoldable.classList.remove("unfolded");
-                        localFoldable.classList.add("folded");
-                    }
+                    foldElement(localFoldable.classList);
                 }
-
-                //Then unfold the clicked one
-                toggleFoldable(foldableParentClassList);
             }
+            //Then toggle the clicked one
+            toggleFoldable(foldableParentClassList);
         }
     }
 
@@ -81,7 +76,7 @@ const setupFoldables = () =>
         //Add states for styling
         foldable.onmouseenter = e =>
         {
-            if(e.target.classList.contains("folded"))
+            // if(e.target.classList.contains("folded"))
             {
                 e.target.classList.add("foldPeek");
             }
@@ -94,26 +89,37 @@ const setupFoldables = () =>
 }
 
 /**
- * Toggles the state of the specified foldable element's class list
+ * Sets the state of the specified foldable element's class list to folded
  * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
+ */
+const foldElement = foldableParentClassList =>
+{
+    foldableParentClassList.remove("unfolded");
+    foldableParentClassList.add("folded");
+}
+
+/**
+ * Sets the state of the specified foldable element's class list to unfolded
+ * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
+ */
+const unfoldElement = foldableParentClassList =>
+{
+    foldableParentClassList.remove("folded");
+    foldableParentClassList.add("unfolded");
+    //Also remove the peek state if possible
+    foldableParentClassList.remove("foldPeek");
+}
+
+/**
+ * Toggles the state of the specified foldable element's class list
+ * @param {DOMTokenList} foldableParentClassList 
  */
 const toggleFoldable = foldableParentClassList =>
 {
-    createElement("div", { innerText: "▼" }).classList;
-    //Transition to unfolded
     if(foldableParentClassList.contains("folded"))
-    {
-        foldableParentClassList.remove("folded");
-        foldableParentClassList.add("unfolded");
-        //Also remove the peek state if possible
-        foldableParentClassList.remove("foldPeek");
-    }
-    //Transition to folded
-    else if(foldableParentClassList.contains("unfolded"))
-    {
-        foldableParentClassList.remove("unfolded");
-        foldableParentClassList.add("folded");
-    }
+        unfoldElement(foldableParentClassList);
+    else
+        foldElement(foldableParentClassList);
 }
 
 //#endregion
