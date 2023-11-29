@@ -11,7 +11,7 @@
     --bg: #1a1a1a;
     --main-font: 'Open Sans', sans-serif;
 
-    --side-width: 15rem;
+    --side-width: 18rem;
     --header-height: 3.5rem;
 
     font-size: 20px;
@@ -35,7 +35,8 @@ body
     font-family: var(--main-font);
 
     display: grid;
-    grid-template-areas: "side   search" "side   main";
+    grid-template-areas:    "side   search"
+                            "side   main";
     grid-template-columns: var(--side-width) 1fr;
     grid-template-rows: var(--header-height) 1fr;
 }
@@ -50,13 +51,18 @@ header
     height: var(--header-height);
     width: 100%;
     z-index: 1;
-}
 
-    #containerSearch
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+    #searchBar
     {
-        margin: 0 auto;
-        width: max-content;
-        height: var(--header-height);
+        min-width: 1rem;
+        max-width: max-content;
+        height: max-content;
+        flex-grow: 1;
+        flex-shrink: 1;
     }
 
 aside
@@ -76,6 +82,7 @@ aside
     flex-wrap: nowrap;
     justify-content: flex-start;
 }
+    header>section,
     aside>section
     {
         height: min-content;
@@ -118,7 +125,7 @@ main
         width: 15rem;
         min-height: 30rem;
         max-height: fit-content;
-        margin: 1rem;
+        margin: 0.5rem;
     }
         .anime h4
         {

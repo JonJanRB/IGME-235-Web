@@ -122,12 +122,12 @@ const populateSeasonalYears = () => requestData
  * @param {number} year year of the season
  * @param {string} season season time (winter, spring, etc)
  */
-const showSeason = (year, season) => requestAndDisplay(`seasons/${year}/${season}?sfw=true`);
+const showSeason = (year, season) => requestAndDisplay(`seasons/${year}/${season}?sfw`);
 
 /**
  * Displays the current season of anime
  */
-const showCurrentSeason = () => requestAndDisplay("seasons/now?sfw=true");
+const showCurrentSeason = () => requestAndDisplay("seasons/now?sfw");
 
 /**
  * Populates the seasonal filter based on the specified year
@@ -178,7 +178,7 @@ const setupSearch = () =>
 const search = (searchTerm, filters, sorting) => requestAndDisplay
 (
     //I kind of want ot have sorting be an enum
-    "anime?sfw=true&q=" + searchTerm
+    "anime?sfw&q=" + searchTerm
 );
 
 //#endregion
