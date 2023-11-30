@@ -66,6 +66,7 @@ header
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 1rem;
 }
     .shadowUI
     {
@@ -229,6 +230,7 @@ footer
 {
     grid-area: footer;
     background-color: var(--footer-bg);
+    border-top: var(--ui-border);
 
     display: flex;
     flex-direction: row;
@@ -292,6 +294,8 @@ footer
         align-items: center;
         overflow-x: hidden;
         padding: 0.5rem 0;
+        cursor: pointer;
+        user-select: none;
     }
         .foldableHeader h2
         {
@@ -305,7 +309,7 @@ footer
             font-size: var(--font-big);
             color: var(--sub-color);
 
-            transition: rotate 0.25s ease-out, translate 0.25s ease-out;
+            transition: rotate 0.25s ease-out, scale 0.25s ease-out, color 0.25s ease-out;
         }
 
     .foldableBody
@@ -331,11 +335,11 @@ footer
         .foldPeek
         {
             height: var(--peek-height);
-            cursor: pointer;
         }
             .foldPeek .foldableHeader p
             {
-                translate: -0.1rem;
+                scale: 1.25;
+                color: var(--contrast-color);
             }
             .foldPeek .foldableBody
             {

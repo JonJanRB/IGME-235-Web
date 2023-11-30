@@ -68,24 +68,40 @@ const setupFoldables = () =>
             //Then toggle the clicked one
             toggleFoldable(foldableParentClassList);
         }
+
+        header.onmouseenter = e =>
+        {
+            //Get the parent foldable element
+            const foldableParent = e.target.closest(".foldable");
+            const foldableParentClassList = foldableParent.classList;
+
+            foldableParentClassList.add("foldPeek");
+        }
+        header.onmouseleave = e =>
+        {
+            //Get the parent foldable element
+            const foldableParent = e.target.closest(".foldable");
+            const foldableParentClassList = foldableParent.classList;
+
+            foldableParentClassList.remove("foldPeek");
+        }
     }
 
-    for(const foldable of foldables)
-    {
-        const foldableee = document.createElement("div");
-        //Add states for styling
-        foldable.onmouseenter = e =>
-        {
-            // if(e.target.classList.contains("folded"))
-            {
-                e.target.classList.add("foldPeek");
-            }
-        }
-        foldable.onmouseleave = e =>
-        {
-            e.target.classList.remove("foldPeek");
-        }
-    }
+    // for(const foldable of foldables)
+    // {
+    //     //Add states for styling
+    //     foldable.onmouseenter = e =>
+    //     {
+    //         // if(e.target.classList.contains("folded"))
+    //         {
+    //             e.target.classList.add("foldPeek");
+    //         }
+    //     }
+    //     foldable.onmouseleave = e =>
+    //     {
+    //         e.target.classList.remove("foldPeek");
+    //     }
+    // }
 }
 
 /**
@@ -107,7 +123,7 @@ const unfoldElement = foldableParentClassList =>
     foldableParentClassList.remove("folded");
     foldableParentClassList.add("unfolded");
     //Also remove the peek state if possible
-    foldableParentClassList.remove("foldPeek");
+    // foldableParentClassList.remove("foldPeek");
 }
 
 /**
