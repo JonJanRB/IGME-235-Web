@@ -36,8 +36,6 @@ let advancedSearchBar;
 //The search history
 const searchHistory = ["test1", "test2", "test3"];
 
-//The search history container which is created when needed
-let searchHistoryContainer;
 
 
 //URL Extensions
@@ -66,8 +64,6 @@ window.onload = () =>
     populateGenreList();
     setupAdvancedSearchButton();
     setupSearch();
-
-    showSearchHistory(searchBar);
 
     //Lastly load the current season
     showCurrentSeason();
@@ -198,6 +194,12 @@ const setupSearch = () =>
      * @param {Event} e the key up event
      */
     searchBar.onkeyup = e => { if(e.code === "Enter") search(e.target.value) }
+
+    //Add seach history when focused
+    searchBar.onfocus = e => showSearchHistory(e.target);
+
+    //Remove search history when unfocused
+    searchBar.onblur = hideSearchHistory;
 };
 
 /**
@@ -274,6 +276,14 @@ const setupAdvancedSearchButton = () =>
     //Advanced search when the button is clicked or enter is pressed within the search bar
     advancedSearchButton.onclick = advancedSearchSubmit;
     advancedSearchBar.onkeyup = e => { if(e.code === "Enter") advancedSearchSubmit(); }
+
+    //This works for the most part but it is ugly so this is commented out
+
+    //Add seach history when focused
+    // advancedSearchBar.onfocus = e => showSearchHistory(e.target);
+
+    //Remove search history when unfocused
+    // advancedSearchBar.onblur = e => searchHistoryContainer.remove();
 }
 
 
@@ -305,7 +315,7 @@ const addSearch = searchTerm =>
 }
 
 /**
- * 
+ * Shows the search history under the specified search bar
  * @param {HTMLElement} searchBar The search bar to show history under
  */
 const showSearchHistory = searchBar =>
@@ -314,17 +324,55 @@ const showSearchHistory = searchBar =>
     if(searchHistory.length == 0) return;
 
     //Create the container for search history
-    searchHistoryContainer = createElement("div", {}, ["searchHistory", "shadowUI"]);
+    const searchHistoryContainer =
+        createElement("div", {}, ["searchHistory", "shadowUI"]);
+    //Initial transition state
+    searchHistoryContainer.style.scale = "1 0";
+    searchHistoryContainer.style.opacity = "0";
 
     //Add each search to the container
     for(const search of searchHistory)
     {
-        tryAppend(searchHistoryContainer, "p", [search],
-            { innerText: search }, ["uiDivider"]);
+        const historyItem =
+            createElement("p", { innerText: search }, ["uiDivider"]);
+        historyItem.onclick = e =>
+        {
+            //Set the search bar to the clicked history item
+            searchBar.value = e.target.innerText;
+            //Then search it however the search bar is set up
+            searchBar.dispatchEvent(
+                new KeyboardEvent("keyup", { code: "Enter" }));
+        };
+
+        //Prepend so that the history is in reverse order
+        searchHistoryContainer.prepend(historyItem);
     }
 
     //Add the container to the page
     searchBar.parentElement.append(searchHistoryContainer);
+    
+    //Pop and fade in in the search history (basically just wait
+    //no time but enough for the css transition to work)
+    setTimeout(() =>
+    {
+        searchHistoryContainer.style.scale = "";
+        searchHistoryContainer.style.opacity = "";
+    }, 0);
+}
+
+/**
+ * Hides all search history with css transition being triggered.
+ */
+const hideSearchHistory = () =>
+{
+    //Possibility of multiple seach histories being shown and so this ensures all are removed
+    const histories = document.querySelectorAll(".searchHistory");
+    for(const history of histories)
+    {
+        history.style.scale = "1 0";
+        history.style.opacity = "0";
+        setTimeout(() => { history.remove(); }, 250);
+    }
 }
 
 //#endregion

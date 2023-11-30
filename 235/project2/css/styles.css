@@ -45,6 +45,7 @@
 {
     :root
     {
+        --side-width: 20rem;
         font-size: 15px;
     }
 }
@@ -258,7 +259,7 @@ footer
     width: 100%;
     height: var(--footer-height);
     padding: 0 0.5rem;
-    z-index: 2;
+    z-index: 10;
 }
     footer h1,
     footer p
@@ -296,7 +297,7 @@ footer
 }
     .foldable:hover
     {
-        border-color: var(--foooter-color);
+        border-color: var(--contrast-color);
     }
 
     .foldableHeader
@@ -414,12 +415,12 @@ a:visited
 a:focus,
 a:hover
 {
-    color: #2d8fff;
+    color: #5faaff;
     text-decoration: underline;
 }
 a:active
 {
-    color: #0059ff;
+    color: #ffffff;
 }
 
 .searchContainer
@@ -429,13 +430,13 @@ a:active
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center;
-    height: var(--font-medium);
+    height: var(--font-huge);
     /* min-width: 1rem; */
     /* max-width: max-content; */
     overflow-y: visible;
 
     min-width: 1rem;
-    max-width: max-content;
+    max-width: 23rem;
     flex-grow: 1;
     flex-shrink: 1;
 }
@@ -452,25 +453,31 @@ a:active
     {
         background-color: var(--ui-bg);
         height: max-content;
+        max-height: calc(100vh - var(--header-height) - var(--footer-height) - 1.2rem);
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         border: var(--ui-border);
         border-radius: 0.25rem;
-        transition: border-color 0.25s ease-out, height 0.25s ease-out;
+        transform-origin: 0 0;
+        transition: border-color 0.25s ease-out, scale 0.25s ease-out, opacity 0.25s ease-out;
         padding: 0.5rem;
         padding-top: 0;
         margin-top: 1rem;
     }
-/* 
-    .searchHistory
-{
-    height: var(--folded-height);
-    flex-shrink: 1;
-    overflow-y: hidden;
-    margin: 0.5rem 0;
-    
-
-} */
         .searchHistory:hover
         {
-            border-color: var(--foooter-color);
+            border-color: var(--contrast-color);
         }
+        .searchHistory p
+        {
+            font-size: var(--font-small);
+            color: var(--sub-color);
+            transition: color 0.25s ease-out, padding-left 0.25s ease-out;
+            cursor: pointer;
+        }
+            .searchHistory p:hover
+            {
+                color: var(--contrast-color);
+                padding-left: 1rem;
+            }
