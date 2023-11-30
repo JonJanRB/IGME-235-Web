@@ -33,6 +33,12 @@ let advancedSearchButton;
 //The advanced search bar
 let advancedSearchBar;
 
+//The search history
+const searchHistory = ["test1", "test2", "test3"];
+
+//The search history container which is created when needed
+let searchHistoryContainer;
+
 
 //URL Extensions
 const GENRE_EXTENSION = "genres/anime";
@@ -61,119 +67,11 @@ window.onload = () =>
     setupAdvancedSearchButton();
     setupSearch();
 
+    showSearchHistory(searchBar);
+
     //Lastly load the current season
     showCurrentSeason();
 };
-
-/**
- * Sets up the foldable elements
- */
-const setupFoldables = () =>
-{
-    const foldables = document.querySelectorAll(".foldable");
-    const foldableHeaders = document.querySelectorAll(".foldableHeader");
-
-    for(const header of foldableHeaders)
-    {
-        //Make sure there are no duplicates of the arrow
-        //(in case of refresh by calling this again such as during an error which is foldable)
-        const allPInHead = header.querySelectorAll("p");
-        for(const p of allPInHead)
-        {
-            if(p.innerText == "▼") p.remove();
-        }
-
-        header.append(createElement("p", { innerText: "▼" }));
-
-        //Styling state
-        header.onclick = e =>
-        {
-            //Get the parent foldable element
-            const foldableParent = e.target.closest(".foldable");
-            const foldableParentClassList = foldableParent.classList;
-
-            //Only do it if it is folded
-            if(foldableParentClassList.contains("folded"))
-            {
-                //Get all the sibling foldables and fold them
-                const localFoldables = foldableParent.parentElement.querySelectorAll(".foldable");
-                for(const localFoldable of localFoldables)
-                {
-                    foldElement(localFoldable.classList);
-                }
-            }
-            //Then toggle the clicked one
-            toggleFoldable(foldableParentClassList);
-        }
-
-        header.onmouseenter = e =>
-        {
-            //Get the parent foldable element
-            const foldableParent = e.target.closest(".foldable");
-            const foldableParentClassList = foldableParent.classList;
-
-            foldableParentClassList.add("foldPeek");
-        }
-        header.onmouseleave = e =>
-        {
-            //Get the parent foldable element
-            const foldableParent = e.target.closest(".foldable");
-            const foldableParentClassList = foldableParent.classList;
-
-            foldableParentClassList.remove("foldPeek");
-        }
-    }
-
-    // for(const foldable of foldables)
-    // {
-    //     //Add states for styling
-    //     foldable.onmouseenter = e =>
-    //     {
-    //         // if(e.target.classList.contains("folded"))
-    //         {
-    //             e.target.classList.add("foldPeek");
-    //         }
-    //     }
-    //     foldable.onmouseleave = e =>
-    //     {
-    //         e.target.classList.remove("foldPeek");
-    //     }
-    // }
-}
-
-/**
- * Sets the state of the specified foldable element's class list to folded
- * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
- */
-const foldElement = foldableParentClassList =>
-{
-    foldableParentClassList.remove("unfolded");
-    foldableParentClassList.add("folded");
-}
-
-/**
- * Sets the state of the specified foldable element's class list to unfolded
- * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
- */
-const unfoldElement = foldableParentClassList =>
-{
-    foldableParentClassList.remove("folded");
-    foldableParentClassList.add("unfolded");
-    //Also remove the peek state if possible
-    // foldableParentClassList.remove("foldPeek");
-}
-
-/**
- * Toggles the state of the specified foldable element's class list
- * @param {DOMTokenList} foldableParentClassList 
- */
-const toggleFoldable = foldableParentClassList =>
-{
-    if(foldableParentClassList.contains("folded"))
-        unfoldElement(foldableParentClassList);
-    else
-        foldElement(foldableParentClassList);
-}
 
 //#endregion
 
@@ -383,6 +281,50 @@ const setupAdvancedSearchButton = () =>
 const advancedSearchSubmit = () =>
 {
     search(advancedSearchBar.value, { genres: dropdownGenre.value });
+}
+
+//#endregion
+
+//#region Search History
+
+/**
+ * Loads the search history from local storage if any
+ */
+const loadSearchHistory = () =>
+{
+
+}
+
+/**
+ * Adds a search to the search history
+ * @param {string} searchTerm The search term to save
+ */
+const addSearch = searchTerm =>
+{
+    searchHistory.push(searchTerm);
+}
+
+/**
+ * 
+ * @param {HTMLElement} searchBar The search bar to show history under
+ */
+const showSearchHistory = searchBar =>
+{
+    //Just don't show anything if there isn't any history
+    if(searchHistory.length == 0) return;
+
+    //Create the container for search history
+    searchHistoryContainer = createElement("div", {}, ["searchHistory", "shadowUI"]);
+
+    //Add each search to the container
+    for(const search of searchHistory)
+    {
+        tryAppend(searchHistoryContainer, "p", [search],
+            { innerText: search }, ["uiDivider"]);
+    }
+
+    //Add the container to the page
+    searchBar.parentElement.append(searchHistoryContainer);
 }
 
 //#endregion
@@ -643,5 +585,103 @@ const tryAppend = (outerElement, innerElementType, data, attributes,
  * @param {HTMLElement} element element to clear
  */
 const clearElement = element => element.innerHTML = "";
+
+//#endregion
+
+//#region Foldables
+
+/**
+ * Sets up the foldable elements
+ */
+const setupFoldables = () =>
+{
+    // const foldables = document.querySelectorAll(".foldable");
+    const foldableHeaders = document.querySelectorAll(".foldableHeader");
+
+    for(const header of foldableHeaders)
+    {
+        //Make sure there are no duplicates of the arrow
+        //(in case of refresh by calling this again such as during an error which is foldable)
+        const allPInHead = header.querySelectorAll("p");
+        for(const p of allPInHead)
+        {
+            if(p.innerText == "▼") p.remove();
+        }
+
+        header.append(createElement("p", { innerText: "▼" }));
+
+        //Styling state
+        header.onclick = e =>
+        {
+            //Get the parent foldable element
+            const foldableParent = e.target.closest(".foldable");
+            const foldableParentClassList = foldableParent.classList;
+
+            //Only do it if it is folded
+            if(foldableParentClassList.contains("folded"))
+            {
+                //Get all the sibling foldables and fold them
+                const localFoldables = foldableParent.parentElement.querySelectorAll(".foldable");
+                for(const localFoldable of localFoldables)
+                {
+                    foldElement(localFoldable.classList);
+                }
+            }
+            //Then toggle the clicked one
+            toggleFoldable(foldableParentClassList);
+        }
+
+        header.onmouseenter = e =>
+        {
+            //Get the parent foldable element
+            const foldableParent = e.target.closest(".foldable");
+            const foldableParentClassList = foldableParent.classList;
+
+            foldableParentClassList.add("foldPeek");
+        }
+        header.onmouseleave = e =>
+        {
+            //Get the parent foldable element
+            const foldableParent = e.target.closest(".foldable");
+            const foldableParentClassList = foldableParent.classList;
+
+            foldableParentClassList.remove("foldPeek");
+        }
+    }
+}
+
+/**
+ * Sets the state of the specified foldable element's class list to folded
+ * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
+ */
+const foldElement = foldableParentClassList =>
+{
+    foldableParentClassList.remove("unfolded");
+    foldableParentClassList.add("folded");
+}
+
+/**
+ * Sets the state of the specified foldable element's class list to unfolded
+ * @param {DOMTokenList} foldableParentClassList the classlist of the foldable parent
+ */
+const unfoldElement = foldableParentClassList =>
+{
+    foldableParentClassList.remove("folded");
+    foldableParentClassList.add("unfolded");
+    //Also remove the peek state if possible
+    // foldableParentClassList.remove("foldPeek");
+}
+
+/**
+ * Toggles the state of the specified foldable element's class list
+ * @param {DOMTokenList} foldableParentClassList 
+ */
+const toggleFoldable = foldableParentClassList =>
+{
+    if(foldableParentClassList.contains("folded"))
+        unfoldElement(foldableParentClassList);
+    else
+        foldElement(foldableParentClassList);
+}
 
 //#endregion

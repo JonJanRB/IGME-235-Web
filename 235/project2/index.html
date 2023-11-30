@@ -9,7 +9,9 @@
 </head>
 <body>
     <header class="shadowUI">
-        <input id="searchBar" type="text" size="50" maxlength="100" autofocus placeholder="Search anime..." />
+        <div class="searchContainer">
+            <input id="searchBar" type="text" size="50" maxlength="100" autofocus placeholder="Search anime..." />
+        </div>
     </header>
     <aside>
         <section class="foldable unfolded">
@@ -35,7 +37,9 @@
                 </div> -->
                 <div class="uiDivider horizontalCentered">
                     <h3>Keywords</h3>
-                    <input id="advancedSearchBar" type="text" size="20" maxlength="100" autofocus placeholder="Advanced search..." />
+                    <div class="searchContainer">
+                        <input id="advancedSearchBar" type="text" size="20" maxlength="100" autofocus placeholder="Advanced search..." />
+                    </div>
                 </div>
                 <div class="uiDivider horizontalCentered">
                     <button type="button" id="advancedSearchButton">Search</button>

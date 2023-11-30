@@ -90,14 +90,6 @@ header
         background-color: var(--transparent-ui-bg);
         box-shadow: 0 0 1rem 1rem var(--transparent-ui-bg); 
     }
-    input
-    {
-        width: 1rem;
-        max-width: max-content;
-        height: max-content;
-        flex-grow: 1;
-        flex-shrink: 1;
-    }
 
 aside
 {
@@ -288,7 +280,6 @@ footer
     }
 
 
-
 .foldable
 {
     background-color: var(--ui-bg);
@@ -430,3 +421,56 @@ a:active
 {
     color: #0059ff;
 }
+
+.searchContainer
+{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    height: var(--font-medium);
+    /* min-width: 1rem; */
+    /* max-width: max-content; */
+    overflow-y: visible;
+
+    min-width: 1rem;
+    max-width: max-content;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+    input
+    {
+        min-width: 1rem;
+        max-width: max-content;
+        height: max-content;
+        flex-grow: 1;
+        flex-shrink: 1;
+    }
+
+    .searchHistory
+    {
+        background-color: var(--ui-bg);
+        height: max-content;
+        width: 100%;
+        border: var(--ui-border);
+        border-radius: 0.25rem;
+        transition: border-color 0.25s ease-out, height 0.25s ease-out;
+        padding: 0.5rem;
+        padding-top: 0;
+        margin-top: 1rem;
+    }
+/* 
+    .searchHistory
+{
+    height: var(--folded-height);
+    flex-shrink: 1;
+    overflow-y: hidden;
+    margin: 0.5rem 0;
+    
+
+} */
+        .searchHistory:hover
+        {
+            border-color: var(--foooter-color);
+        }
