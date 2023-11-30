@@ -9,43 +9,50 @@
 </head>
 <body>
     <header class="shadowUI">
-        <input id="searchBar" type="text" size="100" maxlength="100" autofocus placeholder="Search anime..." />
+        <input id="searchBar" type="text" size="50" maxlength="100" autofocus placeholder="Search anime..." />
     </header>
     <aside>
-        <section class="foldable folded">
+        <section class="foldable unfolded">
             <div class="foldableHeader">
-                <h2 title="Search anime with the constraints set here">Advanced Search</h2>
+                <h2 title="Search anime with constraints set here">Advanced Search</h2>
             </div>
             <div class="foldableBody">
                 <div class="uiDivider">
-                    <h3>Filter:</h3>
-                    <div id="containerFilter">
-                        <h4>Genre</h4>
-                        <section id="containerGenre"></section>
+                    <h3>Filters</h3>
+                    <div id="containerFilter" class="horizontalCentered">
+                        <h4>Genre:</h4>
+                        <section id="containerGenre" class="horizontalCentered"></section>
                     </div>
                 </div>
-                <div class="uiDivider">
-                    <h3>Sort:</h3>
+                <!-- <div class="uiDivider">
+                    <h3>Sort</h3>
                     <div id="containerSort">
                         <h4>Rating</h4>
                         <section id="containerRating"></section>
                         <h4>Popularity</h4>
                         <section id="containerPopularity"></section>
                     </div>
+                </div> -->
+                <div class="uiDivider horizontalCentered">
+                    <h3>Keywords</h3>
+                    <input id="advancedSearchBar" type="text" size="20" maxlength="100" autofocus placeholder="Advanced search..." />
+                </div>
+                <div class="uiDivider horizontalCentered">
+                    <button type="button" id="advancedSearchButton">Search</button>
                 </div>
             </div>
         </section>
-        <section class="foldable unfolded">
+        <section class="foldable folded">
             <div class="foldableHeader">
                 <h2 title="Display pre-made lists unaffected by searching">Lists</h2>
             </div>
             <div class="foldableBody">
                 <div class="uiDivider">
-                    <h3>Seasonal:</h3>
-                    <section id="containerSeasonal"></section>
+                    <h3>Seasonal</h3>
+                    <section id="containerSeasonal" class="horizontalCentered"></section>
                 </div>
                 <!-- <div class="uiDivider">
-                    <h3>Top:</h3>
+                    <h3>Top</h3>
                     <section id="containerTopAnime"></section>
                 </div> -->
             </div>

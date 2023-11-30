@@ -83,7 +83,7 @@
             is present. If any of the included data is invalid, it will not create or append the element at all.
             This way, the HTML doesn't have any tags that are empty shells or contain the word "null" meaning it is more semantic and clean.
         </p>
-        <h2>Foldable Things</h2>
+        <h2>Foldable Containers</h2>
         <img src="src/multiple-folds.png" alt="Multiple folds showcase" class="portrait">
         <p>
             I created a foldable mechanism that allowed for sections to be folded and unfolded. For styling, I basically created a finite state
@@ -92,6 +92,26 @@
             (even though I limited it to only have one unfolded at a time since I think it makes it easier for the user to understand that the filters
             and sorting won't work on the "Lists" section).
         </p>
+        <h2>Documentation and Code Style</h2>
+        <p>
+            I commented most code that is not self explainitory along with type specifying function headers. This makes it easier for me and others looking
+            at the code to understand what is going on. By having the types specified, it also helps intellisense work better which improves quality of
+            life when coding. I also made many functions that reduced repeated code but also made it easier to extend and add new features since many have
+            similar functionality. Additionally for organization purposes, I added regions to the code.
+        </p>
+        <h2>Error Catching</h2>
+        <img src="src/error-catching.png" alt="Error catching showcase" class="portrait">
+        <p>
+            I made a robust error catching and reporting system allowing the errors to display to the user with all relavent details. This may be confusing to
+            the user though which makes me question if I should have even done this.
+        </p>
+        <p style="clear: both;">
+            So after writing that, I decided to utilize the foldable system I made to make the error more user friendly. Now it only shows the details when
+            clicking on it! If you want to see an error yourself, spam click on one of the seasonal anime or spam 'enter' in the main search bar. This will
+            cause an error from jikan since it doesn't allow too many requests at once.
+        </p>
+        <img src="src/folded-error.png" alt="Error catching folded" class="landscape">
+        <img src="src/unfolded-error.png" alt="Error catching unfolded" class="landscape">
     </section>
 </body>
 </html>

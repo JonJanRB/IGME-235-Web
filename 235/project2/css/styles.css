@@ -4,8 +4,9 @@
 :root
 {
     --contrast-color: #d6d6d6;
-    --sub-color: #686868;
-    --ui-bg: transparent;
+    --sub-color: #6e6e6e;
+    --ui-bg: #1a1a1a;
+    --error-bg: #0000004b;
     --footer-bg: #2c2c2c;
     --transparent-ui-bg: #1a1a1adf;
     --bg: #1a1a1a;
@@ -40,6 +41,22 @@
     flex-shrink: 0;
 }
 
+@media screen and (max-width: 850px)
+{
+    :root
+    {
+        font-size: 15px;
+    }
+}
+
+.horizontalCentered
+{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 body
 {
     background-color: var(--bg);
@@ -61,7 +78,7 @@ header
     top: 0;
     height: var(--header-height);
     width: 100%;
-    z-index: 1;
+    z-index: 3;
 
     display: flex;
     align-items: center;
@@ -73,7 +90,7 @@ header
         background-color: var(--transparent-ui-bg);
         box-shadow: 0 0 1rem 1rem var(--transparent-ui-bg); 
     }
-    #searchBar
+    input
     {
         width: 1rem;
         max-width: max-content;
@@ -85,12 +102,11 @@ header
 aside
 {
     grid-area: side;
-    background-color: var(--ui-bg);
     position: fixed;
     width: var(--side-width);
     height: calc(100% - var(--footer-height));
     overflow-y: hidden;
-    z-index: 2;
+    z-index: 4;
     padding: 0.5rem 1rem;
 
     display: flex;
@@ -101,18 +117,21 @@ aside
     .uiDivider
     {
         border-top: var(--ui-border);
+        padding: 0.5rem;
     }
     aside h3
     {
         font-size: var(--font-big);
+        text-align: center;
     }
     aside h4
     {
+        align-self: center;
         font-size: var(--font-medium);
-        margin-top: 0.5rem;
+        margin: 0.5rem;
         color: var(--sub-color);
     }
-    
+
 
 main
 {
@@ -182,7 +201,10 @@ main
         {
             font-size: var(--font-small);
         }
-
+#advancedSearchButton
+{
+    margin-top: 1rem;
+}
 
 input,
 select,
@@ -269,6 +291,7 @@ footer
 
 .foldable
 {
+    background-color: var(--ui-bg);
     height: var(--folded-height);
     flex-shrink: 1;
     overflow-y: hidden;
@@ -314,10 +337,15 @@ footer
 
     .foldableBody
     {
-        height: max-content;
+        height: calc(100% - var(--folded-height));
         transition: height 0.25s ease-out, width 0.25s ease-out;
         margin: 0 auto;
         overflow-y: auto;
+
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: space-between;
     }
     /* Fold states */
         /* Folded */
@@ -350,3 +378,55 @@ footer
         {
             height: 100%;
         }
+
+.errorContainer
+{
+    overflow: auto;
+    background-color: var(--error-bg);
+    border-color: transparent;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    height: max-content;
+}
+.errorContainer .foldableBody
+{
+    width: max-content;
+}
+.errorContainer .foldableHeader p
+{
+    font-size: var(--font-medium);
+}
+.mainError
+{
+    font-size: var(--font-medium);
+    color: var(--contrast-color);
+}
+.subError
+{
+    font-size: var(--font-small);
+    color: red;
+}
+
+a
+{
+    transition: color 0.25s ease-out;
+}
+a:link
+{
+    color: #0077ff;
+    text-decoration: none;
+}
+a:visited
+{
+    color: #b1e2ff;
+}
+a:focus,
+a:hover
+{
+    color: #2d8fff;
+    text-decoration: underline;
+}
+a:active
+{
+    color: #0059ff;
+}

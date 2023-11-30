@@ -18,10 +18,33 @@ let searchBar;
 //The container to put the anime in
 let animeContainer;
 
+//The container to put the genre filter in
+let genreContainer;
+
+//The dropdown menu of genres
+let dropdownGenre;
+
+//The list of genres
+let genreListResponse;
+
+//The advanced search button
+let advancedSearchButton;
+
+//The advanced search bar
+let advancedSearchBar;
+
+
+//URL Extensions
+const GENRE_EXTENSION = "genres/anime";
+const SEASONS_EXTENSION = "seasons";
+const CURRENT_SEASON_EXTENSION = "seasons/now?sfw";
+const SEARCH_EXTENSION = "anime?sfw";
+
+
 /**
  * Initialization function
  */
-const init = () =>
+window.onload = () =>
 {
     setupFoldables();
 
@@ -29,12 +52,18 @@ const init = () =>
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
     searchBar = document.querySelector("#searchBar");
+    genreContainer = document.querySelector("#containerGenre");
+    advancedSearchButton = document.querySelector("#advancedSearchButton");
+    advancedSearchBar = document.querySelector("#advancedSearchBar");
 
     populateSeasonalYears();
-    showCurrentSeason();
+    populateGenreList();
+    setupAdvancedSearchButton();
     setupSearch();
-}
-window.onload = init;
+
+    //Lastly load the current season
+    showCurrentSeason();
+};
 
 /**
  * Sets up the foldable elements
@@ -46,6 +75,14 @@ const setupFoldables = () =>
 
     for(const header of foldableHeaders)
     {
+        //Make sure there are no duplicates of the arrow
+        //(in case of refresh by calling this again such as during an error which is foldable)
+        const allPInHead = header.querySelectorAll("p");
+        for(const p of allPInHead)
+        {
+            if(p.innerText == "▼") p.remove();
+        }
+
         header.append(createElement("p", { innerText: "▼" }));
 
         //Styling state
@@ -148,26 +185,18 @@ const toggleFoldable = foldableParentClassList =>
  */
 const populateSeasonalYears = () => requestData
 (
-    "seasons",
+    SEASONS_EXTENSION,
     /**
      * Success function adds all listed seasons to sidebar
      * @param {Event} e the api response
      */
     e =>
     {
-        //The parsed json response from the api
-        seasonListResponse = parseResponseEvent(e);
+        //Evaluate if the response worked
+        seasonListResponse = evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION);
 
-        //Check if there are no results or errors
-        if(!seasonListResponse || seasonListResponse.status == 404 ||
-            !seasonListResponse.data || seasonListResponse.data.length == 0)
-        {
-            seasonalContainer.innerHTML = "No seasons found.";
-            return;
-        }
-
-        //Clear the conatiner
-        clearElement(seasonalContainer);
+        //If it returned null, there was an error
+        if(!seasonListResponse) return;
 
         //Create the button container as soon as we know there is valid data
         seasonButtonContainer = document.createElement("div");
@@ -217,7 +246,7 @@ const populateSeasonalYears = () => requestData
                 showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
         };
     },
-    genericFail,
+    e => evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION),
     seasonalContainer
 );
 
@@ -231,7 +260,7 @@ const showSeason = (year, season) => requestAndDisplay(`seasons/${year}/${season
 /**
  * Displays the current season of anime
  */
-const showCurrentSeason = () => requestAndDisplay("seasons/now?sfw");
+const showCurrentSeason = () => requestAndDisplay(CURRENT_SEASON_EXTENSION);
 
 /**
  * Populates the seasonal filter based on the specified year
@@ -247,19 +276,19 @@ const populateSeasonFilter = yearIndex =>
     for(const seasonType of seasonYear.seasons)
     {
         //Create a button with the data needed to make it functional
-        const seasonButton = document.createElement("button");
-        seasonButton.type = "button";
-        seasonButton.classList.add("seasonalButton");
-        seasonButton.dataset.year = seasonYear.year;
-        seasonButton.dataset.season = seasonType;
-        seasonButton.innerText = seasonType;
-        seasonButtonContainer.append(seasonButton);
+        tryAppend
+        (
+            seasonButtonContainer, "button", [seasonType],
+            { type: "button", innerText: seasonType},
+            ["seasonalButton"],
+            { year: seasonYear.year, season: seasonType }
+        );
     }
 }
 
 //#endregion
 
-//#region Searching
+//#region General Searching
 
 /**
  * sets the search bar up
@@ -276,14 +305,84 @@ const setupSearch = () =>
 /**
  * Searches using the search term and filters
  * @param {string} searchTerm the term to search for
- * @param {object} filters an object containing filters
- * @param {object} sorting an object containing the sorting
+ * @param {object} parameters an object containing query parameters
  */
-const search = (searchTerm, filters, sorting) => requestAndDisplay
+const search = (searchTerm, parameters) =>
+{
+    //Add the parameters to the request
+    let finalRequest = SEARCH_EXTENSION + "&q=" + searchTerm;
+    for(const param in parameters)
+    {
+        finalRequest += "&" + param + "=" + parameters[param];
+    }
+    requestAndDisplay(finalRequest);
+}
+
+//#endregion
+
+//#region Advanced Search
+
+//#region Genre
+
+/**
+ * Creates a dropdown for all genres
+ * Requests the genre list and stores it for later use
+ * 
+ * Actually, the api can take in multiple genres so it would have been
+ * better to have a checklist but I didn't get to that
+ */
+const populateGenreList = () => requestData
 (
-    //I kind of want ot have sorting be an enum
-    "anime?sfw&q=" + searchTerm
+    GENRE_EXTENSION,
+    /**
+     * Success function adds all listed genres to sidebar
+     * @param {Event} e the api response
+     */
+    e =>
+    {
+        //Evaluate if the response worked
+        genreListResponse = evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION);
+
+        //If it returned null, there was an error
+        if(!genreListResponse) return;
+
+        //The genre dropdown
+        dropdownGenre = createElement("select", { id: "genreFilter" });
+
+        //Add all the genres to a dropdown menu
+        for(let i = 0; i < genreListResponse.data.length; i++)
+        {
+            const genre = genreListResponse.data[i];
+            //Make the value the index for easy retrival later
+            const genreOption = createElement("option",
+            {
+                value: i,
+                innerText: genre.name
+            });
+            dropdownGenre.append(genreOption);
+        }
+
+        //Append the elements
+        genreContainer.append(dropdownGenre);
+    },
+    e => evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION),
+    genreContainer
 );
+
+//#endregion
+
+const setupAdvancedSearchButton = () =>
+{
+    advancedSearchButton.onclick = e =>
+    {
+        search(advancedSearchBar.value, { genres: dropdownGenre.value });
+    };
+}
+
+const advancedSearchSubmit = () =>
+{
+    
+}
 
 //#endregion
 
@@ -331,11 +430,12 @@ const createAnimeElement = anime =>
 
     //Link to MAL
     // tryAppend(ani, "a", [anime.url], { href: anime.url, target: "_blank", innerText: "View in MAL" });
-    let dragged = false;
+    // let dragged = false;
     ani.onclick = e =>
     {
-        console.log(e.target.dataset.dragged);
-        if(!e.target.dataset.dragged) window.open(anime.url, "_blank");
+        // console.log(e.target.dataset.dragged);
+        // if(!e.target.dataset.dragged)
+        window.open(anime.url, "_blank");
     }
 
     //Return the element
@@ -365,12 +465,21 @@ const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
     xhr.onerror = onFail;
 
     //Add loading animation
-    loadingContainer.innerHTML = "LoAdInG placeholder";//TODO
+    loadingContainer.innerHTML = "LOADING";//TODO
 
     //open connection and send the request
-    xhr.open("GET", API_BASE_URL + urlExtension);
+    const fullURL = getFullAPIURL(urlExtension);
+    // console.log("Requesting: " + fullURL);//DEBUG
+    xhr.open("GET", fullURL);
     xhr.send();
 }
+
+/**
+ * Returns the full api url with the specified extension
+ * @param {string} urlExtension The url extension to add to the base url
+ * @returns The full api url
+ */
+const getFullAPIURL = urlExtension => API_BASE_URL + urlExtension;
 
 /**
  * Parses the api response specified event
@@ -380,32 +489,92 @@ const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
 const parseResponseEvent = e => JSON.parse(e.target.responseText);
 
 /**
- * Fail function
- * @param {Event} e 
+ * Displays the specified error messages in the specified container
+ * @param {Event} e The raw response, most likely unreadable but will be logged
+ * @param {HTMLElement} container The container to display the error
+ * @param {string} errorMessage The main error message
+ * @param {Array} subMessage The sub-error messages to display if provided
  */
-const genericFail = e =>
+const displayErrorMessage = (e, container, errorMessage, subMessage = null) =>
 {
     console.log("Error occured: ", e.target);
-    seasonalContainer.innerHTML = "An error occured. Check console.";
+    clearElement(container);
+    const errorContainer = createElement("div", {}, ["errorContainer", "foldable", "folded"]);
+    tryAppend(errorContainer, "p", [errorMessage], { innerText: errorMessage }, ["mainError", "foldableHeader"]);
+    const errorFoldBody = createElement("div", {}, ["foldableBody"]);
+    for(const message of subMessage)
+    {
+        tryAppend(errorFoldBody, "p", [subMessage], { innerText: message }, ["subError"]);
+    }
+    errorContainer.append(errorFoldBody);
+    container.append(errorContainer);
+    
+    //Refresh foldables so they all have functionality
+    setupFoldables();
 }
 
 /**
  * Requests then displays the requested data
  * @param {string} urlExtension 
  */
-const requestAndDisplay = urlExtension =>
-requestData
+const requestAndDisplay = urlExtension => requestData
 (
     urlExtension,
     /**
      * Success function displays the current season
      * @param {Event} e the api response
      */
-    e => setAnimeFromArray(parseResponseEvent(e).data),
-    genericFail,
+    e =>
+    {
+        //Evaluate if the response worked
+        const response = evaluateResponse(e, animeContainer, "No anime found.", urlExtension);
+        if(!response) return;
+
+        //This is a valid response without any data, therefore no error
+        if(response.data.length == 0)
+        {
+            clearElement(animeContainer);
+            animeContainer.append(createElement("p", { innerText: "No anime found." }));
+            return;
+        }
+        //If it gets here, there is valid data to display
+        setAnimeFromArray(response.data);
+    },
+    e => evaluateResponse(e, animeContainer, "No anime found.", urlExtension),
     animeContainer
 );
 
+/**
+ * Evaluates the api response and displays an error message if needed
+ * @param {Event} e The response event to evaluate
+ * @param {HTMLElement} container The container to put the error message in
+ * @param {string} errorMessage The error message to display
+ * @param {string} apiExtensionURL The extension of the api request sent
+ * @returns The response is valid or null if there was an error
+ */
+const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
+{
+    //The parsed json response from the api
+    const response = parseResponseEvent(e);
+    clearElement(container);
+
+    //Check if there are no results or errors
+    if(!response || (response.status && response.status != 200) ||
+        !response.data)
+    {
+        displayErrorMessage(e, container, errorMessage,
+        [
+            "Status: " + response.status,
+            "Type: " + response.type,
+            "Message: " + response.message,
+            "Error: " + response.error,
+            "Report URL: " + response.report_url,
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+        return null;
+    }
+    return response;
+}
 //#endregion
 
 //#region Element Extensions
