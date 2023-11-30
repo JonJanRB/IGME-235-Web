@@ -373,15 +373,16 @@ const populateGenreList = () => requestData
 
 const setupAdvancedSearchButton = () =>
 {
-    advancedSearchButton.onclick = e =>
-    {
-        search(advancedSearchBar.value, { genres: dropdownGenre.value });
-    };
+    //Advanced search when the button is clicked or enter is pressed within the search bar
+    advancedSearchButton.onclick = advancedSearchSubmit;
+    advancedSearchBar.onkeyup = e => { if(e.code === "Enter") advancedSearchSubmit(); }
 }
+
+
 
 const advancedSearchSubmit = () =>
 {
-    
+    search(advancedSearchBar.value, { genres: dropdownGenre.value });
 }
 
 //#endregion
