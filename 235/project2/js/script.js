@@ -34,7 +34,7 @@ let advancedSearchButton;
 let advancedSearchBar;
 
 //The search history
-const searchHistory = ["test1", "test2", "test3"];
+let searchHistory = [];
 
 
 
@@ -43,6 +43,10 @@ const GENRE_EXTENSION = "genres/anime";
 const SEASONS_EXTENSION = "seasons";
 const CURRENT_SEASON_EXTENSION = "seasons/now?sfw";
 const SEARCH_EXTENSION = "anime?sfw";
+
+//Local storage (abbreviated as LS)
+const LS_PREFIX = "jmj2097-";
+const LS_HISTORY = LS_PREFIX + "searchHistory";
 
 
 /**
@@ -56,6 +60,9 @@ window.onload = () =>
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
     searchBar = document.querySelector("#searchBar");
+    //Unfocus the search bar
+    searchBar.blur();
+
     genreContainer = document.querySelector("#containerGenre");
     advancedSearchButton = document.querySelector("#advancedSearchButton");
     advancedSearchBar = document.querySelector("#advancedSearchBar");
@@ -193,10 +200,21 @@ const setupSearch = () =>
      * searches when enter is released
      * @param {Event} e the key up event
      */
-    searchBar.onkeyup = e => { if(e.code === "Enter") search(e.target.value) }
+    searchBar.onkeyup = e =>
+    {
+        if(e.code === "Enter")
+        {
+            search(e.target.value);
+            //Unfocus so that the search history is removed
+            searchBar.blur();
+        }
+    };
 
     //Add seach history when focused
     searchBar.onfocus = e => showSearchHistory(e.target);
+
+    //Setup search history
+    loadSearchHistory();
 
     //Remove search history when unfocused
     searchBar.onblur = hideSearchHistory;
@@ -209,6 +227,9 @@ const setupSearch = () =>
  */
 const search = (searchTerm, parameters) =>
 {
+    //If invalid after sanitized, return null
+    searchTerm = sanitizeSearchTerm(searchTerm);
+
     //Add the parameters to the request
     let finalRequest = SEARCH_EXTENSION + "&q=" + searchTerm;
     for(const param in parameters)
@@ -216,6 +237,9 @@ const search = (searchTerm, parameters) =>
         finalRequest += "&" + param + "=" + parameters[param];
     }
     requestAndDisplay(finalRequest);
+
+    //Add the search to the search history
+    addSearch(searchTerm);
 }
 
 //#endregion
@@ -302,7 +326,11 @@ const advancedSearchSubmit = () =>
  */
 const loadSearchHistory = () =>
 {
+    const history = localStorage.getItem(LS_HISTORY);
 
+    //If there is history, add them to the search history
+    //(otherwise the default is already an empty array)
+    if(history) searchHistory = JSON.parse(history);
 }
 
 /**
@@ -311,7 +339,23 @@ const loadSearchHistory = () =>
  */
 const addSearch = searchTerm =>
 {
+    //It should be sanitized at this point so empty strings can be filtered
+    if(searchTerm === "") return;
+
+    //If in the search history, remove it and add it to the front
+    if(searchHistory.includes(searchTerm))
+    {
+        searchHistory.splice(searchHistory.indexOf(searchTerm), 1);
+    }
+
+    //Otherwise do something
     searchHistory.push(searchTerm);
+    saveSearchHistory();
+}
+
+const saveSearchHistory = () =>
+{
+    localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
 }
 
 /**
@@ -342,6 +386,7 @@ const showSearchHistory = searchBar =>
             //Then search it however the search bar is set up
             searchBar.dispatchEvent(
                 new KeyboardEvent("keyup", { code: "Enter" }));
+            console.log("object");
         };
 
         //Prepend so that the history is in reverse order
@@ -365,14 +410,18 @@ const showSearchHistory = searchBar =>
  */
 const hideSearchHistory = () =>
 {
-    //Possibility of multiple seach histories being shown and so this ensures all are removed
-    const histories = document.querySelectorAll(".searchHistory");
-    for(const history of histories)
+    //Wait a little bit so that any clicks on the search history register
+    setTimeout(() =>
     {
-        history.style.scale = "1 0";
-        history.style.opacity = "0";
-        setTimeout(() => { history.remove(); }, 250);
-    }
+        //Possibility of multiple seach histories being shown and so this ensures all are removed
+        const histories = document.querySelectorAll(".searchHistory");
+        for(const history of histories)
+        {
+            history.style.scale = "1 0";
+            history.style.opacity = "0";
+            setTimeout(() => { history.remove(); }, 250);
+        }
+    }, 50);
 }
 
 //#endregion
@@ -565,6 +614,14 @@ const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
         return null;
     }
     return response;
+}
+
+const sanitizeSearchTerm = searchTerm =>
+{
+    searchTerm = searchTerm.trim();
+
+    //Return sanitized search term
+    return searchTerm;
 }
 //#endregion
 
