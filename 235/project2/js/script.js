@@ -475,34 +475,6 @@ const createAnimeElement = anime =>
 /**
  * Requests data from the specified url and calls the specified fail or success functions
  * @param {string} urlExtension the url extension to request from (anime/{id})
- * @param {Function} onSuccess runs on successful get
- * @param {Function} onFail runs on failed get
- * @param {HTMLElement} loadingContainer the container to add a loading animation to
- */
-// const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
-// {
-//     //create a new xhr object
-//     const xhr = new XMLHttpRequest();
-
-//     //set the onload handler
-//     xhr.onload = onSuccess;
-
-//     //set the onerror handler
-//     xhr.onerror = onFail;
-
-//     //Add loading animation
-//     loadingContainer.innerHTML = "LOADING";//TODO
-
-//     //open connection and send the request
-//     const fullURL = getFullAPIURL(urlExtension);
-//     // console.log("Requesting: " + fullURL);//DEBUG
-//     xhr.open("GET", fullURL);
-//     xhr.send();
-// }
-
-/**
- * Requests data from the specified url and calls the specified fail or success functions
- * @param {string} urlExtension the url extension to request from (anime/{id})
  * @param {HTMLElement} loadingContainer the container to add a loading animation to
  * @returns {Promise<object, object>} Resolve returns the parsed response, Reject returns the raw response
  */
@@ -803,7 +775,7 @@ const toggleFoldable = foldableParentClassList =>
  */
 const displayErrorMessage = (parsedResponse, container, errorMessage, subMessage = null) =>
 {
-    //Log the full error
+    //Log the full error. This is intentionally left in, it should not show unless there really is an error
     console.log("Error occured: ", parsedResponse);
 
     //Clear the element to put the error message in
