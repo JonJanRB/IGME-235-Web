@@ -60,9 +60,6 @@ window.onload = () =>
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
     searchBar = document.querySelector("#searchBar");
-    //Unfocus the search bar
-    searchBar.blur();
-
     genreContainer = document.querySelector("#containerGenre");
     advancedSearchButton = document.querySelector("#advancedSearchButton");
     advancedSearchBar = document.querySelector("#advancedSearchBar");
@@ -295,6 +292,9 @@ const populateGenreList = () => requestData
 
 //#endregion
 
+/**
+ * Sets up the advanced search button and bar for submission
+ */
 const setupAdvancedSearchButton = () =>
 {
     //Advanced search when the button is clicked or enter is pressed within the search bar
@@ -311,7 +311,9 @@ const setupAdvancedSearchButton = () =>
 }
 
 
-
+/**
+ * Searches using the advanced search parameters
+ */
 const advancedSearchSubmit = () =>
 {
     search(advancedSearchBar.value, { genres: dropdownGenre.value });
@@ -353,6 +355,9 @@ const addSearch = searchTerm =>
     saveSearchHistory();
 }
 
+/**
+ * Saves the search history to local storage
+ */
 const saveSearchHistory = () =>
 {
     localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
@@ -386,7 +391,6 @@ const showSearchHistory = searchBar =>
             //Then search it however the search bar is set up
             searchBar.dispatchEvent(
                 new KeyboardEvent("keyup", { code: "Enter" }));
-            console.log("object");
         };
 
         //Prepend so that the history is in reverse order
@@ -616,6 +620,11 @@ const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
     return response;
 }
 
+/**
+ * Sanitizes the specified search term
+ * @param {string} searchTerm The term to sanitize
+ * @returns Sanitized search term
+ */
 const sanitizeSearchTerm = searchTerm =>
 {
     searchTerm = searchTerm.trim();

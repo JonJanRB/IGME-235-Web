@@ -10,11 +10,11 @@
 <body>
     <header class="shadowUI">
         <div class="searchContainer">
-            <input id="searchBar" type="text" size="50" maxlength="100" autofocus placeholder="Search anime..." />
+            <input id="searchBar" type="text" size="50" maxlength="100" placeholder="Search anime..." />
         </div>
     </header>
     <aside>
-        <section class="foldable folded">
+        <div class="foldable folded">
             <div class="foldableHeader">
                 <h2 title="Search anime with constraints set here">Advanced Search</h2>
             </div>
@@ -23,7 +23,7 @@
                     <h3>Filters</h3>
                     <div id="containerFilter" class="horizontalCentered">
                         <h4>Genre:</h4>
-                        <section id="containerGenre" class="horizontalCentered"></section>
+                        <div id="containerGenre" class="horizontalCentered"></div>
                     </div>
                 </div>
                 <!-- <div class="uiDivider">
@@ -38,32 +38,32 @@
                 <div class="uiDivider horizontalCentered">
                     <h3>Keywords</h3>
                     <div class="searchContainer">
-                        <input id="advancedSearchBar" type="text" size="20" maxlength="100" autofocus placeholder="Advanced search..." />
+                        <input id="advancedSearchBar" type="text" size="20" maxlength="100" placeholder="Advanced search..." />
                     </div>
                 </div>
                 <div class="uiDivider horizontalCentered">
                     <button type="button" id="advancedSearchButton">Search</button>
                 </div>
             </div>
-        </section>
-        <section class="foldable unfolded">
+        </div>
+        <div class="foldable unfolded">
             <div class="foldableHeader">
                 <h2 title="Display pre-made lists unaffected by searching">Lists</h2>
             </div>
             <div class="foldableBody">
                 <div class="uiDivider">
                     <h3>Seasonal</h3>
-                    <section id="containerSeasonal" class="horizontalCentered"></section>
+                    <div id="containerSeasonal" class="horizontalCentered"></div>
                 </div>
                 <!-- <div class="uiDivider">
                     <h3>Top</h3>
                     <section id="containerTopAnime"></section>
                 </div> -->
             </div>
-        </section>
+        </div>
     </aside>
     <main>
-        <section id="containerAnime"></section>
+        <div id="containerAnime"></div>
     </main>
     <footer>
         <h1>Anime Searcher</h1>
