@@ -378,11 +378,11 @@ footer
     border-color: transparent;
     padding: 1rem;
     border-radius: 0.5rem;
-    height: max-content;
+    height: min-content;
 }
 .errorContainer .foldableBody
 {
-    width: max-content;
+    width: min-content;
 }
 .errorContainer .foldableHeader p
 {
@@ -396,6 +396,7 @@ footer
 .subError
 {
     font-size: var(--font-small);
+    margin-bottom: 0.5rem;
     color: red;
 }
 
@@ -461,8 +462,7 @@ a:active
         border-radius: 0.25rem;
         transform-origin: 0 0;
         transition: border-color 0.25s ease-out, scale 0.25s ease-out, opacity 0.25s ease-out;
-        padding: 0.5rem;
-        padding-top: 0;
+        padding: 0 0.5rem;
         margin-top: 1rem;
     }
         .searchHistory:hover
@@ -475,6 +475,7 @@ a:active
             color: var(--sub-color);
             transition: color 0.25s ease-out, padding-left 0.25s ease-out;
             cursor: pointer;
+            display: block;
         }
             .searchHistory p:hover
             {

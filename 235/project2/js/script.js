@@ -40,7 +40,7 @@ let searchHistory = [];
 let currentlySearching = false;
 
 //URL Extensions
-const GENRE_EXTENSION = "genresg/anime";
+const GENRE_EXTENSION = "genres/anime";
 const SEASONS_EXTENSION = "seasons";
 const CURRENT_SEASON_EXTENSION = "seasons/now?sfw";
 const SEARCH_EXTENSION = "anime?sfw";
@@ -82,7 +82,7 @@ window.onload = () =>
  * Creates a dropdown for all seasonal years.
  * Requests the season list and stores it for later use.
  */
-const populateSeasonalYears = () => requestDataPromise(SEASONS_EXTENSION, seasonalContainer)
+const populateSeasonalYears = () => requestData(SEASONS_EXTENSION, seasonalContainer)
 .then(response =>
 {
     //Evaluate if the response worked
@@ -138,7 +138,8 @@ const populateSeasonalYears = () => requestDataPromise(SEASONS_EXTENSION, season
         if(seasonButton.classList.contains("seasonalButton"))
             showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
     };
-}).catch();
+}).catch(parsedResponse => 
+    evaluateErrors(parsedResponse, seasonalContainer, "No seasons found", SEASONS_EXTENSION));
 
 /**
  * Displays the specified season ith the specified parameters
@@ -244,7 +245,7 @@ const search = (searchTerm, parameters) =>
  * Actually, the api can take in multiple genres so it would have been
  * better to have a checklist but I didn't get to that
  */
-const populateGenreList = () => requestDataPromise(GENRE_EXTENSION, genreContainer)
+const populateGenreList = () => requestData(GENRE_EXTENSION, genreContainer)
 .then(response =>
 {
     //Evaluate if the response worked
@@ -271,7 +272,8 @@ const populateGenreList = () => requestDataPromise(GENRE_EXTENSION, genreContain
 
     //Append the elements
     genreContainer.append(dropdownGenre);
-}).catch();
+}).catch(parsedResponse =>
+    evaluateErrors(parsedResponse, genreContainer, "No genres found", GENRE_EXTENSION));
 
 //#endregion
 
@@ -367,7 +369,8 @@ const showSearchHistory = searchBar =>
     {
         const historyItem =
             createElement("p", { innerText: search }, ["uiDivider"]);
-        historyItem.onclick = e =>
+        //Mouse down so that it triggers before the search bar loses focus
+        historyItem.onmousedown = e =>
         {
             //Set the search bar to the clicked history item
             searchBar.value = e.target.innerText;
@@ -397,18 +400,14 @@ const showSearchHistory = searchBar =>
  */
 const hideSearchHistory = () =>
 {
-    //Wait a little bit so that any clicks on the search history register
-    setTimeout(() =>
+    //Possibility of multiple seach histories being shown and so this ensures all are removed
+    const histories = document.querySelectorAll(".searchHistory");
+    for(const history of histories)
     {
-        //Possibility of multiple seach histories being shown and so this ensures all are removed
-        const histories = document.querySelectorAll(".searchHistory");
-        for(const history of histories)
-        {
-            history.style.scale = "1 0";
-            history.style.opacity = "0";
-            setTimeout(() => { history.remove(); }, 250);
-        }
-    }, 50);
+        history.style.scale = "1 0";
+        history.style.opacity = "0";
+        setTimeout(() => { history.remove(); }, 250);
+    }
 }
 
 //#endregion
@@ -480,35 +479,34 @@ const createAnimeElement = anime =>
  * @param {Function} onFail runs on failed get
  * @param {HTMLElement} loadingContainer the container to add a loading animation to
  */
-const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
-{
-    //create a new xhr object
-    const xhr = new XMLHttpRequest();
+// const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
+// {
+//     //create a new xhr object
+//     const xhr = new XMLHttpRequest();
 
-    //set the onload handler
-    xhr.onload = onSuccess;
+//     //set the onload handler
+//     xhr.onload = onSuccess;
 
-    //set the onerror handler
-    xhr.onerror = onFail;
+//     //set the onerror handler
+//     xhr.onerror = onFail;
 
-    //Add loading animation
-    loadingContainer.innerHTML = "LOADING";//TODO
+//     //Add loading animation
+//     loadingContainer.innerHTML = "LOADING";//TODO
 
-    //open connection and send the request
-    const fullURL = getFullAPIURL(urlExtension);
-    // console.log("Requesting: " + fullURL);//DEBUG
-    xhr.open("GET", fullURL);
-    xhr.send();
-}
+//     //open connection and send the request
+//     const fullURL = getFullAPIURL(urlExtension);
+//     // console.log("Requesting: " + fullURL);//DEBUG
+//     xhr.open("GET", fullURL);
+//     xhr.send();
+// }
 
 /**
  * Requests data from the specified url and calls the specified fail or success functions
  * @param {string} urlExtension the url extension to request from (anime/{id})
  * @param {HTMLElement} loadingContainer the container to add a loading animation to
- * @param {string} errorMessage the error message to display
- * @returns {Promise<object, number>} Resolve returns the response, Reject returns the status
+ * @returns {Promise<object, object>} Resolve returns the parsed response, Reject returns the raw response
  */
-const requestDataPromise = (urlExtension, loadingContainer, errorMessage = "Request failed.") =>
+const requestData = (urlExtension, loadingContainer) =>
 {
     //Promises for xhr help: https://stackoverflow.com/questions/30008114/how-do-i-promisify-native-xhr
     return new Promise((resolve, reject) =>
@@ -519,21 +517,23 @@ const requestDataPromise = (urlExtension, loadingContainer, errorMessage = "Requ
         const fullURL = getFullAPIURL(urlExtension);
 
         //set the onload handler
-        xhr.onload = e => 
+        xhr.onload = rawResponse => 
         {
-            evaluateResponse(e, loadingContainer, errorMessage, fullURL)
-            .then(response =>
+            evaluateResponse(rawResponse)
+            .then(parsedResponse =>
             {
-                resolve(response);
+                clearElement(loadingContainer);
+                resolve(parsedResponse);
             })
-            .catch(status => 
+            .catch(parsedResponse => 
             {
                 //I have used promises in the past for a personal project
                 //Basically keep checking every 2 seconds until it resolves or rejects
                 //https://stackoverflow.com/questions/39538473/using-settimeout-on-promise-chain
                 
-                //If too many requests
-                if(status == 429)
+                //If is not null, has a status, and has too many requests
+                if(parsedResponse && parsedResponse.status
+                    && parsedResponse.status == 429)
                 {
                     //Wait 2 seconds, then try again recursively
                     setTimeout(() =>
@@ -543,26 +543,26 @@ const requestDataPromise = (urlExtension, loadingContainer, errorMessage = "Requ
                         if(!currentlySearching) return;
 
                         //Otherwise try again
-                        requestDataPromise(urlExtension, loadingContainer, errorMessage)
-                        .then(response => resolve(response));
+                        requestData(urlExtension, loadingContainer)
+                        .then(parsedResponse => resolve(parsedResponse))
+                        .catch(parsedResponse => reject(parsedResponse));
                     }, 2000);
                     return;
                 }
 
                 //Otherwise reject
-                reject(status);
+                reject(parsedResponse);
             });
         };
 
         //set the onerror handler
-        xhr.onerror = e =>
+        xhr.onerror = rawResponse =>
         {
-            console.log("native error");
-            reject(xhr.status);
+            reject(parseResponseEvent(rawResponse));
         };
 
         //Add loading animation
-        loadingContainer.innerHTML = "LOADING";//TODO
+        loadingContainer.innerHTML = "LOADING";
 
         //open connection and send the request
         
@@ -581,35 +581,10 @@ const getFullAPIURL = urlExtension => API_BASE_URL + urlExtension;
 
 /**
  * Parses the api response specified event
- * @param {Event} e the api response event
+ * @param {Event} rawResponse the api response event
  * @returns {object} the parsed object from the api
  */
-const parseResponseEvent = e => JSON.parse(e.target.responseText);
-
-/**
- * Displays the specified error messages in the specified container
- * @param {Event} e The raw response, most likely unreadable but will be logged
- * @param {HTMLElement} container The container to display the error
- * @param {string} errorMessage The main error message
- * @param {Array} subMessage The sub-error messages to display if provided
- */
-const displayErrorMessage = (e, container, errorMessage, subMessage = null) =>
-{
-    console.log("Error occured: ", e.target);
-    clearElement(container);
-    const errorContainer = createElement("div", {}, ["errorContainer", "foldable", "folded"]);
-    tryAppend(errorContainer, "p", [errorMessage], { innerText: errorMessage }, ["mainError", "foldableHeader"]);
-    const errorFoldBody = createElement("div", {}, ["foldableBody"]);
-    for(const message of subMessage)
-    {
-        tryAppend(errorFoldBody, "p", [subMessage], { innerText: message }, ["subError"]);
-    }
-    errorContainer.append(errorFoldBody);
-    container.append(errorContainer);
-    
-    //Refresh foldables so they all have functionality
-    setupFoldables();
-}
+const parseResponseEvent = rawResponse => JSON.parse(rawResponse.target.responseText);
 
 /**
  * Requests then displays the requested data
@@ -617,10 +592,12 @@ const displayErrorMessage = (e, container, errorMessage, subMessage = null) =>
  */
 const requestAndDisplay = urlExtension =>
 {
+    //Interupt existing searches if possible
     currentlySearching = true;
-    requestDataPromise(urlExtension, animeContainer)
+    requestData(urlExtension, animeContainer)
     .then(response =>
     {
+        //This is not an error, just a display of no results
         if(response.data.length == 0)
         {
             clearElement(animeContainer);
@@ -629,82 +606,10 @@ const requestAndDisplay = urlExtension =>
         }
         //If it gets here, there is valid data to display
         setAnimeFromArray(response.data);
-    }).catch()
+    })
+    .catch(parsedResponse => 
+        evaluateErrors(parsedResponse, animeContainer, "No anime found", urlExtension))
     .finally(() => currentlySearching = false);
-}
-
-
-/**
- * Evaluates the api response and displays an error message if needed
- * @param {Event} e The response event to evaluate
- * @param {HTMLElement} container The container to put the error message in
- * @param {string} errorMessage The error message to display
- * @param {string} apiExtensionURL The extension of the api request sent
- * @returns {Promise<object, number>} Resolve returns the response, Reject returns the status
- */
-const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
-{
-    return new Promise((resolve, reject) =>
-    {
-        //The parsed json response from the api
-        const response = parseResponseEvent(e);
-
-        //If no response at all
-        if(!response || response === undefined)
-        {
-            displayErrorMessage(e, container, errorMessage,
-            [
-                "No response.",
-                "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-            ]);
-            reject(404);//Make my own status
-            return;
-        }
-
-        //If no data, there was an error
-        if(!response.data)
-        {
-            //Reject first, then decide what to do (error messages or something else)
-            reject(response.status);
-
-            //If no status either, then there was a weird error
-            if(!response.status)
-            {
-                displayErrorMessage(e, container, errorMessage,
-                [
-                    "Invalid response, check console.",
-                    "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-                ]);
-                return;
-            }
-            
-            //If too many requests
-            if(response.status == 429)
-            {
-                // console.log("too many requetss triggered");
-                return;
-            }
-
-            //Otherwise display the error info unless it has a successful status
-            //(which probably shouldn't actually happen if it has a status)
-            if(response.status && response.status != 200)
-            {
-                displayErrorMessage(e, container, errorMessage,
-                [
-                    "Status: " + response.status,
-                    "Type: " + response.type,
-                    "Message: " + response.message,
-                    "Error: " + response.error,
-                    "Report URL: " + response.report_url,
-                    "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-                ]);
-                return;
-            } 
-        }
-
-        clearElement(container);
-        resolve(response);
-    });
 }
 
 /**
@@ -883,6 +788,108 @@ const toggleFoldable = foldableParentClassList =>
         unfoldElement(foldableParentClassList);
     else
         foldElement(foldableParentClassList);
+}
+
+//#endregion
+
+//#region Error Evaluation
+
+/**
+ * Displays the specified error messages in the specified container
+ * @param {Event} parsedResponse The parsed response, most likely unreadable but will be logged
+ * @param {HTMLElement} container The container to display the error
+ * @param {string} errorMessage The main error message
+ * @param {Array} subMessage The sub-error messages to display if provided
+ */
+const displayErrorMessage = (parsedResponse, container, errorMessage, subMessage = null) =>
+{
+    //Log the full error
+    console.log("Error occured: ", parsedResponse);
+
+    //Clear the element to put the error message in
+    clearElement(container);
+
+    //Add the error messages
+    const errorContainer = createElement("div", {}, ["errorContainer", "foldable", "folded"]);
+    tryAppend(errorContainer, "p", [errorMessage], { innerText: errorMessage }, ["mainError", "foldableHeader"]);
+    const errorFoldBody = createElement("div", {}, ["foldableBody"]);
+    for(const message of subMessage)
+    {
+        tryAppend(errorFoldBody, "p", [subMessage], { innerText: message }, ["subError"]);
+    }
+    errorContainer.append(errorFoldBody);
+    container.append(errorContainer);
+    
+    //Refresh foldables so they all have functionality
+    setupFoldables();
+}
+
+/**
+ * Evaluates the api response as error or success
+ * @param {Event} rawResponse The response event to evaluate
+ * @returns {Promise<object, object>} Resolve returns the response, Reject returns the parsed response
+ */
+const evaluateResponse = (rawResponse) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        //The parsed json response from the api
+        const parsedResponse = parseResponseEvent(rawResponse);
+
+        //If there is an error, reject
+        if(!parsedResponse || !parsedResponse.data ||
+            (parsedResponse.status && parsedResponse.status != 200))
+        {
+            reject(parsedResponse);
+            return;
+        }
+
+        //Otherwise resolve
+        resolve(parsedResponse);
+    });
+}
+
+/**
+ * Catches errors and displays them
+ * @param {object} parsedResponse the parsed response from the api
+ * @param {HTMLElement} container the container to display the error
+ * @param {string} errorMessage the main error message
+ * @param {string} apiExtensionURL the extension for the api url
+ */
+const evaluateErrors = (parsedResponse, container, errorMessage, apiExtensionURL) =>
+{
+    //If no response at all
+    if(!parsedResponse)
+    {
+        displayErrorMessage(parsedResponse, container, errorMessage,
+        [
+            "No response.",
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+        reject(404);//Make my own status
+    }
+    //If no status either, then there was a weird error
+    else if(!parsedResponse.status)
+    {
+        displayErrorMessage(parsedResponse, container, errorMessage,
+        [
+            "Invalid response, check console.",
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+    }
+    //Display detailed error unless it is too many requests
+    else if(parsedResponse.status != 429)
+    {
+        displayErrorMessage(parsedResponse, container, errorMessage,
+        [
+            "Status: " + parsedResponse.status,
+            "Type: " + parsedResponse.type,
+            "Message: " + parsedResponse.message,
+            "Error: " + parsedResponse.error,
+            "Report URL: " + parsedResponse.report_url,
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+    } 
 }
 
 //#endregion
