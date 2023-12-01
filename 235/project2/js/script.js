@@ -36,10 +36,11 @@ let advancedSearchBar;
 //The search history
 let searchHistory = [];
 
-
+//Status of searching (used to prevent multiple searches at once)
+let currentlySearching = false;
 
 //URL Extensions
-const GENRE_EXTENSION = "genres/anime";
+const GENRE_EXTENSION = "genresg/anime";
 const SEASONS_EXTENSION = "seasons";
 const CURRENT_SEASON_EXTENSION = "seasons/now?sfw";
 const SEARCH_EXTENSION = "anime?sfw";
@@ -81,158 +82,8 @@ window.onload = () =>
  * Creates a dropdown for all seasonal years.
  * Requests the season list and stores it for later use.
  */
-// const populateSeasonalYears = () => requestData
-// (
-//     SEASONS_EXTENSION,
-//     /**
-//      * Success function adds all listed seasons to sidebar
-//      * @param {Event} e the api response
-//      */
-//     e =>
-//     {
-//         evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION)
-//         .then(response =>
-//         {
-//             //Evaluate if the response worked
-//             seasonListResponse = response;
-
-//             //If it returned null, there was an error
-//             if(!seasonListResponse) return;
-
-//             //Create the button container as soon as we know there is valid data
-//             seasonButtonContainer = document.createElement("div");
-
-//             //The year dropdown
-//             const dropdownYear = createElement("select",
-//             {
-//                 //Add listener for changes in the year
-//                 onchange: e => populateSeasonFilter(e.target.value)
-//             });
-
-//             //Add all the years to a dropdown menu
-//             for(let i = 0; i < seasonListResponse.data.length; i++)
-//             {
-//                 const year = seasonListResponse.data[i].year;
-//                 //Make the value the index for easy retrival later
-//                 const yearOption = createElement("option",
-//                 {
-//                     value: i,
-//                     innerText: year
-//                 });
-//                 dropdownYear.append(yearOption);
-
-//                 //Check for the current year
-//                 if(year == CURRENT_DATE.getFullYear())
-//                 {
-//                     dropdownYear.value = i;
-//                     //Trigger the event rather than hard coding it in
-//                     //[AI] Thanks to github copilot for this one
-//                     dropdownYear.dispatchEvent(new Event("change"));
-//                 }
-//             }
-
-//             //Append the elements
-//             seasonalContainer.append(dropdownYear);
-//             seasonalContainer.append(seasonButtonContainer);
-
-//             //[AI] ChatGPT suggested using event delegation and it seems
-//             //cleaner and more reliable than the above code
-//             //https://javascript.info/event-delegation
-//             //Make all seasonal buttons call their click function on click
-//             seasonButtonContainer.onclick = e =>
-//             {
-//                 const seasonButton = e.target;
-//                 //Could also use event.target.matches("button.seasonalButton")
-//                 if(seasonButton.classList.contains("seasonalButton"))
-//                     showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
-//             };
-//         });
-//     },
-//     e => evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION),
-//     seasonalContainer
-// );
-
-/**
- * Creates a dropdown for all seasonal years.
- * Requests the season list and stores it for later use.
- */
-// const populateSeasonalYears = () => requestDataPromise
-// (
-//     SEASONS_EXTENSION,
-//     seasonalContainer
-// ).then(e =>
-//     {
-//         evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION)
-//         .then(response =>
-//         {
-//             //Evaluate if the response worked
-//             seasonListResponse = response;
-
-//             //If it returned null, there was an error
-//             if(!seasonListResponse) return;
-
-//             //Create the button container as soon as we know there is valid data
-//             seasonButtonContainer = document.createElement("div");
-
-//             //The year dropdown
-//             const dropdownYear = createElement("select",
-//             {
-//                 //Add listener for changes in the year
-//                 onchange: e => populateSeasonFilter(e.target.value)
-//             });
-
-//             //Add all the years to a dropdown menu
-//             for(let i = 0; i < seasonListResponse.data.length; i++)
-//             {
-//                 const year = seasonListResponse.data[i].year;
-//                 //Make the value the index for easy retrival later
-//                 const yearOption = createElement("option",
-//                 {
-//                     value: i,
-//                     innerText: year
-//                 });
-//                 dropdownYear.append(yearOption);
-
-//                 //Check for the current year
-//                 if(year == CURRENT_DATE.getFullYear())
-//                 {
-//                     dropdownYear.value = i;
-//                     //Trigger the event rather than hard coding it in
-//                     //[AI] Thanks to github copilot for this one
-//                     dropdownYear.dispatchEvent(new Event("change"));
-//                 }
-//             }
-
-//             //Append the elements
-//             seasonalContainer.append(dropdownYear);
-//             seasonalContainer.append(seasonButtonContainer);
-
-//             //[AI] ChatGPT suggested using event delegation and it seems
-//             //cleaner and more reliable than the above code
-//             //https://javascript.info/event-delegation
-//             //Make all seasonal buttons call their click function on click
-//             seasonButtonContainer.onclick = e =>
-//             {
-//                 const seasonButton = e.target;
-//                 //Could also use event.target.matches("button.seasonalButton")
-//                 if(seasonButton.classList.contains("seasonalButton"))
-//                     showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
-//             };
-//         });
-//     }).catch(e => 
-//         {
-//             evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION);
-//         });
-        
-/**
- * Creates a dropdown for all seasonal years.
- * Requests the season list and stores it for later use.
- */
-const populateSeasonalYears = () => requestDataPromise
-(
-    SEASONS_EXTENSION,
-    seasonalContainer
-).then(response =>
+const populateSeasonalYears = () => requestDataPromise(SEASONS_EXTENSION, seasonalContainer)
+.then(response =>
 {
     //Evaluate if the response worked
     seasonListResponse = response;
@@ -393,93 +244,8 @@ const search = (searchTerm, parameters) =>
  * Actually, the api can take in multiple genres so it would have been
  * better to have a checklist but I didn't get to that
  */
-// const populateGenreList = () => requestData
-// (
-//     GENRE_EXTENSION,
-//     /**
-//      * Success function adds all listed genres to sidebar
-//      * @param {Event} e the api response
-//      */
-//     e =>
-//     {
-//         evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION)
-//         .then(response =>
-//         {
-//             //Evaluate if the response worked
-//             genreListResponse = response;
-
-//             //If it returned null, there was an error
-//             if(!genreListResponse) return;
-
-//             //The genre dropdown
-//             dropdownGenre = createElement("select", { id: "genreFilter" });
-
-//             //Add all the genres to a dropdown menu
-//             for(let i = 0; i < genreListResponse.data.length; i++)
-//             {
-//                 const genre = genreListResponse.data[i];
-//                 //Make the value the index for easy retrival later
-//                 const genreOption = createElement("option",
-//                 {
-//                     value: i,
-//                     innerText: genre.name
-//                 });
-//                 dropdownGenre.append(genreOption);
-//             }
-
-//             //Append the elements
-//             genreContainer.append(dropdownGenre);
-//         });
-//     },
-//     e => evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION),
-//     genreContainer
-// );
-
-// const populateGenreList = () => requestDataPromise
-// (
-//     GENRE_EXTENSION,
-//     genreContainer
-// ).then(e =>
-// {
-//     evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION)
-//     .then(response =>
-//     {
-//         //Evaluate if the response worked
-//         genreListResponse = response;
-
-//         //If it returned null, there was an error
-//         if(!genreListResponse) return;
-
-//         //The genre dropdown
-//         dropdownGenre = createElement("select", { id: "genreFilter" });
-
-//         //Add all the genres to a dropdown menu
-//         for(let i = 0; i < genreListResponse.data.length; i++)
-//         {
-//             const genre = genreListResponse.data[i];
-//             //Make the value the index for easy retrival later
-//             const genreOption = createElement("option",
-//             {
-//                 value: i,
-//                 innerText: genre.name
-//             });
-//             dropdownGenre.append(genreOption);
-//         }
-
-//         //Append the elements
-//         genreContainer.append(dropdownGenre);
-//     });
-    
-// }).catch(() =>
-// {
-//     e => evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION)
-// });
-
-const populateGenreList = () => requestDataPromise
-(
-    GENRE_EXTENSION,
-    genreContainer
-).then(response =>
+const populateGenreList = () => requestDataPromise(GENRE_EXTENSION, genreContainer)
+.then(response =>
 {
     //Evaluate if the response worked
     genreListResponse = response;
@@ -772,6 +538,11 @@ const requestDataPromise = (urlExtension, loadingContainer, errorMessage = "Requ
                     //Wait 2 seconds, then try again recursively
                     setTimeout(() =>
                     {
+                        //First check if another search hasn't already completed
+                        //If so, then return meaning it will reject silently
+                        if(!currentlySearching) return;
+
+                        //Otherwise try again
                         requestDataPromise(urlExtension, loadingContainer, errorMessage)
                         .then(response => resolve(response));
                     }, 2000);
@@ -842,154 +613,26 @@ const displayErrorMessage = (e, container, errorMessage, subMessage = null) =>
 
 /**
  * Requests then displays the requested data
- * @param {string} urlExtension 
+ * @param {string} urlExtension The url extension to use
  */
-// const requestAndDisplay = urlExtension => requestData
-// (
-//     urlExtension,
-//     /**
-//      * Success function displays the current season
-//      * @param {Event} e the api response
-//      */
-//     e =>
-//     {
-//         //Evaluate if the response worked
-//         evaluateResponse(e, animeContainer, "No anime found.", urlExtension)
-//         //On resolve, do nothing on reject
-//         .then(response =>
-//         {
-//             //This is a valid response without any data, therefore no error
-//             if(response.data.length == 0)
-//             {
-//                 clearElement(animeContainer);
-//                 animeContainer.append(createElement("p", { innerText: "No anime found." }));
-//                 return;
-//             }
-//             //If it gets here, there is valid data to display
-//             setAnimeFromArray(response.data);
-//         });
-
-        
-//     },
-//     e => evaluateResponse(e, animeContainer, "No anime found.", urlExtension),//No then statement needed
-//     animeContainer
-// );
-
-// const requestAndDisplay = urlExtension => requestDataPromise
-// (
-//     urlExtension,
-//     animeContainer
-// ).then(e =>
-// {
-//     //Evaluate if the response worked
-//     evaluateResponse(e, animeContainer, "No anime found.", urlExtension)
-//     //On resolve, do nothing on reject
-//     .then(response =>
-//     {
-//         //This is a valid response without any data, therefore no error
-//         if(response.data.length == 0)
-//         {
-//             clearElement(animeContainer);
-//             animeContainer.append(createElement("p", { innerText: "No anime found." }));
-//             return;
-//         }
-//         //If it gets here, there is valid data to display
-//         setAnimeFromArray(response.data);
-//     });
-// }).catch( e => evaluateResponse(e, animeContainer, "No anime found.", urlExtension));
-
-const requestAndDisplay = urlExtension => requestDataPromise
-(
-    urlExtension,
-    animeContainer
-).then(response =>
+const requestAndDisplay = urlExtension =>
 {
-    if(response.data.length == 0)
+    currentlySearching = true;
+    requestDataPromise(urlExtension, animeContainer)
+    .then(response =>
     {
-        clearElement(animeContainer);
-        animeContainer.append(createElement("p", { innerText: "No anime found." }));
-        return;
-    }
-    //If it gets here, there is valid data to display
-    setAnimeFromArray(response.data);
-}).catch();
+        if(response.data.length == 0)
+        {
+            clearElement(animeContainer);
+            animeContainer.append(createElement("p", { innerText: "No anime found." }));
+            return;
+        }
+        //If it gets here, there is valid data to display
+        setAnimeFromArray(response.data);
+    }).catch()
+    .finally(() => currentlySearching = false);
+}
 
-/**
- * Evaluates the api response and displays an error message if needed
- * @param {Event} e The response event to evaluate
- * @param {HTMLElement} container The container to put the error message in
- * @param {string} errorMessage The error message to display
- * @param {string} apiExtensionURL The extension of the api request sent
- * @returns {Promise} A promise with the response
- */
-// const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
-// {
-//     //The parsed json response from the api
-//     const response = parseResponseEvent(e);
-
-//     const rejection = () => Promise.reject();
-
-//     //If no response at all
-//     if(!response || response === undefined)
-//     {
-//         displayErrorMessage(e, container, errorMessage,
-//         [
-//             "No response.",
-//             "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-//         ]);
-//         return rejection;
-//     }
-
-//     //If no data, there was an error
-//     if(!response.data)
-//     {
-//         //If no status either, then there was a weird error
-//         if(!response.status)
-//         {
-//             displayErrorMessage(e, container, errorMessage,
-//             [
-//                 "Invalid response, check console.",
-//                 "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-//             ]);
-//             return rejection;
-//         }
-        
-//         //If too many requests, wait 2s and try again
-//         if(response.status == 429)
-//         {
-//             console.log("too many requetss triggered");
-//             //I have used promises in the past for a personal project
-//             //Basically keep checking every 2 seconds until it resolves or rejects
-//             //https://stackoverflow.com/questions/39538473/using-settimeout-on-promise-chain
-//             return new Promise(resolve => setTimeout(resolve, 2000))
-//             .then(() =>
-//             {
-//                 evaluateResponse(e, container, errorMessage, apiExtensionURL);
-//             });
-//             // setTimeout(() => evaluateResponse(e, container, errorMessage, apiExtensionURL), 2000);
-//             // return response;
-//         }
-
-//         //Otherwise display the error info unless it has a successful status
-//         //(which probably shouldn't actually happen if it has a status)
-//         if(response.status && response.status != 200)
-//         {
-//             displayErrorMessage(e, container, errorMessage,
-//             [
-//                 "Status: " + response.status,
-//                 "Type: " + response.type,
-//                 "Message: " + response.message,
-//                 "Error: " + response.error,
-//                 "Report URL: " + response.report_url,
-//                 "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-//             ]);
-//             return rejection;
-//         }
-//     }
-
-//     clearElement(container);
-//     return new Promise(resolve => resolve(response));
-// }
 
 /**
  * Evaluates the api response and displays an error message if needed
@@ -1038,7 +681,7 @@ const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
             //If too many requests
             if(response.status == 429)
             {
-                console.log("too many requetss triggered");
+                // console.log("too many requetss triggered");
                 return;
             }
 
