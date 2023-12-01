@@ -50,6 +50,14 @@
     }
 }
 
+@media screen and (max-width: 650px)
+{
+    :root
+    {
+        font-size: 2vw;
+    }
+}
+
 .horizontalCentered
 {
     display: flex;
@@ -274,10 +282,14 @@ footer
     {
         font-size: var(--font-medium);
         color: var(--sub-color);
+        padding-left: 1rem;
+        border-left: var(--ui-border);
     }
     footer #footerEnd
     {
         margin-left: auto;
+        padding-left: 0;
+        border-left: none;
     }
 
 
