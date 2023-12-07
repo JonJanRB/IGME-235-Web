@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inconsolata&family=Open+Sans&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
         img
         {
             margin: 30px auto 0px;
@@ -14,17 +14,19 @@
         {
             width: 100%;
             max-width: max-content;
+            margin: 0;
         }
         img.portrait
         {
             height: 70vh;
             max-height: max-content;
             float: left;
-            margin: 0px 30px 0px 0px;
+            margin: 0px 30px 50px 0px;
         }
         h2
         {
             clear: both;
+            margin-top: 50px;
         }
         *
         {
@@ -36,30 +38,56 @@
             width: 80%;
             max-width: 1000px;
         }
+        br
+        {
+            margin-bottom: 20px;
+        }
+        h1
+        {
+            margin-top: 50px;
+        }
     </style>
 </head>
 <body>
     <h1>Documentation</h1>
     <h2>Quicklinks</h2>
     <ul>
-        <li><a href="">Bloosdeas</a></li>
-        <li><a href="">All parts with ai assistance are marked with a comment starting with "[AI]"</a></li>
+        <li><a href="index.html">Anime Searcher</a></li>
+        <li><a href="prototype/">Prototype</a></li>
     </ul>
+    <h2>Resources</h2>
+    <ul>
+        <h3>Assets</h3>
+        <li>Font Used: <a href="https://fonts.google.com/specimen/Open+Sans">Open Sans</a></li>
+        <li>API Used: <a href="https://jikan.moe/">Jikan</a></li>
+        <li>Information and Images From: <a href="https://myanimelist.net/">MyAnimeList</a></li>
+        <h3>Readings</h3>
+        <li><a href="https://javascript.info/event-delegation">Event Delegation</a></li>
+        <li><a href="https://stackoverflow.com/questions/30008114/how-do-i-promisify-native-xhr">Promises with XHR</a></li>
+        <li><a href="https://stackoverflow.com/questions/39538473/using-settimeout-on-promise-chain">Promises for Timeout</a></li>
+        <h3>AI Assistance (All parts with ai assistance are marked with a comment starting with "[AI]")</h3>
+        <li>Dispatching events</li>
+        <li>Suggesting event delegation (which I then used that reading listed above)</li>
+        <li>Suggesting Promises (which I then used some readings listed above)</li>
+    </ul>
+    <h2>Mockup</h2>
+    <img src="src/mockup.png" alt="mockup sketch of site" class="portrait">
+    <h1 style="clear: both;">Things to Point Out</h1>
     <section>
-        <h2 id="innerHTMLHell">Weird quirk of dom manipulation I encountered</h2>
+        <!-- <h2 id="innerHTMLHell">Weird quirk of dom manipulation I encountered</h2>
         <p>
             Something I found to be frustrating was that using the innerHTML property of an elment
             was not good to use since it basically cleared the events of anything in it. This was
             confusing to figure out since it was not immediatly obvous of what was causing the buttons
             I was adding events to to have their onclick events become null. Not even AI knew what was
             going wrong so I figured it out on my own since its advice was not very helpful.
-        </p>
+        </p> -->
         <h2>Creating Elements</h2>
         <img src="src/create-element.png" alt="Create Element function" class="landscape">
         <p>
             Something I found frustrating and a bit harder to read was making elements with attributes.
-            It was quick and easy with innerHTML, but I avoided that because of the loss of data described
-            <a href="#innerHTMLHell">above</a>. When adding attributes using the element variable, is meant
+            It was quick and easy with innerHTML, but using that could cause unintended side effects such as removing
+            events previously attatched to it. When adding attributes using the element variable, is meant
             I would have to define it, then set each attribute individually with its own code statement.
             <br>
             I wanted a way to create an element with a single code statement that could not lose any data in the process.
@@ -80,8 +108,9 @@
             probably just make an if statement for the thing that could be null and call it a day, but I decided I wanted to make
             an easy way to do this in one line that worked for any element rather than hard coding it every time. In that vain,
             I made a function called `tryAppend` which will create an element and append it to a parent element only if the specified data
-            is present. If any of the included data is invalid, it will not create or append the element at all.
-            This way, the HTML doesn't have any tags that are empty shells or contain the word "null" meaning it is more semantic and clean.
+            is valid. If any of the included data is invalid, it will not create or append the element at all.
+            This way, the HTML doesn't have any tags that are empty shells or contain the word "null" meaning it is more semantic and clean
+            This is especially 
         </p>
         <h2>Foldable Containers</h2>
         <img src="src/multiple-folds.png" alt="Multiple folds showcase" class="portrait">
@@ -107,11 +136,74 @@
         </p>
         <p style="clear: both;">
             So after writing that, I decided to utilize the foldable system I made to make the error more user friendly. Now it only shows the details when
-            clicking on it! If you want to see an error yourself, spam click on one of the seasonal anime or spam 'enter' in the main search bar. This will
-            cause an error from jikan since it doesn't allow too many requests at once.
+            clicking on it!
         </p>
         <img src="src/folded-error.png" alt="Error catching folded" class="landscape">
         <img src="src/unfolded-error.png" alt="Error catching unfolded" class="landscape">
+        <h2 id="localStorage">Local Storage</h2>
+        <p>
+            Rather than store the last search term only, I decided to implement a history bar that pops up below the search bar when focused. The reason I chose not
+            to save the term in the search box is because I felt that it makes it more of a burden to the user to have to intentionally clear the box to search something
+            new. The search history has the most recent at the top so it is quite close to the mouse meaning it would be pretty easy to re-search that if they want to, so it
+            is giving the user more agency over what happens.
+        </p>
+        <h2>Promises</h2>
+        <p>
+            After I finished with everything, there was one thing bugging me which was that if you spam clicked the search button, you could get a response of status 429,
+            too many requests. It would display an error message just like other errors but to me, that is kind of annoying since you would think it should just show "loading"
+            until it is able to get it.
+            <br>
+            In my head, it went like this:
+            <ul>
+                <li>request data</li>
+                <li>validate the data</li>
+                <li>if it has an error wait a few seconds and then request again</li>
+                <li>keep doing this until you get data</li>
+            </ul>
+            And so I made a delay using timeout but I soon realized there wasn't a way to return a value from within the function that is invoked by the delay. Copilot suggested using promises.
+            I have used promises before with a personal project but didn't really understand them or use them the best. I thought it would not be too difficult to use them since I knew that
+            ".then()" would do what I was looking for.
+            <br>
+            Long story short, I basically refactored any code that had to do with the api.
+            <br>
+            Once I was done with that, you could spam and it worked kind of but there were multiple of these loading loops happening at once if you clicked fast enough causing multiple to get
+            reloaded. My thought was to maybe have a queue of requests but what I ended up doing to save time was having a boolean that is set to false in ".finally()" during a search meaning
+            and if a delay loop encounters it, it will stop repeating. This meant that after a single loop got through and loaded, any other loops would stop. This almost works but you can mix
+            up the order if you rapidly trigger 2 different searches (such as spamming one season and then pressing another season, it might show the first season instead of the most recently
+            pressed one).
+            <br>
+            I am happy with the outcome and it is pretty readable, but the amount of stuff I had to change was immense and I probably could have gotten away with not using promises since normally
+            users don't spam buttons that often. But I learned a lot about Promises and I think I actually understand them now.
+        </p>
     </section>
+    <h1>Grading Myself</h1>
+    <h2>Meeting the Requirments</h2>
+    <ul>
+        <li>I use a lot of different parts of Jikan</li>
+        <li>I use local storage to create a history list. The rubric says that it should be used for putting the search term into the search box but I explained my rational for having a history
+            container instead <a href="#localStorage">above</a>. Even though that is the case, I would understand if I lost a few points here since it did not follow the directions exactly, though
+            in my opinion, I think it shows my ability to utilize local storage just as well or better than just putting it in the text box.</li>
+        <li>I have more than 3 controls: Main search bar, genre drop down, advanced keyword search, season year, season buttons, and history</li>
+        <li>There are no errors that show up and things like "too many requests" are handled in a way that makes it easier for the user. If an error does show up, it is user friendly while also
+            having the option to provide more details useful to a developer</li>
+        <li>In my opinion, the code style and comments are very well done. The css has much less comments than my project 1 and does not contain regions but I kept my code style of indentation to
+            indicate child elements which in my opinion makes it much easier to read and tell what is going on</li>
+        <li>I believe I did a decent job on semantics, though I had to turn section elements into divs because the validator said that sections needed to have a header. I think maybe there could be
+            some improvement here because I don't like how many divs there are in my html</li>
+        <li>HTML is valid</li>
+        <li>CSS is valid, but thinks that rotate is not a property even though it definetly is (we used it in tetris grid)</li>
+        <li>I think it has a nice visual design</li>
+        <li>I think the interactability is good</li>
+        <li>It is not as responsive as I would like it to be but it definetly is responsive at 1024px width. It technically is infinitly shrinkable since I based everything on rem and once it gets
+            small enough, I set the root font relative to vw so eveything shrinks with the width</li>
+        <li>Both the proposal and prototype were submitted on time</li>
+        <li>Documentation is good I think</li>
+    </ul>
+    <h2>My Grade</h2>
+    <h3>77%</h3>
+    <p>
+        I could see points being taken off for would be the local storage not storing something inside the search bar, having many un-semantic tags like div, and not having enough comments for css.
+        Additionaly, this is getting submitted 1 day and 5 hours late so that probably would be a penalty of about 20% I think.
+    </p>
 </body>
 </html>

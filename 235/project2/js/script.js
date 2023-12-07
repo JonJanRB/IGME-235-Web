@@ -36,7 +36,8 @@ let advancedSearchBar;
 //The search history
 let searchHistory = [];
 
-
+//Status of searching (used to prevent multiple searches at once)
+let currentlySearching = false;
 
 //URL Extensions
 const GENRE_EXTENSION = "genres/anime";
@@ -60,9 +61,6 @@ window.onload = () =>
     seasonalContainer = document.querySelector("#containerSeasonal");
     animeContainer = document.querySelector("#containerAnime");
     searchBar = document.querySelector("#searchBar");
-    //Unfocus the search bar
-    searchBar.blur();
-
     genreContainer = document.querySelector("#containerGenre");
     advancedSearchButton = document.querySelector("#advancedSearchButton");
     advancedSearchBar = document.querySelector("#advancedSearchBar");
@@ -84,72 +82,64 @@ window.onload = () =>
  * Creates a dropdown for all seasonal years.
  * Requests the season list and stores it for later use.
  */
-const populateSeasonalYears = () => requestData
-(
-    SEASONS_EXTENSION,
-    /**
-     * Success function adds all listed seasons to sidebar
-     * @param {Event} e the api response
-     */
-    e =>
+const populateSeasonalYears = () => requestData(SEASONS_EXTENSION, seasonalContainer)
+.then(response =>
+{
+    //Evaluate if the response worked
+    seasonListResponse = response;
+
+    //If it returned null, there was an error
+    if(!seasonListResponse) return;
+
+    //Create the button container as soon as we know there is valid data
+    seasonButtonContainer = document.createElement("div");
+
+    //The year dropdown
+    const dropdownYear = createElement("select",
     {
-        //Evaluate if the response worked
-        seasonListResponse = evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION);
+        //Add listener for changes in the year
+        onchange: e => populateSeasonFilter(e.target.value)
+    });
 
-        //If it returned null, there was an error
-        if(!seasonListResponse) return;
-
-        //Create the button container as soon as we know there is valid data
-        seasonButtonContainer = document.createElement("div");
-
-        //The year dropdown
-        const dropdownYear = createElement("select",
+    //Add all the years to a dropdown menu
+    for(let i = 0; i < seasonListResponse.data.length; i++)
+    {
+        const year = seasonListResponse.data[i].year;
+        //Make the value the index for easy retrival later
+        const yearOption = createElement("option",
         {
-            //Add listener for changes in the year
-            onchange: e => populateSeasonFilter(e.target.value)
+            value: i,
+            innerText: year
         });
+        dropdownYear.append(yearOption);
 
-        //Add all the years to a dropdown menu
-        for(let i = 0; i < seasonListResponse.data.length; i++)
+        //Check for the current year
+        if(year == CURRENT_DATE.getFullYear())
         {
-            const year = seasonListResponse.data[i].year;
-            //Make the value the index for easy retrival later
-            const yearOption = createElement("option",
-            {
-                value: i,
-                innerText: year
-            });
-            dropdownYear.append(yearOption);
-
-            //Check for the current year
-            if(year == CURRENT_DATE.getFullYear())
-            {
-                dropdownYear.value = i;
-                //Trigger the event rather than hard coding it in
-                //[AI] Thanks to github copilot for this one
-                dropdownYear.dispatchEvent(new Event("change"));
-            }
+            dropdownYear.value = i;
+            //Trigger the event rather than hard coding it in
+            //[AI] Thanks to github copilot for this one
+            dropdownYear.dispatchEvent(new Event("change"));
         }
+    }
 
-        //Append the elements
-        seasonalContainer.append(dropdownYear);
-        seasonalContainer.append(seasonButtonContainer);
+    //Append the elements
+    seasonalContainer.append(dropdownYear);
+    seasonalContainer.append(seasonButtonContainer);
 
-        //[AI] ChatGPT suggested using event delegation and it seems
-        //cleaner and more reliable than the above code
-        //https://javascript.info/event-delegation
-        //Make all seasonal buttons call their click function on click
-        seasonButtonContainer.onclick = e =>
-        {
-            const seasonButton = e.target;
-            //Could also use event.target.matches("button.seasonalButton")
-            if(seasonButton.classList.contains("seasonalButton"))
-                showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
-        };
-    },
-    e => evaluateResponse(e, seasonalContainer, "No seasons found.", SEASONS_EXTENSION),
-    seasonalContainer
-);
+    //[AI] ChatGPT suggested using event delegation and it seems
+    //cleaner and more reliable than the above code
+    //https://javascript.info/event-delegation
+    //Make all seasonal buttons call their click function on click
+    seasonButtonContainer.onclick = e =>
+    {
+        const seasonButton = e.target;
+        //Could also use event.target.matches("button.seasonalButton")
+        if(seasonButton.classList.contains("seasonalButton"))
+            showSeason(seasonButton.dataset.year, seasonButton.dataset.season);
+    };
+}).catch(parsedResponse => 
+    evaluateErrors(parsedResponse, seasonalContainer, "No seasons found", SEASONS_EXTENSION));
 
 /**
  * Displays the specified season ith the specified parameters
@@ -255,46 +245,41 @@ const search = (searchTerm, parameters) =>
  * Actually, the api can take in multiple genres so it would have been
  * better to have a checklist but I didn't get to that
  */
-const populateGenreList = () => requestData
-(
-    GENRE_EXTENSION,
-    /**
-     * Success function adds all listed genres to sidebar
-     * @param {Event} e the api response
-     */
-    e =>
+const populateGenreList = () => requestData(GENRE_EXTENSION, genreContainer)
+.then(response =>
+{
+    //Evaluate if the response worked
+    genreListResponse = response;
+
+    //If it returned null, there was an error
+    if(!genreListResponse) return;
+
+    //The genre dropdown
+    dropdownGenre = createElement("select", { id: "genreFilter" });
+
+    //Add all the genres to a dropdown menu
+    for(let i = 0; i < genreListResponse.data.length; i++)
     {
-        //Evaluate if the response worked
-        genreListResponse = evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION);
-
-        //If it returned null, there was an error
-        if(!genreListResponse) return;
-
-        //The genre dropdown
-        dropdownGenre = createElement("select", { id: "genreFilter" });
-
-        //Add all the genres to a dropdown menu
-        for(let i = 0; i < genreListResponse.data.length; i++)
+        const genre = genreListResponse.data[i];
+        //Make the value the index for easy retrival later
+        const genreOption = createElement("option",
         {
-            const genre = genreListResponse.data[i];
-            //Make the value the index for easy retrival later
-            const genreOption = createElement("option",
-            {
-                value: i,
-                innerText: genre.name
-            });
-            dropdownGenre.append(genreOption);
-        }
+            value: i,
+            innerText: genre.name
+        });
+        dropdownGenre.append(genreOption);
+    }
 
-        //Append the elements
-        genreContainer.append(dropdownGenre);
-    },
-    e => evaluateResponse(e, genreContainer, "No genres found.", GENRE_EXTENSION),
-    genreContainer
-);
+    //Append the elements
+    genreContainer.append(dropdownGenre);
+}).catch(parsedResponse =>
+    evaluateErrors(parsedResponse, genreContainer, "No genres found", GENRE_EXTENSION));
 
 //#endregion
 
+/**
+ * Sets up the advanced search button and bar for submission
+ */
 const setupAdvancedSearchButton = () =>
 {
     //Advanced search when the button is clicked or enter is pressed within the search bar
@@ -311,7 +296,9 @@ const setupAdvancedSearchButton = () =>
 }
 
 
-
+/**
+ * Searches using the advanced search parameters
+ */
 const advancedSearchSubmit = () =>
 {
     search(advancedSearchBar.value, { genres: dropdownGenre.value });
@@ -353,6 +340,9 @@ const addSearch = searchTerm =>
     saveSearchHistory();
 }
 
+/**
+ * Saves the search history to local storage
+ */
 const saveSearchHistory = () =>
 {
     localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
@@ -379,14 +369,14 @@ const showSearchHistory = searchBar =>
     {
         const historyItem =
             createElement("p", { innerText: search }, ["uiDivider"]);
-        historyItem.onclick = e =>
+        //Mouse down so that it triggers before the search bar loses focus
+        historyItem.onmousedown = e =>
         {
             //Set the search bar to the clicked history item
             searchBar.value = e.target.innerText;
             //Then search it however the search bar is set up
             searchBar.dispatchEvent(
                 new KeyboardEvent("keyup", { code: "Enter" }));
-            console.log("object");
         };
 
         //Prepend so that the history is in reverse order
@@ -410,18 +400,14 @@ const showSearchHistory = searchBar =>
  */
 const hideSearchHistory = () =>
 {
-    //Wait a little bit so that any clicks on the search history register
-    setTimeout(() =>
+    //Possibility of multiple seach histories being shown and so this ensures all are removed
+    const histories = document.querySelectorAll(".searchHistory");
+    for(const history of histories)
     {
-        //Possibility of multiple seach histories being shown and so this ensures all are removed
-        const histories = document.querySelectorAll(".searchHistory");
-        for(const history of histories)
-        {
-            history.style.scale = "1 0";
-            history.style.opacity = "0";
-            setTimeout(() => { history.remove(); }, 250);
-        }
-    }, 50);
+        history.style.scale = "1 0";
+        history.style.opacity = "0";
+        setTimeout(() => { history.remove(); }, 250);
+    }
 }
 
 //#endregion
@@ -489,29 +475,73 @@ const createAnimeElement = anime =>
 /**
  * Requests data from the specified url and calls the specified fail or success functions
  * @param {string} urlExtension the url extension to request from (anime/{id})
- * @param {Function} onSuccess runs on successful get
- * @param {Function} onFail runs on failed get
  * @param {HTMLElement} loadingContainer the container to add a loading animation to
+ * @returns {Promise<object, object>} Resolve returns the parsed response, Reject returns the raw response
  */
-const requestData = (urlExtension, onSuccess, onFail, loadingContainer) =>
+const requestData = (urlExtension, loadingContainer) =>
 {
-    //create a new xhr object
-    const xhr = new XMLHttpRequest();
+    //Promises for xhr help: https://stackoverflow.com/questions/30008114/how-do-i-promisify-native-xhr
+    return new Promise((resolve, reject) =>
+    {
+        //create a new xhr object
+        const xhr = new XMLHttpRequest();
 
-    //set the onload handler
-    xhr.onload = onSuccess;
+        const fullURL = getFullAPIURL(urlExtension);
 
-    //set the onerror handler
-    xhr.onerror = onFail;
+        //set the onload handler
+        xhr.onload = rawResponse => 
+        {
+            evaluateResponse(rawResponse)
+            .then(parsedResponse =>
+            {
+                clearElement(loadingContainer);
+                resolve(parsedResponse);
+            })
+            .catch(parsedResponse => 
+            {
+                //I have used promises in the past for a personal project
+                //Basically keep checking every 2 seconds until it resolves or rejects
+                //https://stackoverflow.com/questions/39538473/using-settimeout-on-promise-chain
+                
+                //If is not null, has a status, and has too many requests
+                if(parsedResponse && parsedResponse.status
+                    && parsedResponse.status == 429)
+                {
+                    //Wait 2 seconds, then try again recursively
+                    setTimeout(() =>
+                    {
+                        //First check if another search hasn't already completed
+                        //If so, then return meaning it will reject silently
+                        if(!currentlySearching) return;
 
-    //Add loading animation
-    loadingContainer.innerHTML = "LOADING";//TODO
+                        //Otherwise try again
+                        requestData(urlExtension, loadingContainer)
+                        .then(parsedResponse => resolve(parsedResponse))
+                        .catch(parsedResponse => reject(parsedResponse));
+                    }, 2000);
+                    return;
+                }
 
-    //open connection and send the request
-    const fullURL = getFullAPIURL(urlExtension);
-    // console.log("Requesting: " + fullURL);//DEBUG
-    xhr.open("GET", fullURL);
-    xhr.send();
+                //Otherwise reject
+                reject(parsedResponse);
+            });
+        };
+
+        //set the onerror handler
+        xhr.onerror = rawResponse =>
+        {
+            reject(parseResponseEvent(rawResponse));
+        };
+
+        //Add loading animation
+        loadingContainer.innerHTML = "LOADING";
+
+        //open connection and send the request
+        
+        // console.log("Requesting: " + fullURL);//DEBUG
+        xhr.open("GET", fullURL);
+        xhr.send();
+    });    
 }
 
 /**
@@ -523,54 +553,23 @@ const getFullAPIURL = urlExtension => API_BASE_URL + urlExtension;
 
 /**
  * Parses the api response specified event
- * @param {Event} e the api response event
+ * @param {Event} rawResponse the api response event
  * @returns {object} the parsed object from the api
  */
-const parseResponseEvent = e => JSON.parse(e.target.responseText);
-
-/**
- * Displays the specified error messages in the specified container
- * @param {Event} e The raw response, most likely unreadable but will be logged
- * @param {HTMLElement} container The container to display the error
- * @param {string} errorMessage The main error message
- * @param {Array} subMessage The sub-error messages to display if provided
- */
-const displayErrorMessage = (e, container, errorMessage, subMessage = null) =>
-{
-    console.log("Error occured: ", e.target);
-    clearElement(container);
-    const errorContainer = createElement("div", {}, ["errorContainer", "foldable", "folded"]);
-    tryAppend(errorContainer, "p", [errorMessage], { innerText: errorMessage }, ["mainError", "foldableHeader"]);
-    const errorFoldBody = createElement("div", {}, ["foldableBody"]);
-    for(const message of subMessage)
-    {
-        tryAppend(errorFoldBody, "p", [subMessage], { innerText: message }, ["subError"]);
-    }
-    errorContainer.append(errorFoldBody);
-    container.append(errorContainer);
-    
-    //Refresh foldables so they all have functionality
-    setupFoldables();
-}
+const parseResponseEvent = rawResponse => JSON.parse(rawResponse.target.responseText);
 
 /**
  * Requests then displays the requested data
- * @param {string} urlExtension 
+ * @param {string} urlExtension The url extension to use
  */
-const requestAndDisplay = urlExtension => requestData
-(
-    urlExtension,
-    /**
-     * Success function displays the current season
-     * @param {Event} e the api response
-     */
-    e =>
+const requestAndDisplay = urlExtension =>
+{
+    //Interupt existing searches if possible
+    currentlySearching = true;
+    requestData(urlExtension, animeContainer)
+    .then(response =>
     {
-        //Evaluate if the response worked
-        const response = evaluateResponse(e, animeContainer, "No anime found.", urlExtension);
-        if(!response) return;
-
-        //This is a valid response without any data, therefore no error
+        //This is not an error, just a display of no results
         if(response.data.length == 0)
         {
             clearElement(animeContainer);
@@ -579,43 +578,17 @@ const requestAndDisplay = urlExtension => requestData
         }
         //If it gets here, there is valid data to display
         setAnimeFromArray(response.data);
-    },
-    e => evaluateResponse(e, animeContainer, "No anime found.", urlExtension),
-    animeContainer
-);
-
-/**
- * Evaluates the api response and displays an error message if needed
- * @param {Event} e The response event to evaluate
- * @param {HTMLElement} container The container to put the error message in
- * @param {string} errorMessage The error message to display
- * @param {string} apiExtensionURL The extension of the api request sent
- * @returns The response is valid or null if there was an error
- */
-const evaluateResponse = (e, container, errorMessage, apiExtensionURL) =>
-{
-    //The parsed json response from the api
-    const response = parseResponseEvent(e);
-    clearElement(container);
-
-    //Check if there are no results or errors
-    if(!response || (response.status && response.status != 200) ||
-        !response.data)
-    {
-        displayErrorMessage(e, container, errorMessage,
-        [
-            "Status: " + response.status,
-            "Type: " + response.type,
-            "Message: " + response.message,
-            "Error: " + response.error,
-            "Report URL: " + response.report_url,
-            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
-        ]);
-        return null;
-    }
-    return response;
+    })
+    .catch(parsedResponse => 
+        evaluateErrors(parsedResponse, animeContainer, "No anime found", urlExtension))
+    .finally(() => currentlySearching = false);
 }
 
+/**
+ * Sanitizes the specified search term
+ * @param {string} searchTerm The term to sanitize
+ * @returns Sanitized search term
+ */
 const sanitizeSearchTerm = searchTerm =>
 {
     searchTerm = searchTerm.trim();
@@ -787,6 +760,108 @@ const toggleFoldable = foldableParentClassList =>
         unfoldElement(foldableParentClassList);
     else
         foldElement(foldableParentClassList);
+}
+
+//#endregion
+
+//#region Error Evaluation
+
+/**
+ * Displays the specified error messages in the specified container
+ * @param {Event} parsedResponse The parsed response, most likely unreadable but will be logged
+ * @param {HTMLElement} container The container to display the error
+ * @param {string} errorMessage The main error message
+ * @param {Array} subMessage The sub-error messages to display if provided
+ */
+const displayErrorMessage = (parsedResponse, container, errorMessage, subMessage = null) =>
+{
+    //Log the full error. This is intentionally left in, it should not show unless there really is an error
+    console.log("Error occured: ", parsedResponse);
+
+    //Clear the element to put the error message in
+    clearElement(container);
+
+    //Add the error messages
+    const errorContainer = createElement("div", {}, ["errorContainer", "foldable", "folded"]);
+    tryAppend(errorContainer, "p", [errorMessage], { innerText: errorMessage }, ["mainError", "foldableHeader"]);
+    const errorFoldBody = createElement("div", {}, ["foldableBody"]);
+    for(const message of subMessage)
+    {
+        tryAppend(errorFoldBody, "p", [subMessage], { innerText: message }, ["subError"]);
+    }
+    errorContainer.append(errorFoldBody);
+    container.append(errorContainer);
+    
+    //Refresh foldables so they all have functionality
+    setupFoldables();
+}
+
+/**
+ * Evaluates the api response as error or success
+ * @param {Event} rawResponse The response event to evaluate
+ * @returns {Promise<object, object>} Resolve returns the response, Reject returns the parsed response
+ */
+const evaluateResponse = (rawResponse) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        //The parsed json response from the api
+        const parsedResponse = parseResponseEvent(rawResponse);
+
+        //If there is an error, reject
+        if(!parsedResponse || !parsedResponse.data ||
+            (parsedResponse.status && parsedResponse.status != 200))
+        {
+            reject(parsedResponse);
+            return;
+        }
+
+        //Otherwise resolve
+        resolve(parsedResponse);
+    });
+}
+
+/**
+ * Catches errors and displays them
+ * @param {object} parsedResponse the parsed response from the api
+ * @param {HTMLElement} container the container to display the error
+ * @param {string} errorMessage the main error message
+ * @param {string} apiExtensionURL the extension for the api url
+ */
+const evaluateErrors = (parsedResponse, container, errorMessage, apiExtensionURL) =>
+{
+    //If no response at all
+    if(!parsedResponse)
+    {
+        displayErrorMessage(parsedResponse, container, errorMessage,
+        [
+            "No response.",
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+        reject(404);//Make my own status
+    }
+    //If no status either, then there was a weird error
+    else if(!parsedResponse.status)
+    {
+        displayErrorMessage(parsedResponse, container, errorMessage,
+        [
+            "Invalid response, check console.",
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+    }
+    //Display detailed error unless it is too many requests
+    else if(parsedResponse.status != 429)
+    {
+        displayErrorMessage(parsedResponse, container, errorMessage,
+        [
+            "Status: " + parsedResponse.status,
+            "Type: " + parsedResponse.type,
+            "Message: " + parsedResponse.message,
+            "Error: " + parsedResponse.error,
+            "Report URL: " + parsedResponse.report_url,
+            "Sent Request URL: " + getFullAPIURL(apiExtensionURL)
+        ]);
+    } 
 }
 
 //#endregion
