@@ -1,5 +1,6 @@
-import * as PIXI from './lib/pixi.js';
-import * as Victor from './lib/victor.js';
+//These are used for the intellisense and then commented out to run
+// import * as PIXI from './lib/pixi.js';
+// import * as Victor from './lib/victor.js';
 
 "use strict";
 
@@ -7,57 +8,134 @@ import * as Victor from './lib/victor.js';
 
 class PhysicsObject extends PIXI.Graphics
 {
-    constructor(radius, color = 0xFF0000, x = 0, y = 0)
+    /**
+     * Creates a new PhysicsObject
+     * @param {Function} drawCall
+     * A function of what to draw, requires 1 arg of PhysicsObject
+     */
+    constructor(drawCall)
     {
         super();
 
-        //Properties (I love not having types (that is sarcasm))
-        /**@type {number}*/this.color = color;
-        //Collider
+        // --Properties
+
+        /**@type {Victor} width and height*/
+        this.vectorScale = Victor(0, 0);
+        
+        //Maybe just use destroy instead of enabling and pooling
+        // /**@type {boolean}*/this.enabled = true;
+        
+        //-Collider
         /**@type {number}*/this.colliderRadius = 1;
         // /**@type {number}*/this.rotation = 0;
 
-        this.beginFill(color);
-        this.drawCircle(0, 0, radius);
-        this.endFill();
-        this.radius = radius;
-        this.fwd = getRandomUnitVector();
-        this.speed = 50;
-        this.isAlive = true;
+        //-Physics
+        /**@type {Victor}*/this.vectorPosition = Victor(0, 0);
+        /**@type {Victor}*/this.velocity = Victor(0, 0);
+        /**@type {Victor}*/this.momentOfAcceleration = Victor(0, 0);
+
+        //Setup visual
+        drawCall(this);
     }
 
     //"Properties"
-    /**
-     * Returns the position as a vector
-     * @returns {Victor}
-     */
-    getPosition() { return Victor(super.x, super.y); }
-    /**
-     * Sets the position of this object
-     * @param {Victor} position 
-     */
-    setPosition(position)
+
+    //Methods
+    update()
     {
-        super.x = position.x;
-        super.y = position.y;
+        //Basic physics
+        this.velocity.add(this.momentOfAcceleration.multiplyScalar(timeSpeed));
+        this.vectorPosition.add(this.velocity.multiplyScalar(timeSpeed));
+
+        //Apply "friction"
+        this.velocity.subtract(this.velocity.multiplyScalar(friction * timeSpeed));
+
+        //Reset acceleration
+        this.momentOfAcceleration = Victor(0, 0);
+
+        //Update the base pixi properties
+        this.x = this.vectorPosition.x;
+        this.y = this.vectorPosition.y;
     }
+
+    /**
+     * Checks if this object collides with another
+     * @param {PhysicsObject} physObj other physics object to check collision with 
+     * @returns {boolean} TRUE if the objects are colliding
+     */
+    colliding(physObj)
+    {
+        return this.vectorPosition.distance(physObj.vectorPosition) <
+            this.colliderRadius + physObj.colliderRadius;
+    }
+}
+
+/**
+ * The friendly object that adds flings and gives a boost
+ */
+class Orb extends PhysicsObject
+{
+    /**
+     * Creates a new Orb
+     * @param {number} visualRadius The radius of the circle being drawn
+     * @param {number} colliderRadius The radius of the circle collider
+     * @param {number} color The color of the circle
+     */
+    constructor(visualRadius, colliderRadius, color = 0x00ff00)
+    {
+        //Call the base constructor where it draws a circle
+        super(phys =>
+        {
+            phys.beginFill(color);
+            phys.drawCircle(0, 0, visualRadius);
+            phys.endFill();
+        });
+
+        //Set the collider radius
+        super.colliderRadius = colliderRadius;
+
+        //Add to the list of orbs
+        ORBS.push(this);
+    }
+
+    //I would like to add particles too
 }
 
 //#endregion
 
 //#region Global Variables
 
-//Constants and unchanging variables
+//Pixi stuff
 const APP_WIDTH = 500;
 const APP_HEIGHT = 750;
 const APP = new PIXI.Application({width: APP_WIDTH, height: APP_HEIGHT});
 const STAGE = APP.stage;
-let ASSETS;
-
+// let ASSETS;
 
 //#endregion
 
-//#region Initialization
+//#region Managers
+
+//#region Physics Manager
+
+/**@type {number} The amount time should be progressing */
+let timeSpeed = 1;
+
+/**@type {number} The amount of friction to be applied to physics objects */
+const friction = 1;
+
+//#endregion
+
+//#region Object Manager
+
+/**@type {Orb[]} The list of all objects in the game */
+const ORBS = [];
+
+//#endregion
+
+//#endregion
+
+//#region Initialization and Mono Behaviors
 
 /**
  * Initial method for loading into the DOM
@@ -90,7 +168,22 @@ const loadAssets = async() =>
  */
 const start = () =>
 {
-    STAGE.addChild(new PIXI.Graphics().beginFill(0xff0000).drawRect(0, 0, APP_WIDTH/2, APP_HEIGHT/2));
+    const tmp = new Orb(5, 5);
+    STAGE.addChild(tmp);
+
+    //Begin the game loop
+    APP.ticker.add(update);
+}
+
+/**
+ * The game loop
+ */
+const update = () =>
+{
+    for(const orb of ORBS)
+    {
+        orb.update();
+    }
 }
 
 //#endregion
