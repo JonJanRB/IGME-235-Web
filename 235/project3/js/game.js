@@ -12,12 +12,7 @@
  * Whether or not debug mode is enabled
  * @type {boolean}
  */
-const DO_DEBUG = true;
-
-/**
- * The debug object for the game
- */
-let DEBUG;
+let debugEnabled = false;
 
 /**
  * An object that holds all the debug elements
@@ -32,22 +27,24 @@ class Debug extends PIXI.Container
     {
         super();
 
-        //Stop debugging if not enabled
-        if(!DO_DEBUG) return;
-
-        STAGE.addChild(this);
+        //Add listener for toggling debug when '/' is pressed
+        document.onkeydown = e =>
+        {
+            e.preventDefault();
+            if(e.key === "/") debugEnabled = !debugEnabled;
+        };
     }
 
     /**
      * Updates the debug elements and clears previous frame
      */
-    update = () =>
+    update()
     {
-        //Stop debugging if not enabled
-        if(!DO_DEBUG) return;
-
         //Clear the debug elements for this frame
         this.removeChildren();
+
+        //Stop debugging if not enabled
+        if(!debugEnabled) return;
 
         //Collider
         this.drawColliders();
@@ -56,7 +53,7 @@ class Debug extends PIXI.Container
     /**
      * Draws the colliders for all objects
      */
-    drawColliders = () =>
+    drawColliders()
     {
         for(const physObj of OBJECTS)
         {
@@ -73,8 +70,16 @@ class Debug extends PIXI.Container
     }
 }
 
+/**
+ * The debug object for the game
+ */
+const DEBUG = new Debug();
+
 //#endregion
 
+/**
+ * An object with basic physics and is a graphics object
+ */
 class PhysicsObject extends PIXI.Graphics
 {
     /**
@@ -170,7 +175,7 @@ class PhysicsObject extends PIXI.Graphics
 }
 
 /**
- * The friendly object that adds flings and gives a boost
+ * A friendly object that adds flings and gives a boost
  */
 class Orb extends PhysicsObject
 {
@@ -635,8 +640,8 @@ const start = () =>
     switchToScene(SCENE_ID.Game);
     initializeGameScene(getScene(SCENE_ID.Game));
 
-    //Initialize debugger
-    DEBUG = new Debug();
+    //Add debug to the stage to be visible over everything
+    STAGE.addChild(DEBUG);
 
     //Begin the game loop
     APP.ticker.add(update);
@@ -649,7 +654,12 @@ const update = () =>
 {
     //TODO FSM
     updateGame();
+
+
+    /*-----Ending tasks of update, nothing past here-----*/
     
+    //Update the debugger AFTER objects are updated so there is no lag in positioning
+    DEBUG.update();
 }
 
 //#endregion
@@ -723,9 +733,6 @@ const updateGame = () =>
 
 
     /*-----Ending tasks of update, nothing past here-----*/
-
-    //Update the debugger
-    DEBUG.update();
 
     //Update all physics objects
     updatePhysicsObjects();
