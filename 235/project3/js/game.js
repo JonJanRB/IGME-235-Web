@@ -12,7 +12,7 @@
  * Whether or not debug mode is enabled
  * @type {boolean}
  */
-let debugEnabled = false;
+let debugEnabled = true;
 
 /**
  * An object that holds all the debug elements
@@ -60,7 +60,7 @@ class Debug extends PIXI.Container
             //Draw circle outline
             const colliderGraphic = new PIXI.Graphics();
             colliderGraphic.beginFill(0x00000, 0);
-            colliderGraphic.lineStyle(5, 0xff0000,0.5);
+            colliderGraphic.lineStyle(2, 0xff0000,0.5);
             colliderGraphic.drawCircle(physObj.x, physObj.y, physObj.colliderRadius);
             colliderGraphic.endFill();
 
@@ -186,7 +186,7 @@ class Orb extends PhysicsObject
      * @param {number} colliderRadius The radius of the circle collider
      * @param {number} tint The color of the circle
      */
-    constructor(vectorPosition = Victor(0, 0), visualRadius = 50, colliderRadius = visualRadius*2, tint = 0x00ff00)
+    constructor(vectorPosition = Victor(0, 0), visualRadius = 20, colliderRadius = visualRadius*2, tint = 0x00ff00)
     {
         //Call the base constructor where it draws a circle
         super(phys =>
@@ -275,7 +275,7 @@ class Spike extends PhysicsObject
      * @param {number} colliderRadius The radius for the collider
      * @param {number} tint The color of the initial visual
      */
-    constructor(vectorPosition = Victor(0, 0), scaleAmount = 50, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
+    constructor(vectorPosition = Victor(0, 0), scaleAmount = 75, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
     {
         super(phys =>
         {
@@ -458,7 +458,7 @@ const resetObjects = () =>
 {
     for(let i = 0; i < OBJECTS.length; i++)
     {
-        let tryOrb = new Orb(Victor(0, 0), 50);
+        let tryOrb = new Orb();
     }
 }
 
@@ -679,12 +679,15 @@ const update = () =>
 const initializeGameScene = gameScene =>
 {
     //DEBUG
-    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50, 50);
+    // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50);
+    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5));
     // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 100);
     // orb.setScale(7);
     // const orb2 = new Orb(Victor(APP_SIZE.x*0.5 + 500, APP_SIZE.y*0.5), 700, 1400, 0xffff00);
-    PLAYER = new Player(Victor(0, 0), 20);
-    spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
+    // PLAYER = new Player(Victor(0, 0), 20);
+    PLAYER = new Player(Victor(100, 200));
+    // spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
+    spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100));
 
     //Add all the objects to the scene
     for(const object of OBJECTS)
@@ -699,7 +702,7 @@ let spike;//DEBUG
 const updateGame = () =>
 {
     //DEBUG
-    PLAYER.rotation += 0.01;
+    // PLAYER.rotation += 0.01;
     // console.log(mouseClientPosition);
     if(mouseDown)
     {
@@ -707,29 +710,31 @@ const updateGame = () =>
         // CAMERA.easeTo(Victor(0, 0), 50, 0.01);
         // CAMERA.easeTo(SPIKES[0].vectorPosition.clone(), 2, 0.1);
         // spike.vectorPosition = mousePosition.clone();
-        CAMERA.easeTo(mouseCanvasPosition, 2, 0.1);
-        ORBS[0].setScale(ORBS[0].getScale() + 0.001);
+        // CAMERA.easeTo(mouseCanvasPosition, 0.1, 0.1);
+        CAMERA.easeTo(mouseCanvasPosition, 5, 0.1);
+        // ORBS[0].setScale(ORBS[0].getScale() + 0.001);
         // ORBS[1].setScale(ORBS[1].getScale() + 0.001);
     }
     else
     {
         // CAMERA.easeTo(Victor(0, 0), 1, 0.1);
-        CAMERA.easeTo(mouseCanvasPosition, 1, 0.1);
+        // CAMERA.easeTo(mouseCanvasPosition, 1, 0.1);
+        CAMERA.easeTo(APP_SIZE.clone().multiplyScalar(0.5), 1, 0.1);
     }
     CAMERA.update();
     updateInputManager();
 
     //DEBUG test collisions
-    PLAYER.vectorPosition = mouseWorldPosition.clone();
-    for(const orb of ORBS)
-    {
-        orb.tint = 0xffffff;
-    }
+    // PLAYER.vectorPosition = mouseWorldPosition.clone();
+    // for(const orb of ORBS)
+    // {
+    //     orb.tint = 0xffffff;
+    // }
 
-    if(PLAYER.isColliding(ORBS[0])) ORBS[0].tint = 0xff0000;
+    // if(PLAYER.isColliding(ORBS[0])) ORBS[0].tint = 0xff0000;
     // if(PLAYER.isColliding(ORBS[1])) ORBS[1].tint = 0x00ff00;
 
-    spike.vectorPosition = CAMERA.canvasToWorld(Victor(300, 200));
+    // spike.vectorPosition = CAMERA.canvasToWorld(Victor(300, 200));
 
 
     /*-----Ending tasks of update, nothing past here-----*/
@@ -751,7 +756,7 @@ const resetGame = () =>
     CAMERA.position = Victor(0, 0);
 
     //Reset other physics objects
-    //TEMP putting a hold on this, lets test if collisions work
+    resetObjects();
 }
 
 //#endregion
