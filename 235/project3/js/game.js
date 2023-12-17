@@ -6,6 +6,75 @@
 
 //#region Classes (these are here, rather than another file, for intellisense)
 
+//#region Debug
+
+/**
+ * Whether or not debug mode is enabled
+ * @type {boolean}
+ */
+const DO_DEBUG = true;
+
+/**
+ * The debug object for the game
+ */
+let DEBUG;
+
+/**
+ * An object that holds all the debug elements
+ * Cleared each frame for frame based debug elements
+ */
+class Debug extends PIXI.Container
+{
+    /**
+     * Creates a new Debug object and adds it to the scene
+     */
+    constructor()
+    {
+        super();
+
+        //Stop debugging if not enabled
+        if(!DO_DEBUG) return;
+
+        STAGE.addChild(this);
+    }
+
+    /**
+     * Updates the debug elements and clears previous frame
+     */
+    update = () =>
+    {
+        //Stop debugging if not enabled
+        if(!DO_DEBUG) return;
+
+        //Clear the debug elements for this frame
+        this.removeChildren();
+
+        //Collider
+        this.drawColliders();
+    }
+
+    /**
+     * Draws the colliders for all objects
+     */
+    drawColliders = () =>
+    {
+        for(const physObj of OBJECTS)
+        {
+            //Draw circle outline
+            const colliderGraphic = new PIXI.Graphics();
+            colliderGraphic.beginFill(0x00000, 0);
+            colliderGraphic.lineStyle(5, 0xff0000,0.5);
+            colliderGraphic.drawCircle(physObj.x, physObj.y, physObj.colliderRadius);
+            colliderGraphic.endFill();
+
+            //Add drawing to the containter
+            this.addChild(colliderGraphic);
+        }
+    }
+}
+
+//#endregion
+
 class PhysicsObject extends PIXI.Graphics
 {
     /**
@@ -351,88 +420,6 @@ const DEFAULT_ZOOM = 0.1;
 
 //#endregion
 
-//#region Debug
-
-/**
- * Whether or not debug mode is enabled
- * @type {boolean}
- */
-const DO_DEBUG = true;
-
-/**
- * The debug object for the game
- */
-let DEBUG;
-
-/**
- * An object that holds all the debug elements
- * Cleared each frame for frame based debug elements
- */
-class Debug extends PIXI.Container
-{
-    /**
-     * Creates a new Debug object and adds it to the scene
-     */
-    constructor()
-    {
-        super();
-
-        //Stop debugging if not enabled
-        if(!DO_DEBUG) return;
-
-        STAGE.addChild(this);
-    }
-
-    /**
-     * Updates the debug elements and clears previous frame
-     */
-    update = () =>
-    {
-        //Stop debugging if not enabled
-        if(!DO_DEBUG) return;
-
-        //Clear the debug elements for this frame
-        this.removeChildren();
-
-        //Collider
-        this.drawColliders();
-    }
-
-    /**
-     * Draws the colliders for all objects
-     */
-    drawColliders = () =>
-    {
-        // for(const orb of ORBS)
-        // {
-        //     //Draw the collider if debug is enabled (just comment out when not needed,
-        //     //no need to do extra computation each frame when it is completed)
-        //     const debugGraphics = new PIXI.Graphics();
-        //     debugGraphics.beginFill(0x00000, 0);
-        //     debugGraphics.lineStyle(5, 0xff0000,0.5);
-        //     debugGraphics.drawCircle(0, 0, 100*this.getScale()/2);
-        //     debugGraphics.endFill();
-        //     //Basically draw this evey frame and the collider will be updated
-        //     this.addChild(debugGraphics);
-        // }
-
-        for(const physObj of OBJECTS)
-        {
-            //Draw circle outline
-            const colliderGraphic = new PIXI.Graphics();
-            colliderGraphic.beginFill(0x00000, 0);
-            colliderGraphic.lineStyle(5, 0xff0000,0.5);
-            colliderGraphic.drawCircle(physObj.x, physObj.y, physObj.colliderRadius);
-            colliderGraphic.endFill();
-
-            //Add drawing to the containter
-            this.addChild(colliderGraphic);
-        }
-    }
-}
-
-//#endregion
-
 //#region Managers
 
 //#region Physics Manager
@@ -682,10 +669,10 @@ const update = () =>
 const initializeGameScene = gameScene =>
 {
     //DEBUG
-    // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50);
-    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 100);
-    orb.setScale(7);
-    const orb2 = new Orb(Victor(APP_SIZE.x*0.5 + 500, APP_SIZE.y*0.5), 700, 1400, 0xffff00);
+    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50, 50);
+    // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 100);
+    // orb.setScale(7);
+    // const orb2 = new Orb(Victor(APP_SIZE.x*0.5 + 500, APP_SIZE.y*0.5), 700, 1400, 0xffff00);
     PLAYER = new Player(Victor(0, 0), 20);
     spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
 
@@ -710,14 +697,14 @@ const updateGame = () =>
         // CAMERA.easeTo(Victor(0, 0), 50, 0.01);
         // CAMERA.easeTo(SPIKES[0].vectorPosition.clone(), 2, 0.1);
         // spike.vectorPosition = mousePosition.clone();
-        CAMERA.easeTo(mouseCanvasPosition, 0.5, 0.1);
+        CAMERA.easeTo(mouseCanvasPosition, 2, 0.1);
         ORBS[0].setScale(ORBS[0].getScale() + 0.001);
-        ORBS[1].setScale(ORBS[1].getScale() + 0.001);
+        // ORBS[1].setScale(ORBS[1].getScale() + 0.001);
     }
     else
     {
         // CAMERA.easeTo(Victor(0, 0), 1, 0.1);
-        CAMERA.easeTo(mouseCanvasPosition, 0.1, 0.1);
+        CAMERA.easeTo(mouseCanvasPosition, 1, 0.1);
     }
     CAMERA.update();
     updateInputManager();
@@ -730,7 +717,7 @@ const updateGame = () =>
     }
 
     if(PLAYER.isColliding(ORBS[0])) ORBS[0].tint = 0xff0000;
-    if(PLAYER.isColliding(ORBS[1])) ORBS[1].tint = 0x00ff00;
+    // if(PLAYER.isColliding(ORBS[1])) ORBS[1].tint = 0x00ff00;
 
     spike.vectorPosition = CAMERA.canvasToWorld(Victor(300, 200));
 
@@ -744,6 +731,9 @@ const updateGame = () =>
     updatePhysicsObjects();
 }
 
+/**
+ * Resets everything in the game to starting values
+ */
 const resetGame = () =>
 {
     //Reset player
