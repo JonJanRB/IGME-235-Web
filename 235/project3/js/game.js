@@ -4,43 +4,45 @@
 
 "use strict";
 
-//#region Classes (these are here for intellisense)
+//#region Classes (these are here, rather than another file, for intellisense)
 
 class PhysicsObject extends PIXI.Graphics
 {
     /**
      * Creates a new PhysicsObject
-     * @param {Function} drawCall
-     * A function of what to draw, requires 1 arg of PhysicsObject
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
+     * @param {Function} setupVisual A function of what to draw, requires 1 arg of PhysicsObject
      */
-    constructor(drawCall)
+    constructor(setupVisual, vectorPosition)
     {
         super();
 
         // --Properties
 
         /**@type {Victor} width and height*/
-        this.vectorScale = Victor(0, 0);
+        this.vectorScale = vectorPosition;
         
         //Maybe just use destroy instead of enabling and pooling
         // /**@type {boolean}*/this.enabled = true;
         
         //-Collider
         /**@type {number}*/this.colliderRadius = 1;
-        // /**@type {number}*/this.rotation = 0;
 
         //-Physics
-        /**@type {Victor}*/this.vectorPosition = Victor(0, 0);
+        /**@type {Victor}*/this.vectorPosition = vectorPosition;
         /**@type {Victor}*/this.velocity = Victor(0, 0);
         /**@type {Victor}*/this.momentOfAcceleration = Victor(0, 0);
 
         //Setup visual
-        drawCall(this);
+        setupVisual(this);
+
+        //Add to the list of objects
+        OBJECTS.push(this);
     }
 
-    //"Properties"
-
-    //Methods
+    /**
+     * Preforms anything that needs to be run every frame
+     */
     update()
     {
         //Basic physics
@@ -63,7 +65,7 @@ class PhysicsObject extends PIXI.Graphics
      * @param {PhysicsObject} physObj other physics object to check collision with 
      * @returns {boolean} TRUE if the objects are colliding
      */
-    colliding(physObj)
+    isColliding(physObj)
     {
         return this.vectorPosition.distance(physObj.vectorPosition) <
             this.colliderRadius + physObj.colliderRadius;
@@ -77,11 +79,12 @@ class Orb extends PhysicsObject
 {
     /**
      * Creates a new Orb
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} visualRadius The radius of the circle being drawn
      * @param {number} colliderRadius The radius of the circle collider
      * @param {number} color The color of the circle
      */
-    constructor(visualRadius, colliderRadius = visualRadius*2, color = 0x00ff00)
+    constructor(vectorPosition, visualRadius, colliderRadius = visualRadius*2, color = 0x00ff00)
     {
         //Call the base constructor where it draws a circle
         super(phys =>
@@ -90,6 +93,8 @@ class Orb extends PhysicsObject
             phys.drawCircle(0, 0, visualRadius);
             phys.endFill();
         });
+
+        super.vectorPosition = vectorPosition;
 
         //Set the collider radius
         super.colliderRadius = colliderRadius;
@@ -106,23 +111,44 @@ class Player extends PhysicsObject
 {
     /**
      * Creates a new Player with the specified values
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} scaleAmount Amount to scale the initial visual by
      * @param {number} colliderRadius The radius for the collider
      * @param {number} color The color of the initial visual
      */
-    constructor(scaleAmount = 100, colliderRadius = scaleAmount*0.5, color = 0x0000ff)
+    constructor(vectorPosition, scaleAmount = 100, colliderRadius = scaleAmount*0.5, color = 0x0000ff)
     {
         super(phys =>
         {
             //Create square centered around 0,0
             phys.beginFill(color);
             const negativeHalfScale = scaleAmount*-0.5;
-            phys.drawRect(-negativeHalfScale, -negativeHalfScale, scaleAmount, scaleAmount);
+            //Kind of weird how this uses x2 and y2 for the position (starts from the bottom right)
+            phys.drawRect(negativeHalfScale, negativeHalfScale, scaleAmount, scaleAmount);
             phys.endFill();
         });
 
+        //Properties
+        /**@type {boolean}*/this.isAlive = false;
+        /**@type {number}*/this.flings = 0;
+        /**The direction to fling @type {number}*/
+        this.direction = 0;
+
+
+        //Set position
+        super.vectorPosition = vectorPosition;
+
         //Set the collider radius
         super.colliderRadius = colliderRadius;
+    }
+
+    reset()
+    {
+        this.vectorPosition = Victor(0, 0);
+        this.velocity = Victor(0, 0);
+        this.isAlive = true;
+        this.flings = 5;
+        this.direction = Math.PI * 0.5;//Up
     }
 }
 
@@ -133,23 +159,30 @@ class Spike extends PhysicsObject
 {
     /**
      * Creates a new Spike with the specified values
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} scaleAmount The amount to scale the initial visual by
      * @param {number} colliderRadius The radius for the collider
      * @param {number} color The color of the initial visual
      */
-    constructor(scaleAmount, colliderRadius = scaleAmount*0.2, color = 0x0000ff)
+    constructor(vectorPosition, scaleAmount, colliderRadius = scaleAmount*0.2, color = 0xff4500)
     {
         super(phys =>
         {
             //Create a triangle centered around 0,0
-            const halfScale = scaleAmount*0.5;
+            const halfScale = scaleAmount * 0.5;
             phys.beginFill(color);
-            phys.drawPolygon([0, -halfScale, -halfScale, halfScale, halfScale, halfScale]);
+            phys.drawPolygon([0, -halfScale, -halfScale, scaleAmount*0.333, halfScale, scaleAmount*0.333]);
             phys.endFill();
         });
 
+        //Set position
+        super.vectorPosition = vectorPosition;
+
         //Set the collider radius
         super.colliderRadius = colliderRadius;
+
+        //Add to the list of spikes
+        SPIKES.push(this);
     }
 }
 
@@ -172,19 +205,13 @@ class Camera
      * Changes the position of the camera
      * @param {Victor} amount the amount to pan by
      */
-    panBy(amount)
-    {
-        this.position.add(amount);
-    }
+    panBy = amount => this.position.add(amount);
 
     /**
      * Changes the scale of the camera
      * @param {number} amount The amount to zoom by
      */
-    zoomBy(amount)
-    {
-        this.zoom += amount;
-    }
+    zoomBy = amount => this.zoom += amount;
 
     /**
      * Zooms to the specified point using the specified easing factor
@@ -210,26 +237,78 @@ class Camera
         this.matrix.identity()
             .translate(-this.position.x, -this.position.y)
             .scale(this.zoom, this.zoom)
-            .translate(APP_WIDTH*0.5, APP_HEIGHT*0.5);
+            .translate(APP_SIZE.x*0.5, APP_SIZE.y*0.5);
 
         //Apply the matrix
         STAGE.transform.setFromMatrix(this.matrix);
     }
+
+    /**
+     * Returns the specified position in world space (relative to this camera)
+     * @param {Victor} canvasPosition The position relative to the canvas
+     * @returns {Victor} The position relative to the world
+     */
+    canvasToWorld = canvasPosition => convertToVector(this.matrix.applyInverse(canvasPosition.clone()));
 }
 
 //#endregion
 
-//#region Global Variables
+//#region Global Variables (not actually global scope, but like, global for all intents and purposes)
 
-//Pixi stuff
-const APP_WIDTH = 500;
-const APP_HEIGHT = 750;
-const APP = new PIXI.Application({width: APP_WIDTH, height: APP_HEIGHT});
+//DOM
+
+/**
+ * The container element for the game
+ * @type {HTMLElement}
+ */
+let GAME_CONTAINER_ELEMENT;
+
+//PIXI
+
+/**
+ * A vector containing the width and height of the app (canvas element)
+ * @type {Victor}
+ */
+const APP_SIZE = Victor(500, 750);
+
+/**
+ * The pixi application
+ * @type {PIXI.Application}
+ */
+const APP = new PIXI.Application({width: APP_SIZE.x, height: APP_SIZE.y});
+
+/**
+ * The position of the app on the page (client)
+ * @type {Victor}
+ */
+let APP_CLIENT_POSITION;
+
+/**
+ * The center of the app on the page (client)
+ * You know, maybe I don't actually need this lol
+ * @type {Victor}
+ */
+let APP_CLIENT_CENTER;
+
+/**
+ * The stage for the game (outer most container)
+ * @type {PIXI.Container}
+ */
 const STAGE = APP.stage;
-// let ASSETS;
 
+//Camera
 
+/**
+ * The main camera for the game
+ * @type {Camera}
+ */
 const CAMERA = new Camera();
+
+/**
+ * The default zoom for the camera
+ * @type {number}
+ */
+const DEFAULT_ZOOM = 0.1;
 
 //#endregion
 
@@ -247,41 +326,137 @@ const friction = 1;
 
 //#region Object Manager
 
+/**@type {PhysicsObject[]} The list of all objects in the game */
+const OBJECTS = [];
+
 /**@type {Orb[]} The list of all objects in the game */
 const ORBS = [];
+
+/**@type {Spike[]} The list of all objects in the game */
+const SPIKES = [];
+
+/**@type {Player} The player object. Yes I know, its not const but it should be treated like one*/
+let PLAYER;
+
+/**
+ * Updates all physics objects
+ */
+const updatePhysicsObjects = () =>
+{
+    for(const object of OBJECTS)
+    {
+        object.update();
+    }
+}
 
 //#endregion
 
 //#region Input Manager
 
 /**
- * The position of the mouse
+ * The position of the mouse in client space (the entire website)
  * @type {Victor}
  */
-let mousePos = Victor(0, 0);
+let mouseClientPosition = Victor(0, 0);
+
+/**
+ * The position of the mouse in canvas space (the canvas object)
+ * @type {Victor}
+ */
+let mouseCanvasPosition = Victor(0, 0);
+
+/**
+ * The position of the mouse in world space (takes into account the camera)
+ * @type {Victor}
+ */
+let mouseWorldPosition = Victor(0, 0);
 
 /**@type {boolean}*/
 let mouseDown = false;
 
+/**
+ * Initializes input related tasks 
+ */
 const initializeInputManager = () =>
 {
     //Update the mouse position on move
-    APP.view.onpointermove = e =>
+    document.onpointermove = e =>
     {
-        mousePos = Victor(e.clientX, e.clientY);
+        mouseClientPosition = Victor(e.clientX, e.clientY);
+        mouseCanvasPosition = mouseClientPosition.clone().subtract(APP_CLIENT_POSITION);
     };
 
     //When mouse down
-    APP.view.onpointerdown = e =>
+    GAME_CONTAINER_ELEMENT.onpointerdown = e =>
     {
+        //Prevent default
+        e.preventDefault();
         mouseDown = true;
     };
 
     //When mouse up
-    APP.view.onpointerup = e =>
+    GAME_CONTAINER_ELEMENT.onpointerup = e =>
     {
         mouseDown = false;
     };
+}
+
+/**
+ * Updates input related tasks
+ */
+const updateInputManager = () =>
+{
+    //This needs to be updated every frame since the camera can move even when the mouse isn't
+    mouseWorldPosition = CAMERA.canvasToWorld(mouseCanvasPosition);
+}
+
+//#endregion
+
+//#region Scene Manager
+
+/**
+ * The scenes in the game
+ * @type {PIXI.Container[]}
+ */
+const SCENES = [];
+
+/**
+ * An "enum" for the scene names
+ */
+const SCENE_ID = { Menu: 0, Game: 1 };
+
+/**
+ * Initializes all scenes and adds them to the stage
+ */
+const initializeScenes = () =>
+{
+    //Create the scenes and set them invisible
+    for(const sceneID in SCENE_ID)
+    {
+        const scene = new PIXI.Container();
+        scene.visible = false;
+        SCENES.push(scene);
+        STAGE.addChild(scene);
+    }
+}
+
+/**
+ * Returns the scene from the specified scene id
+ * @param {number} sceneID The scene number, integer, which should be
+ * passed in from the SCENE_ID enum
+ * @returns {PIXI.Container}
+ */
+const getScene = (sceneID) => SCENES[sceneID];
+
+/**
+ * Sets the specified scene visible and all others invisible
+ * @param {number} sceneID The scene number, integer, which should be
+ * passed in from the SCENE_ID enum
+ */
+const switchToScene = (sceneID) =>
+{
+    for(const scene of SCENES) scene.visible = false;
+    SCENES[sceneID].visible = true;
 }
 
 //#endregion
@@ -295,20 +470,30 @@ const initializeInputManager = () =>
  */
 const init = () =>
 {
-    //Initialize the input manager
-    initializeInputManager();
+    //The game container
+    GAME_CONTAINER_ELEMENT = document.querySelector("#gameContainer");
 
     //Add the game panel to the dom
-    document.body.appendChild(APP.view);
+    GAME_CONTAINER_ELEMENT.appendChild(APP.view);
+
+    //Set the position relative to the page
+    const bounds = APP.view.getBoundingClientRect();
+    APP_CLIENT_POSITION = Victor(bounds.x, bounds.y);
+
+    //Set the client center
+    APP_CLIENT_CENTER = APP_CLIENT_POSITION.clone().add(APP_SIZE.clone().multiplyScalar(0.5));
+
+    //Load any assets
     loadAssets();
 }
 window.onload = init;
 
 /**
- * Loads all the assets for the game
+ * Loads all the assets for the game. Called after the DOM is loaded
  */
 const loadAssets = async() =>
 {
+    //DEBUG
     // PIXI.Assets.addBundle('sprites', {
     //     spaceship: 'images/spaceship.png',
     //     explosions: 'images/explosions.png',
@@ -319,23 +504,17 @@ const loadAssets = async() =>
 }
 
 /**
- * Starts the game 
+ * Called when all assets are loaded
  */
 const start = () =>
 {
-    const orb = new Orb(50);
-    orb.vectorPosition = Victor(APP_WIDTH*0.5, APP_HEIGHT*0.5);
-    STAGE.addChild(orb);
+    //Initialize the input manager
+    initializeInputManager();
 
-    const player = new Player(20);
-    player.vectorPosition = Victor(30, 50);
-    STAGE.addChild(player);
-
-    const spike = new Spike(50);
-    spike.vectorPosition = Victor(APP_WIDTH*0.5 + 100, APP_HEIGHT*0.5 + 100);
-    STAGE.addChild(spike);
-
-    
+    //Initialize the scenes
+    initializeScenes();
+    switchToScene(SCENE_ID.Game);
+    initializeGameScene(getScene(SCENE_ID.Game));
 
     //Begin the game loop
     APP.ticker.add(update);
@@ -346,16 +525,100 @@ const start = () =>
  */
 const update = () =>
 {
-    for(const orb of ORBS)
-    {
-        orb.update();
-    }
-
-    // console.log(mousePos);
-    if(mouseDown) CAMERA.easeTo(mousePos, 2, 0.1);
-    else CAMERA.easeTo(mousePos, 1, 0.1);
-    CAMERA.update();
+    //TODO FSM
+    updateGame();
+    
 }
 
 //#endregion
 
+//#region Menu Scene
+
+
+
+//#endregion
+
+//#region Game Scene
+
+/**
+ * Initializes the game into the specified scene
+ * @param {PIXI.Container} gameScene The scene to initialize the game into
+ */
+const initializeGameScene = gameScene =>
+{
+    //DEBUG
+    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50);
+    PLAYER = new Player(Victor(0, 0), 20);
+    spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
+
+    //Add all the objects to the scene
+    for(const object of OBJECTS)
+    {
+        gameScene.addChild(object);
+    }
+}
+let spike;//DEBUG
+/**
+ * Updates the game scene
+ */
+const updateGame = () =>
+{
+    //DEBUG
+    PLAYER.rotation += 0.01;
+    // console.log(mouseClientPosition);
+    if(mouseDown)
+    {
+        // CAMERA.easeTo(mouseCanvasPosition.clone().add(Victor(-APP_SIZE.x*.5, -APP_SIZE.y*.5)), 2, 0.1);
+        CAMERA.easeTo(Victor(0, 0), 50, 0.01);
+        // CAMERA.easeTo(SPIKES[0].vectorPosition.clone(), 2, 0.1);
+        // spike.vectorPosition = mousePosition.clone();
+    }
+    else
+    {
+        // CAMERA.easeTo(Victor(0, 0), 1, 0.1);
+        CAMERA.easeTo(mouseCanvasPosition, 0.5, 0.1);
+    }
+    CAMERA.update();
+    updateInputManager();
+
+    //DEBUG test collisions
+    PLAYER.vectorPosition = mouseWorldPosition.clone();
+    if(PLAYER.isColliding(spike))
+    {
+        console.log("Colliding");
+    }
+
+    spike.vectorPosition = CAMERA.canvasToWorld(Victor(300, 200));
+
+
+    /*-----Ending tasks of update, nothing past here-----*/
+
+    //Update all physics objects
+    updatePhysicsObjects();
+}
+
+const resetGame = () =>
+{
+    //Reset player
+    PLAYER.reset();
+
+    //Reset camera
+    CAMERA.zoom = DEFAULT_ZOOM;
+    CAMERA.position = Victor(0, 0);
+
+    //Reset other physics objects
+    //TEMP putting a hold on this, lets test if collisions work
+}
+
+//#endregion
+
+//#region Utility
+
+/**
+ * Returns a Victor of the specified point or object with x and y properties
+ * @param {any} point Any object that holds x and y properties
+ * @returns {Victor} A vector with the same x and y values as the point
+ */
+const convertToVector = (point) => Victor(point.x, point.y);
+
+//#endregion

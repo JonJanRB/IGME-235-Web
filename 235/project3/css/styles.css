@@ -1,10 +1,5 @@
-body
+#gameContainer
 {
     display: flex;
     justify-content: center;
-}
-
-canvas
-{
-    
 }
