@@ -10,28 +10,36 @@ class PhysicsObject extends PIXI.Graphics
 {
     /**
      * Creates a new PhysicsObject
-     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {Function} setupVisual A function of what to draw, requires 1 arg of PhysicsObject
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      */
-    constructor(setupVisual, vectorPosition)
+    constructor(setupVisual, vectorPosition = Victor(0, 0), tint = 0xffffff)
     {
         super();
 
         // --Properties
-
-        /**@type {Victor} width and height*/
-        this.vectorScale = vectorPosition;
-        
-        //Maybe just use destroy instead of enabling and pooling
-        // /**@type {boolean}*/this.enabled = true;
         
         //-Collider
-        /**@type {number}*/this.colliderRadius = 1;
+        /**
+         * The collider radius of the base visual
+         * @type {number}
+         */
+        this.baseColliderRadius = 1;
+
+        /**
+         * The collider radius of the complete physics object
+         * aka the base collider * scale
+         * @type {number}
+         */
+        this.colliderRadius = 1;
 
         //-Physics
         /**@type {Victor}*/this.vectorPosition = vectorPosition;
         /**@type {Victor}*/this.velocity = Victor(0, 0);
         /**@type {Victor}*/this.momentOfAcceleration = Victor(0, 0);
+
+        //Set the color
+        super.tint = tint;
 
         //Setup visual
         setupVisual(this);
@@ -70,6 +78,26 @@ class PhysicsObject extends PIXI.Graphics
         return this.vectorPosition.distance(physObj.vectorPosition) <
             this.colliderRadius + physObj.colliderRadius;
     }
+
+    /**
+     * Sets the scale of the object and computes the collider radius
+     * @param {number} scale The scale amount to set the object to
+     */
+    setScale(scale)
+    {
+        super.scale.x = scale;
+        super.scale.y = scale;
+        this.colliderRadius = this.baseColliderRadius * scale;
+    }
+
+    /**
+     * Returns the scale of the object as a number (x component)
+     * @returns {number} The scale of the object as a number
+     */
+    getScale()
+    {
+        return super.scale.x;
+    }
 }
 
 /**
@@ -82,25 +110,32 @@ class Orb extends PhysicsObject
      * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} visualRadius The radius of the circle being drawn
      * @param {number} colliderRadius The radius of the circle collider
-     * @param {number} color The color of the circle
+     * @param {number} tint The color of the circle
      */
-    constructor(vectorPosition, visualRadius, colliderRadius = visualRadius*2, color = 0x00ff00)
+    constructor(vectorPosition = Victor(0, 0), visualRadius = 50, colliderRadius = visualRadius*2, tint = 0x00ff00)
     {
         //Call the base constructor where it draws a circle
         super(phys =>
         {
-            phys.beginFill(color);
+            phys.beginFill(0xffffff);
             phys.drawCircle(0, 0, visualRadius);
             phys.endFill();
-        });
-
-        super.vectorPosition = vectorPosition;
+        }, vectorPosition, tint);
 
         //Set the collider radius
-        super.colliderRadius = colliderRadius;
+        super.baseColliderRadius = colliderRadius;
+        //Comput the collider radius
+        this.setScale(1);
 
         //Add to the list of orbs
         ORBS.push(this);
+    }
+
+    update()
+    {
+        super.update();
+
+
     }
 }
 
@@ -114,19 +149,19 @@ class Player extends PhysicsObject
      * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} scaleAmount Amount to scale the initial visual by
      * @param {number} colliderRadius The radius for the collider
-     * @param {number} color The color of the initial visual
+     * @param {number} tint The color of the initial visual
      */
-    constructor(vectorPosition, scaleAmount = 100, colliderRadius = scaleAmount*0.5, color = 0x0000ff)
+    constructor(vectorPosition = Victor(0, 0), scaleAmount = 20, colliderRadius = scaleAmount*0.5, tint = 0x0000ff)
     {
         super(phys =>
         {
             //Create square centered around 0,0
-            phys.beginFill(color);
+            phys.beginFill(0xffffff);
             const negativeHalfScale = scaleAmount*-0.5;
             //Kind of weird how this uses x2 and y2 for the position (starts from the bottom right)
             phys.drawRect(negativeHalfScale, negativeHalfScale, scaleAmount, scaleAmount);
             phys.endFill();
-        });
+        }, vectorPosition, tint);
 
         //Properties
         /**@type {boolean}*/this.isAlive = false;
@@ -139,7 +174,9 @@ class Player extends PhysicsObject
         super.vectorPosition = vectorPosition;
 
         //Set the collider radius
-        super.colliderRadius = colliderRadius;
+        super.baseColliderRadius = colliderRadius;
+        //Comput the collider radius
+        this.setScale(1);
     }
 
     reset()
@@ -162,24 +199,26 @@ class Spike extends PhysicsObject
      * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} scaleAmount The amount to scale the initial visual by
      * @param {number} colliderRadius The radius for the collider
-     * @param {number} color The color of the initial visual
+     * @param {number} tint The color of the initial visual
      */
-    constructor(vectorPosition, scaleAmount, colliderRadius = scaleAmount*0.2, color = 0xff4500)
+    constructor(vectorPosition = Victor(0, 0), scaleAmount = 50, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
     {
         super(phys =>
         {
             //Create a triangle centered around 0,0
             const halfScale = scaleAmount * 0.5;
-            phys.beginFill(color);
+            phys.beginFill(0xffffff);
             phys.drawPolygon([0, -halfScale, -halfScale, scaleAmount*0.333, halfScale, scaleAmount*0.333]);
             phys.endFill();
-        });
+        }, vectorPosition, tint);
 
         //Set position
         super.vectorPosition = vectorPosition;
 
         //Set the collider radius
-        super.colliderRadius = colliderRadius;
+        super.baseColliderRadius = colliderRadius;
+        //Comput the collider radius
+        this.setScale(1);
 
         //Add to the list of spikes
         SPIKES.push(this);
@@ -312,6 +351,88 @@ const DEFAULT_ZOOM = 0.1;
 
 //#endregion
 
+//#region Debug
+
+/**
+ * Whether or not debug mode is enabled
+ * @type {boolean}
+ */
+const DO_DEBUG = true;
+
+/**
+ * The debug object for the game
+ */
+let DEBUG;
+
+/**
+ * An object that holds all the debug elements
+ * Cleared each frame for frame based debug elements
+ */
+class Debug extends PIXI.Container
+{
+    /**
+     * Creates a new Debug object and adds it to the scene
+     */
+    constructor()
+    {
+        super();
+
+        //Stop debugging if not enabled
+        if(!DO_DEBUG) return;
+
+        STAGE.addChild(this);
+    }
+
+    /**
+     * Updates the debug elements and clears previous frame
+     */
+    update = () =>
+    {
+        //Stop debugging if not enabled
+        if(!DO_DEBUG) return;
+
+        //Clear the debug elements for this frame
+        this.removeChildren();
+
+        //Collider
+        this.drawColliders();
+    }
+
+    /**
+     * Draws the colliders for all objects
+     */
+    drawColliders = () =>
+    {
+        // for(const orb of ORBS)
+        // {
+        //     //Draw the collider if debug is enabled (just comment out when not needed,
+        //     //no need to do extra computation each frame when it is completed)
+        //     const debugGraphics = new PIXI.Graphics();
+        //     debugGraphics.beginFill(0x00000, 0);
+        //     debugGraphics.lineStyle(5, 0xff0000,0.5);
+        //     debugGraphics.drawCircle(0, 0, 100*this.getScale()/2);
+        //     debugGraphics.endFill();
+        //     //Basically draw this evey frame and the collider will be updated
+        //     this.addChild(debugGraphics);
+        // }
+
+        for(const physObj of OBJECTS)
+        {
+            //Draw circle outline
+            const colliderGraphic = new PIXI.Graphics();
+            colliderGraphic.beginFill(0x00000, 0);
+            colliderGraphic.lineStyle(5, 0xff0000,0.5);
+            colliderGraphic.drawCircle(physObj.x, physObj.y, physObj.colliderRadius);
+            colliderGraphic.endFill();
+
+            //Add drawing to the containter
+            this.addChild(colliderGraphic);
+        }
+    }
+}
+
+//#endregion
+
 //#region Managers
 
 //#region Physics Manager
@@ -337,6 +458,17 @@ const SPIKES = [];
 
 /**@type {Player} The player object. Yes I know, its not const but it should be treated like one*/
 let PLAYER;
+
+/**
+ * Resets physics objects in the game excluding the player
+ */
+const resetObjects = () =>
+{
+    for(let i = 0; i < OBJECTS.length; i++)
+    {
+        let tryOrb = new Orb(Victor(0, 0), 50);
+    }
+}
 
 /**
  * Updates all physics objects
@@ -389,7 +521,6 @@ const initializeInputManager = () =>
     //When mouse down
     GAME_CONTAINER_ELEMENT.onpointerdown = e =>
     {
-        //Prevent default
         e.preventDefault();
         mouseDown = true;
     };
@@ -397,6 +528,7 @@ const initializeInputManager = () =>
     //When mouse up
     GAME_CONTAINER_ELEMENT.onpointerup = e =>
     {
+        e.preventDefault();
         mouseDown = false;
     };
 }
@@ -516,6 +648,9 @@ const start = () =>
     switchToScene(SCENE_ID.Game);
     initializeGameScene(getScene(SCENE_ID.Game));
 
+    //Initialize debugger
+    DEBUG = new Debug();
+
     //Begin the game loop
     APP.ticker.add(update);
 }
@@ -547,7 +682,10 @@ const update = () =>
 const initializeGameScene = gameScene =>
 {
     //DEBUG
-    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50);
+    // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50);
+    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 100);
+    orb.setScale(7);
+    const orb2 = new Orb(Victor(APP_SIZE.x*0.5 + 500, APP_SIZE.y*0.5), 700, 1400, 0xffff00);
     PLAYER = new Player(Victor(0, 0), 20);
     spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
 
@@ -569,29 +707,38 @@ const updateGame = () =>
     if(mouseDown)
     {
         // CAMERA.easeTo(mouseCanvasPosition.clone().add(Victor(-APP_SIZE.x*.5, -APP_SIZE.y*.5)), 2, 0.1);
-        CAMERA.easeTo(Victor(0, 0), 50, 0.01);
+        // CAMERA.easeTo(Victor(0, 0), 50, 0.01);
         // CAMERA.easeTo(SPIKES[0].vectorPosition.clone(), 2, 0.1);
         // spike.vectorPosition = mousePosition.clone();
+        CAMERA.easeTo(mouseCanvasPosition, 0.5, 0.1);
+        ORBS[0].setScale(ORBS[0].getScale() + 0.001);
+        ORBS[1].setScale(ORBS[1].getScale() + 0.001);
     }
     else
     {
         // CAMERA.easeTo(Victor(0, 0), 1, 0.1);
-        CAMERA.easeTo(mouseCanvasPosition, 0.5, 0.1);
+        CAMERA.easeTo(mouseCanvasPosition, 0.1, 0.1);
     }
     CAMERA.update();
     updateInputManager();
 
     //DEBUG test collisions
     PLAYER.vectorPosition = mouseWorldPosition.clone();
-    if(PLAYER.isColliding(spike))
+    for(const orb of ORBS)
     {
-        console.log("Colliding");
+        orb.tint = 0xffffff;
     }
+
+    if(PLAYER.isColliding(ORBS[0])) ORBS[0].tint = 0xff0000;
+    if(PLAYER.isColliding(ORBS[1])) ORBS[1].tint = 0x00ff00;
 
     spike.vectorPosition = CAMERA.canvasToWorld(Victor(300, 200));
 
 
     /*-----Ending tasks of update, nothing past here-----*/
+
+    //Update the debugger
+    DEBUG.update();
 
     //Update all physics objects
     updatePhysicsObjects();
