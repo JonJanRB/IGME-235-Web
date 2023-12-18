@@ -1,6 +1,7 @@
 //These are used for the intellisense and then commented out to run
 // import * as PIXI from './lib/pixi.js';
 // import * as Victor from './lib/victor.js';
+// import {Howl, Howler} from './lib/howler.js';
 
 "use strict";
 
@@ -140,6 +141,14 @@ class PhysicsObject extends PIXI.Graphics
         this.momentOfAcceleration = Victor(0, 0);
 
         //Update the base pixi properties
+        this.updatePosition();
+    }
+
+    /**
+     * Updates this object's base pixi position with vector position
+     */
+    updatePosition()
+    {
         this.x = this.vectorPosition.x;
         this.y = this.vectorPosition.y;
     }
@@ -258,9 +267,14 @@ class Orb extends Obstacle
      */
     update()
     {
-
+        this.updatePosition();
     }
 }
+
+/**
+ * An "enum" for the player states
+ */
+const PLAYER_STATE = Object.freeze({ Dead: 0, Idle: 1, Aiming: 2 , Tutorial: 3});
 
 /**
  * The player of the game
@@ -292,6 +306,11 @@ class Player extends PhysicsObject
         /**The direction to fling @type {number}*/
         this.direction = 0;
 
+        /**
+         * The state of the player represented by the PLAYER_STATE enum
+         * @type {number}
+         */
+        this.playerState = PLAYER_STATE.Dead;
 
         //Set position
         super.vectorPosition = vectorPosition;
@@ -319,18 +338,25 @@ class Player extends PhysicsObject
      */
     update()
     {
-        //Apply gravity
-        // this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(1));
-        this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(timeSpeed));
         
-        //DEBUG
-        console.log(GRAVITY, timeSpeed, this.momentOfAcceleration);
-        // console.log(this.momentOfAcceleration, this.velocity, this.vectorPosition);
+
+
+        //Apply gravity
+        this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(timeSpeed));
 
         //Face where the player is moving
         this.rotation = this.velocity.angle();
 
         super.update();
+    }
+
+    /**
+     * Starts aiming the player
+     */
+    aim()
+    {
+        this.playerState = PLAYER_STATE.Aiming;
+        SFX[SFX_ID.Aim].play();
     }
 }
 
@@ -378,7 +404,7 @@ class Spike extends Obstacle
      */
     update()
     {
-
+        this.updatePosition();
     }
 }
 
@@ -728,6 +754,18 @@ let mouseWorldPosition = Victor(0, 0);
 let mouseDown = false;
 
 /**
+ * The position of the mouse when it was last pressed in canvas space
+ * @type {Victor}
+ */
+let mouseDownCanvasPosition = Victor(0, 0);
+
+/**
+ * The position of the mouse when it was last released in canvas space
+ * @type {Victor}
+ */
+let mouseUpCanvasPosition = Victor(0, 0);
+
+/**
  * Initializes input related tasks 
  */
 const initializeInputManager = () =>
@@ -742,15 +780,26 @@ const initializeInputManager = () =>
     //When mouse down
     GAME_CONTAINER_ELEMENT.onpointerdown = e =>
     {
+        //Stop from dragging on text
         e.preventDefault();
         mouseDown = true;
+
+        //Position when pressed
+        mouseDownCanvasPosition = Victor(e.clientX, e.clientY).subtract(APP_CLIENT_POSITION);
+
+        //Begin aiming
+        PLAYER.aim();
     };
 
     //When mouse up
     GAME_CONTAINER_ELEMENT.onpointerup = e =>
     {
+        //Stop from dragging on text
         e.preventDefault();
         mouseDown = false;
+
+        //Position when pressed
+        mouseUpCanvasPosition = Victor(e.clientX, e.clientY).subtract(APP_CLIENT_POSITION);
     };
 }
 
@@ -776,7 +825,7 @@ const SCENES = [];
 /**
  * An "enum" for the scene names
  */
-const SCENE_ID = { Menu: 0, Game: 1 };
+const SCENE_ID = Object.freeze({ Menu: 0, Game: 1 });
 
 /**
  * Initializes all scenes and adds them to the stage
@@ -810,6 +859,66 @@ const switchToScene = (sceneID) =>
 {
     for(const scene of SCENES) scene.visible = false;
     SCENES[sceneID].visible = true;
+}
+
+//#endregion
+
+//#region Audio Manager
+
+/**
+ * The sound effects in the game
+ * @type {Howl[]}
+ */
+const SFX = [];
+
+/**
+ * An "enum" for the sound effect names
+ */
+const SFX_ID = Object.freeze
+({
+    Select: 0,
+    Swipe: 1,
+    Back: 2,
+    Aim: 3,
+    Fling: 4,
+    Orb: 5,
+    Spike: 6,
+    Death: 7
+});
+
+/**
+ * Initializes all audio
+ */
+const loadAudio = () =>
+{
+    //Initialize sound effects
+    for(const soundName in SFX_ID)
+    {
+        importSfx(soundName);
+    }
+
+    //Initialize music (if there was any)
+}
+
+/**
+ * The directory for all audio files
+ * @type {string}
+ */
+const audioDirectory = "assets/audio/";
+
+/**
+ * The directory for all sound effects
+ * @type {string}
+ */
+const sfxDirectory = audioDirectory + "sfx/";
+
+/**
+ * Imports the specified sfx
+ * @param {string} soundName The file name excluding the extension
+ */
+const importSfx = soundName =>
+{
+    SFX[SFX_ID[soundName]] = new Howl({src: [sfxDirectory + soundName + ".wav"]});
 }
 
 //#endregion
@@ -853,6 +962,11 @@ const loadAssets = async() =>
     //     move: 'images/move.png'
     //   });
     // ASSETS = await PIXI.Assets.loadBundle('sprites');
+
+    //Load audio
+    loadAudio();
+
+    //Start the game
     start();
 }
 
