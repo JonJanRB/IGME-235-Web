@@ -79,6 +79,7 @@ const DEBUG = new Debug();
 
 /**
  * An object with basic physics and is a graphics object
+ * @abstract
  */
 class PhysicsObject extends PIXI.Graphics
 {
@@ -86,6 +87,7 @@ class PhysicsObject extends PIXI.Graphics
      * Creates a new PhysicsObject
      * @param {Function} setupVisual A function of what to draw, requires 1 arg of PhysicsObject
      * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
+     * @param {number} tint The color of the tint
      */
     constructor(setupVisual, vectorPosition = Victor(0, 0), tint = 0xffffff)
     {
@@ -144,13 +146,13 @@ class PhysicsObject extends PIXI.Graphics
 
     /**
      * Checks if this object collides with another
-     * @param {PhysicsObject} physObj other physics object to check collision with 
+     * @param {PhysicsObject} other The physics object to check collision with 
      * @returns {boolean} TRUE if the objects are colliding
      */
-    isColliding(physObj)
+    isColliding(other)
     {
-        return this.vectorPosition.distance(physObj.vectorPosition) <
-            this.colliderRadius + physObj.colliderRadius;
+        return isColliding(this.vectorPosition, this.colliderRadius,
+            other.vectorPosition, other.colliderRadius)
     }
 
     /**
@@ -175,9 +177,51 @@ class PhysicsObject extends PIXI.Graphics
 }
 
 /**
+ * General physics objects that are procedurally placed such as orbs or spikes
+ * @abstract
+ */
+class Obstacle extends PhysicsObject
+{
+    /**
+     * Creates a new Obstacle
+     * @param {Function} setupVisual A function of what to draw, requires 1 arg of PhysicsObject
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
+     * @param {number} colliderRadius The radius of the circle collider
+     * @param {number} tint The color of the tint
+     */
+    constructor(setupVisual, vectorPosition = Victor(0, 0), colliderRadius = 1, tint = 0xffffff)
+    {
+        super(setupVisual, vectorPosition, tint);
+
+        //Set the collider radius
+        super.baseColliderRadius = colliderRadius;
+        //Comput the collider radius
+        super.setScale(1);
+
+        //Add to obstacle list
+        OBSTACLES.push(this);
+    }
+
+    /**
+     * Respawns this obstacle at a random location within the specified bounds with a random scale
+     * @param {PIXI.Rectangle} bounds The bounds to position this obstacle
+     * @param {number} scaleMin The minimum scale used to generate the random scale
+     * @param {number} scaleMax The maximum scale used to generate the random scale
+     */
+    respawn(bounds, scaleMin, scaleMax)
+    {
+        //Set a random position within the bounds
+        this.vectorPosition = randomRange2D(bounds);
+
+        //Set a random scale
+        this.setScale(randomRange(scaleMin, scaleMax));
+    }
+}
+
+/**
  * A friendly object that adds flings and gives a boost
  */
-class Orb extends PhysicsObject
+class Orb extends Obstacle
 {
     /**
      * Creates a new Orb
@@ -194,23 +238,10 @@ class Orb extends PhysicsObject
             phys.beginFill(0xffffff);
             phys.drawCircle(0, 0, visualRadius);
             phys.endFill();
-        }, vectorPosition, tint);
-
-        //Set the collider radius
-        super.baseColliderRadius = colliderRadius;
-        //Comput the collider radius
-        this.setScale(1);
+        }, vectorPosition, colliderRadius, tint);
 
         //Add to the list of orbs
         ORBS.push(this);
-    }
-
-    /**
-     * Updates this orb with any frame based tasks
-     */
-    update()
-    {
-        super.update();
     }
 
     /**
@@ -219,11 +250,7 @@ class Orb extends PhysicsObject
      */
     respawn(bounds)
     {
-        //Set a random position within the bounds
-        this.vectorPosition = randomRange2D(bounds);
-
-        //Set a random scale
-        this.setScale(randomRange(0.5, 1));
+        super.respawn(bounds, 0.5, 1);
     }
 }
 
@@ -237,9 +264,9 @@ class Player extends PhysicsObject
      * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} scaleAmount Amount to scale the initial visual by
      * @param {number} colliderRadius The radius for the collider
-     * @param {number} tint The color of the initial visual
+     * @param {number} tint The color of the player
      */
-    constructor(vectorPosition = Victor(0, 0), scaleAmount = 20, colliderRadius = scaleAmount*0.5, tint = 0x0000ff)
+    constructor(vectorPosition = CAMERA_POSITION_DEFAULT.clone(), scaleAmount = 20, colliderRadius = scaleAmount*0.5, tint = 0x0000ff)
     {
         super(phys =>
         {
@@ -269,7 +296,7 @@ class Player extends PhysicsObject
 
     reset()
     {
-        this.vectorPosition = Victor(0, 0);
+        this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
         this.velocity = Victor(0, 0);
         this.isAlive = true;
         this.flings = 5;
@@ -280,14 +307,14 @@ class Player extends PhysicsObject
 /**
  * A spike that subtracts flings and bounces the player back
  */
-class Spike extends PhysicsObject
+class Spike extends Obstacle
 {
     /**
      * Creates a new Spike with the specified values
      * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
      * @param {number} scaleAmount The amount to scale the initial visual by
      * @param {number} colliderRadius The radius for the collider
-     * @param {number} tint The color of the initial visual
+     * @param {number} tint The color of the spike
      */
     constructor(vectorPosition = Victor(0, 0), scaleAmount = 75, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
     {
@@ -298,15 +325,7 @@ class Spike extends PhysicsObject
             phys.beginFill(0xffffff);
             phys.drawPolygon([0, -halfScale, -halfScale, scaleAmount*0.333, halfScale, scaleAmount*0.333]);
             phys.endFill();
-        }, vectorPosition, tint);
-
-        //Set position
-        super.vectorPosition = vectorPosition;
-
-        //Set the collider radius
-        super.baseColliderRadius = colliderRadius;
-        //Comput the collider radius
-        this.setScale(1);
+        }, vectorPosition, colliderRadius, tint);
 
         //Add to the list of spikes
         SPIKES.push(this);
@@ -318,11 +337,7 @@ class Spike extends PhysicsObject
      */
     respawn(bounds)
     {
-        //Set a random position within the bounds
-        this.vectorPosition = randomRange2D(bounds);
-
-        //Set a random scale
-        this.setScale(randomRange(0.5, 1));
+        super.respawn(bounds, 0.5, 1);
 
         //Set a random rotation
         super.rotation = random(TWO_PI);
@@ -454,7 +469,7 @@ class Camera
 
 //#region Global Variables (not actually global scope, but like, global for all intents and purposes)
 
-//DOM
+//#region DOM
 
 /**
  * The container element for the game
@@ -462,7 +477,9 @@ class Camera
  */
 let GAME_CONTAINER_ELEMENT;
 
-//PIXI
+//#endregion
+
+//#region PIXI
 
 /**
  * A vector containing the width and height of the app (canvas element)
@@ -495,7 +512,9 @@ let APP_CLIENT_CENTER;
  */
 const STAGE = APP.stage;
 
-//Camera
+//#endregion
+
+//#region Camera
 
 /**
  * The main camera for the game
@@ -504,18 +523,32 @@ const STAGE = APP.stage;
 const CAMERA = new Camera(Victor(0, APP_SIZE.x));
 
 /**
- * The default zoom for the camera
- * @type {number}
- */
-const DEFAULT_CAMERA_ZOOM = 1;
-
-/**
  * The default position for the camera
  * @type {Victor}
  */
-const DEFAULT_CAMERA_POSITION = Victor(APP_SIZE.x * 0.5, 0);
+const CAMERA_POSITION_DEFAULT = Victor(APP_SIZE.x * 0.5, 0);
 
-//Math
+/**
+ * The default zoom for the camera
+ * @type {number}
+ */
+const CAMERA_ZOOM_DEFAULT = 1;
+
+/**
+ * The zoom for the camera when aiming
+ * @type {number}
+ */
+const CAMERA_ZOOM_AIMING = CAMERA_ZOOM_DEFAULT * 1.5;
+
+/**
+ * The factor to ease the camera by normally
+ * @type {number}
+ */
+const CAMERA_EASING_FACTOR = 0.1;
+
+//#endregion
+
+//#region Math
 
 /**
  * 90 degrees in radians. Straight up
@@ -528,6 +561,8 @@ const PI_OVER_2 = Math.PI * 0.5;
  * @type {number}
  */
 const TWO_PI = Math.PI * 2;
+
+//#endregion
 
 //#endregion
 
@@ -548,13 +583,16 @@ const friction = 1;
 /**@type {PhysicsObject[]} The list of all objects in the game */
 const OBJECTS = [];
 
-/**@type {Orb[]} The list of all objects in the game */
+/**@type {Obstacle[]} The list of all obstacles in the game */
+const OBSTACLES = [];
+
+/**@type {Orb[]} The list of all orbs in the game */
 const ORBS = [];
 
-/**@type {Spike[]} The list of all objects in the game */
+/**@type {Spike[]} The list of all spikes in the game */
 const SPIKES = [];
 
-/**@type {Player} The player object. Yes I know, its not const but it should be treated like one*/
+/**@type {Player} The player object */
 let PLAYER;
 
 /**
@@ -804,16 +842,8 @@ const update = () =>
  */
 const initializeGameScene = gameScene =>
 {
-    //DEBUG
-    // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 50);
-    const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5));
-    // const orb = new Orb(Victor(APP_SIZE.x*0.5, APP_SIZE.y*0.5), 100);
-    // orb.setScale(7);
-    // const orb2 = new Orb(Victor(APP_SIZE.x*0.5 + 500, APP_SIZE.y*0.5), 700, 1400, 0xffff00);
-    // PLAYER = new Player(Victor(0, 0), 20);
-    PLAYER = new Player(Victor(100, 200));
-    // spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
-    spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100));
+    //Initialize the player
+    PLAYER = new Player();
 
     //Initialize the objects
     initializeOjects(10, 7);
@@ -823,49 +853,24 @@ const initializeGameScene = gameScene =>
     {
         gameScene.addChild(object);
     }
+
+    //DEBUG this should not be called here, rather it should be called when start is pressed
+    //Set the game up
+    resetGame();
 }
-let spike;//DEBUG
+
 /**
  * Updates the game scene
  */
 const updateGame = () =>
 {
-    //DEBUG
-    // PLAYER.rotation += 0.01;
-    // console.log(mouseClientPosition);
-    if(mouseDown)
-    {
-        // CAMERA.easeTo(mouseCanvasPosition.clone().add(Victor(-APP_SIZE.x*.5, -APP_SIZE.y*.5)), 2, 0.1);
-        // CAMERA.easeTo(Victor(0, 0), 50, 0.01);
-        // CAMERA.easeTo(SPIKES[0].vectorPosition.clone(), 2, 0.1);
-        // spike.vectorPosition = mousePosition.clone();
-        // CAMERA.easeTo(mouseCanvasPosition, 0.1, 0.1);
-        // CAMERA.easeTo(mouseCanvasPosition, 5, 0.1);
-        resetGame();
-        // ORBS[0].setScale(ORBS[0].getScale() + 0.001);
-        // ORBS[1].setScale(ORBS[1].getScale() + 0.001);
-    }
-    else
-    {
-        // CAMERA.easeTo(Victor(0, 0), 1, 0.1);
-        CAMERA.easeTo(mouseCanvasPosition, 1, 0.1);
-        // CAMERA.easeTo(APP_SIZE.clone().multiplyScalar(0.5), 1, 0.1);
-    }
+    //Follow player when not aiming
+    CAMERA.easeTo(PLAYER.vectorPosition, CAMERA_ZOOM_DEFAULT, CAMERA_EASING_FACTOR);
+    
+    //Update camera
     CAMERA.update();
     updateInputManager();
-
-    //DEBUG test collisions
-    // PLAYER.vectorPosition = mouseWorldPosition.clone();
-    // for(const orb of ORBS)
-    // {
-    //     orb.tint = 0xffffff;
-    // }
-
-    // if(PLAYER.isColliding(ORBS[0])) ORBS[0].tint = 0xff0000;
-    // if(PLAYER.isColliding(ORBS[1])) ORBS[1].tint = 0x00ff00;
-
-    // spike.vectorPosition = CAMERA.canvasToWorld(Victor(300, 200));
-
+    
 
     /*-----Ending tasks of update, nothing past here-----*/
 
@@ -882,8 +887,8 @@ const resetGame = () =>
     PLAYER.reset();
 
     //Reset camera
-    CAMERA.zoom = DEFAULT_CAMERA_ZOOM;
-    CAMERA.position = DEFAULT_CAMERA_POSITION;
+    CAMERA.zoom = CAMERA_ZOOM_DEFAULT;
+    CAMERA.position = CAMERA_POSITION_DEFAULT;
 
     //Compute the matrix and bounding rectangle
     CAMERA.computeMatrix();
@@ -926,5 +931,20 @@ const randomRange = (min, max) => random(max - min) + min;
  */
 const randomRange2D = bounds =>
     Victor(randomRange(bounds.x, bounds.right), randomRange(bounds.y, bounds.bottom));
+
+/**
+ * Checks if the specified decomposed circles are colliding
+ * @param {Victor} p1 The position of the first circle
+ * @param {number} r1 The radius of the first circle
+ * @param {Victor} p2 The position of the second circle
+ * @param {number} r2 The radius of the second circle
+ * @returns {boolean} TRUE if the circles are colliding
+ */
+const isColliding = (p1, r1, p2, r2) =>
+{
+    //Use distance squared to avoid the square root
+    const radiusTotal = r1 + r2;
+    return p1.distanceSq(p2) < radiusTotal * radiusTotal;
+}
 
 //#endregion
