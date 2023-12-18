@@ -134,7 +134,7 @@ class PhysicsObject extends PIXI.Graphics
         this.vectorPosition.add(this.velocity.clone().multiplyScalar(timeSpeed));
 
         //Apply "friction"
-        this.velocity.subtract(this.velocity.clone().multiplyScalar(friction * timeSpeed));
+        this.velocity.subtract(this.velocity.clone().multiplyScalar(FRICTION * timeSpeed));
 
         //Reset acceleration
         this.momentOfAcceleration = Victor(0, 0);
@@ -252,6 +252,14 @@ class Orb extends Obstacle
     {
         super.respawn(bounds, 0.5, 1);
     }
+
+    /**
+     * Updates this orb
+     */
+    update()
+    {
+
+    }
 }
 
 /**
@@ -294,6 +302,9 @@ class Player extends PhysicsObject
         this.setScale(1);
     }
 
+    /**
+     * Resets the player to the starting values
+     */
     reset()
     {
         this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
@@ -301,6 +312,25 @@ class Player extends PhysicsObject
         this.isAlive = true;
         this.flings = 5;
         this.direction = PI_OVER_2;//Up
+    }
+
+    /**
+     * Updates this player
+     */
+    update()
+    {
+        //Apply gravity
+        // this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(1));
+        this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(timeSpeed));
+        
+        //DEBUG
+        console.log(GRAVITY, timeSpeed, this.momentOfAcceleration);
+        // console.log(this.momentOfAcceleration, this.velocity, this.vectorPosition);
+
+        //Face where the player is moving
+        this.rotation = this.velocity.angle();
+
+        super.update();
     }
 }
 
@@ -341,6 +371,14 @@ class Spike extends Obstacle
 
         //Set a random rotation
         super.rotation = random(TWO_PI);
+    }
+
+    /**
+     * Updates this spike
+     */
+    update()
+    {
+
     }
 }
 
@@ -570,11 +608,34 @@ const TWO_PI = Math.PI * 2;
 
 //#region Physics Manager
 
-/**@type {number} The amount time should be progressing */
+/**@type {number} The game speed without being proccessed by delta time */
+let currentGameSpeed = 1;
+
+/**@type {number} The game speed being targeted (eased to) */
+let targetGameSpeed = 1;
+
+/**@type {number} The amount time should be progressing (game speed * delta time)*/
 let timeSpeed = 1;
 
 /**@type {number} The amount of friction to be applied to physics objects */
-const friction = 1;
+const FRICTION = 0.9;
+
+/**@type {Victor} The gravity to be applied to physics objects */
+const GRAVITY = Victor(0, 100000);
+
+/**@type {number} The amount of easing to apply to the time speed */
+const TIME_EASING_FACTOR = 0.1;
+
+/**
+ * Updates time speed
+ */
+const updatePhysicsManager = () =>
+{
+    //Ease to the target game speed
+    targetGameSpeed += (targetGameSpeed - currentGameSpeed) * TIME_EASING_FACTOR;
+    //Compute the time speed, use elapsed SECONDS so convert from ms
+    timeSpeed = targetGameSpeed * APP.ticker.elapsedMS * 0.001;
+}
 
 //#endregion
 
@@ -615,21 +676,25 @@ const initializeOjects = (orbAmount, spikeAmount) =>
  */
 const resetObjects = bounds =>
 {
-    for(const orb of ORBS)
-    {
-        orb.respawn(bounds);
-    }
+    //How much space the obstacles need to give the player initially
+    const personalSpace = PLAYER.colliderRadius * 10;
 
-    for(const spike of SPIKES)
+    //Spawn all the orbs
+    for(const obstacle of OBSTACLES)
     {
-        spike.respawn(bounds);
+        //Make sure the obstacle isn't colliding with the player within a reasonable distance
+        do
+        {
+            obstacle.respawn(bounds);
+        }
+        while(isColliding(obstacle.vectorPosition, obstacle.colliderRadius, PLAYER.vectorPosition, personalSpace))
     }
 }
 
 /**
  * Updates all physics objects
  */
-const updatePhysicsObjects = () =>
+const updateObjects = () =>
 {
     for(const object of OBJECTS)
     {
@@ -874,8 +939,11 @@ const updateGame = () =>
 
     /*-----Ending tasks of update, nothing past here-----*/
 
+    //Update physics manager
+    updatePhysicsManager();
+
     //Update all physics objects
-    updatePhysicsObjects();
+    updateObjects();
 }
 
 /**
