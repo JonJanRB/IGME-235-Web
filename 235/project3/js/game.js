@@ -12,7 +12,7 @@
  * Whether or not debug mode is enabled
  * @type {boolean}
  */
-let debugEnabled = true;
+let debugEnabled = false;
 
 /**
  * An object that holds all the debug elements
@@ -223,7 +223,7 @@ class Orb extends PhysicsObject
         this.vectorPosition = randomRange2D(bounds);
 
         //Set a random scale
-        this.setScale(randomRange(0.75, 1.5));
+        this.setScale(randomRange(0.5, 1));
     }
 }
 
@@ -273,7 +273,7 @@ class Player extends PhysicsObject
         this.velocity = Victor(0, 0);
         this.isAlive = true;
         this.flings = 5;
-        this.direction = Math.PI * 0.5;//Up
+        this.direction = PI_OVER_2;//Up
     }
 }
 
@@ -322,7 +322,10 @@ class Spike extends PhysicsObject
         this.vectorPosition = randomRange2D(bounds);
 
         //Set a random scale
-        this.setScale(randomRange(2, 4));
+        this.setScale(randomRange(0.5, 1));
+
+        //Set a random rotation
+        super.rotation = random(TWO_PI);
     }
 }
 
@@ -498,13 +501,33 @@ const STAGE = APP.stage;
  * The main camera for the game
  * @type {Camera}
  */
-const CAMERA = new Camera(Victor(-200, 300));
+const CAMERA = new Camera(Victor(0, APP_SIZE.x));
 
 /**
  * The default zoom for the camera
  * @type {number}
  */
-const DEFAULT_ZOOM = 0.1;
+const DEFAULT_CAMERA_ZOOM = 1;
+
+/**
+ * The default position for the camera
+ * @type {Victor}
+ */
+const DEFAULT_CAMERA_POSITION = Victor(APP_SIZE.x * 0.5, 0);
+
+//Math
+
+/**
+ * 90 degrees in radians. Straight up
+ * @type {number}
+ */
+const PI_OVER_2 = Math.PI * 0.5;
+
+/**
+ * 360 degrees in radians. Full circle
+ * @type {number}
+ */
+const TWO_PI = Math.PI * 2;
 
 //#endregion
 
@@ -557,6 +580,11 @@ const resetObjects = bounds =>
     for(const orb of ORBS)
     {
         orb.respawn(bounds);
+    }
+
+    for(const spike of SPIKES)
+    {
+        spike.respawn(bounds);
     }
 }
 
@@ -812,15 +840,16 @@ const updateGame = () =>
         // CAMERA.easeTo(SPIKES[0].vectorPosition.clone(), 2, 0.1);
         // spike.vectorPosition = mousePosition.clone();
         // CAMERA.easeTo(mouseCanvasPosition, 0.1, 0.1);
-        CAMERA.easeTo(mouseCanvasPosition, 5, 0.1);
+        // CAMERA.easeTo(mouseCanvasPosition, 5, 0.1);
+        resetGame();
         // ORBS[0].setScale(ORBS[0].getScale() + 0.001);
         // ORBS[1].setScale(ORBS[1].getScale() + 0.001);
     }
     else
     {
         // CAMERA.easeTo(Victor(0, 0), 1, 0.1);
-        // CAMERA.easeTo(mouseCanvasPosition, 1, 0.1);
-        CAMERA.easeTo(APP_SIZE.clone().multiplyScalar(0.5), 1, 0.1);
+        CAMERA.easeTo(mouseCanvasPosition, 1, 0.1);
+        // CAMERA.easeTo(APP_SIZE.clone().multiplyScalar(0.5), 1, 0.1);
     }
     CAMERA.update();
     updateInputManager();
@@ -853,11 +882,14 @@ const resetGame = () =>
     PLAYER.reset();
 
     //Reset camera
-    CAMERA.zoom = DEFAULT_ZOOM;
-    CAMERA.position = Victor(0, 0);
+    CAMERA.zoom = DEFAULT_CAMERA_ZOOM;
+    CAMERA.position = DEFAULT_CAMERA_POSITION;
+
+    //Compute the matrix and bounding rectangle
+    CAMERA.computeMatrix();
 
     //Reset other physics objects
-    resetObjects();
+    resetObjects(CAMERA.boundingRectangle);
 }
 
 //#endregion
@@ -872,12 +904,19 @@ const resetGame = () =>
 const toVector = (point) => Victor(point.x, point.y);
 
 /**
+ * Generates a random number from 0 to the specified maximum
+ * @param {number} max Max inclusive
+ * @returns {number} A random number from 0 to the specified max
+ */
+const random = max => Math.random() * max;
+
+/**
  * Generates a random number within the specified range
  * @param {number} min Min inclusive
  * @param {number} max Max inclusive
  * @returns {number} A random number within the specified range
  */
-const randomRange = (min, max) => Math.random() * (max - min) + min;
+const randomRange = (min, max) => random(max - min) + min;
 
 
 /**
