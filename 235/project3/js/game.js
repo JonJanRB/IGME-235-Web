@@ -205,11 +205,25 @@ class Orb extends PhysicsObject
         ORBS.push(this);
     }
 
+    /**
+     * Updates this orb with any frame based tasks
+     */
     update()
     {
         super.update();
+    }
 
+    /**
+     * Respawns this orb at a random location within the specified bounds with a random scale
+     * @param {PIXI.Rectangle} bounds The bounds to position this orb in
+     */
+    respawn(bounds)
+    {
+        //Set a random position within the bounds
+        this.vectorPosition = randomRange2D(bounds);
 
+        //Set a random scale
+        this.setScale(randomRange(0.75, 1.5));
     }
 }
 
@@ -297,6 +311,19 @@ class Spike extends PhysicsObject
         //Add to the list of spikes
         SPIKES.push(this);
     }
+
+    /**
+     * Respawns the spike at a random location within the specified bounds with a random scale
+     * @param {PIXI.Rectangle} bounds The bounds to position the spike in
+     */
+    respawn(bounds)
+    {
+        //Set a random position within the bounds
+        this.vectorPosition = randomRange2D(bounds);
+
+        //Set a random scale
+        this.setScale(randomRange(2, 4));
+    }
 }
 
 /**
@@ -307,11 +334,27 @@ class Camera
     /**
      * Creates a new Camera
      */
-    constructor()
+    constructor(xBounds)
     {
         /**@type {Victor}*/this.position = Victor(0, 0);
         /**@type {number}*/this.zoom = 1;
-        /**@type {PIXI.Matrix}*/this.matrix = new PIXI.Matrix();
+        
+        /**
+         * The transformation matrix used to apply the camera to the stage
+         * @type {PIXI.Matrix}
+         */this.matrix = new PIXI.Matrix();
+
+        /**
+         * The rectangle that bounds the camera in world space. Computed every update cycle
+         * @type {PIXI.Rectangle}
+         */
+        this.boundingRectangle = new PIXI.Rectangle(0, 0, 0, 0);
+
+        /**
+         * The bounds for the camera to stay within
+         * @type {Victor}
+         */
+        this.xBounds = xBounds;
     }
 
     /**
@@ -346,11 +389,25 @@ class Camera
      */
     update()
     {
-        //Create the matrix
-        this.matrix.identity()
-            .translate(-this.position.x, -this.position.y)
-            .scale(this.zoom, this.zoom)
-            .translate(APP_SIZE.x*0.5, APP_SIZE.y*0.5);
+        //Compute the matrix and bounding rectangle
+        this.computeMatrix();
+
+        //Clamp camera within bounds. If clamped, recompute the matrix bounding rectangle
+        const overlapLeft = this.boundingRectangle.left - this.xBounds.x;
+        const overlapRight = this.boundingRectangle.right - this.xBounds.y;
+        //Prefers left, but if both are overlapping, each frame it will basically oscialte between the two
+        //since it will be pushed out of the one which means it won't trigger that one but will the other
+        //I am not handling this since it should never actually occur in the game
+        if(overlapLeft < 0)
+        {
+            this.position.x -= overlapLeft;
+            this.computeMatrix();
+        }
+        else if(overlapRight > 0)
+        {
+            this.position.x -= overlapRight;
+            this.computeMatrix();
+        }
 
         //Apply the matrix
         STAGE.transform.setFromMatrix(this.matrix);
@@ -361,7 +418,33 @@ class Camera
      * @param {Victor} canvasPosition The position relative to the canvas
      * @returns {Victor} The position relative to the world
      */
-    canvasToWorld = canvasPosition => convertToVector(this.matrix.applyInverse(canvasPosition.clone()));
+    canvasToWorld = canvasPosition => toVector(this.matrix.applyInverse(canvasPosition.clone()));
+
+    /**
+     * Computes the camera's view bounds in world space and updates the property
+     */
+    computeBoundingRectangle()
+    {
+        const topLeft = this.canvasToWorld(Victor(0, 0));
+        const bottomRight = this.canvasToWorld(Victor(APP_SIZE.x, APP_SIZE.y));
+        this.boundingRectangle = new PIXI.Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+    }
+
+    /**
+     * Computes the matrix to be applied to the stage setting the matrix
+     * and bounding rectangle properties (it computes the bounding rectangle)
+     */
+    computeMatrix()
+    {
+        //Create the matrix
+        this.matrix.identity()
+            .translate(-this.position.x, -this.position.y)
+            .scale(this.zoom, this.zoom)
+            .translate(APP_SIZE.x*0.5, APP_SIZE.y*0.5);
+
+        //Update the bounding rectangle
+        this.computeBoundingRectangle();
+    }
 }
 
 //#endregion
@@ -415,7 +498,7 @@ const STAGE = APP.stage;
  * The main camera for the game
  * @type {Camera}
  */
-const CAMERA = new Camera();
+const CAMERA = new Camera(Victor(-200, 300));
 
 /**
  * The default zoom for the camera
@@ -452,13 +535,28 @@ const SPIKES = [];
 let PLAYER;
 
 /**
- * Resets physics objects in the game excluding the player
+ * Generates the specified amount of objects, should only be called once
+ * @param {number} orbAmount Amount of orbs to generate
+ * @param {number} spikeAmount Amount of spikes to generate
  */
-const resetObjects = () =>
+const initializeOjects = (orbAmount, spikeAmount) =>
 {
-    for(let i = 0; i < OBJECTS.length; i++)
+    //Generate orbs
+    for(let i = 0; i < orbAmount; i++) new Orb();
+
+    //Generate spikes
+    for(let i = 0; i < spikeAmount; i++) new Spike();
+}
+
+/**
+ * Resets physics objects in the game excluding the player
+ * @param {PIXI.Rectangle} bounds The bounds to respawn the objects in
+ */
+const resetObjects = bounds =>
+{
+    for(const orb of ORBS)
     {
-        let tryOrb = new Orb();
+        orb.respawn(bounds);
     }
 }
 
@@ -689,6 +787,9 @@ const initializeGameScene = gameScene =>
     // spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100), 50);
     spike = new Spike(Victor(APP_SIZE.x*0.5 + 100, APP_SIZE.y*0.5 + 100));
 
+    //Initialize the objects
+    initializeOjects(10, 7);
+
     //Add all the objects to the scene
     for(const object of OBJECTS)
     {
@@ -768,6 +869,23 @@ const resetGame = () =>
  * @param {any} point Any object that holds x and y properties
  * @returns {Victor} A vector with the same x and y values as the point
  */
-const convertToVector = (point) => Victor(point.x, point.y);
+const toVector = (point) => Victor(point.x, point.y);
+
+/**
+ * Generates a random number within the specified range
+ * @param {number} min Min inclusive
+ * @param {number} max Max inclusive
+ * @returns {number} A random number within the specified range
+ */
+const randomRange = (min, max) => Math.random() * (max - min) + min;
+
+
+/**
+ * Generates a random vector within the specified bounds
+ * @param {PIXI.Rectangle} bounds The bounds within which the vector should be generated
+ * @returns {Victor} The randomly generated vector
+ */
+const randomRange2D = bounds =>
+    Victor(randomRange(bounds.x, bounds.right), randomRange(bounds.y, bounds.bottom));
 
 //#endregion
