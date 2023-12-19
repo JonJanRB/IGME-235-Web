@@ -291,6 +291,12 @@ class Obstacle extends PhysicsObject
 }
 
 /**
+ * The amount to boost the player by when they hit an orb
+ * @type {number}
+ */
+const ORB_BOOST_MULTIPLIER = 1.2;
+
+/**
  * A friendly object that adds flings and gives a boost
  */
 class Orb extends Obstacle
@@ -690,7 +696,7 @@ class Player extends PhysicsObject
         //Ease to the last indicator ball position in world space (not container space)
         CAMERA.easeTo(
             toVector(this.aimingIndicatorList[this.aimingIndicatorList.length - 1]).add(this.vectorPosition),
-            CAMERA_ZOOM_AIMING, CAMERA_EASING_FACTOR);
+            CAMERA_ZOOM_AIMING, CAMERA_AIMING_EASING_FACTOR);
 
         //Update aiming indicators, if invalid, return
         if(this.updateAimingIndicator()) return;
@@ -781,7 +787,7 @@ class Player extends PhysicsObject
             if(this.isColliding(orb))
             {
                 //Get a lil boost
-                this.velocity = Victor(-this.velocity.x, -Math.abs(this.velocity.y) -500);
+                this.velocity = Victor(-this.velocity.x, -Math.abs(this.velocity.y) * ORB_BOOST_MULTIPLIER);
 
                 //Increase flings
                 this.setFlingAmount(this.flings + 1);
@@ -816,12 +822,8 @@ class Player extends PhysicsObject
         //This could happen if you click outside of the canvas since I want it to be seamless for the player
         if(this.playerState !== PLAYER_STATE.Aiming) return;
 
-        //Hide aiming indicators
-        this.aimingIndicator.visible = false;
-
-        //Time goes back to normal, also make it go back quicker so it feels more responsive
-        currentGameSpeed = 0.5;
-        targetGameSpeed = 1;
+        //Hide indicator and reset time
+        this.exitAiming();
 
         //Change state
         this.playerState = PLAYER_STATE.Idle;
@@ -842,6 +844,19 @@ class Player extends PhysicsObject
         this.velocity = this.flingForce.clone().multiplyScalar(5);
     }
 
+    /**
+     * Transitions out of aiming
+     */
+    exitAiming()
+    {
+        //Hide aiming indicators
+        this.aimingIndicator.visible = false;
+
+        //Time goes back to normal, also make it go back quicker so it feels more responsive
+        currentGameSpeed = 0.5;
+        targetGameSpeed = 1;
+    }
+
     //#endregion
 
     //#region Death
@@ -854,9 +869,11 @@ class Player extends PhysicsObject
         //Change state
         this.playerState = PLAYER_STATE.Dead;
 
-        //Time goes back to normal
-        currentGameSpeed = 0.5;
-        targetGameSpeed = 1;
+        //Transition out of aiming
+        this.exitAiming();
+
+        //Stop horizontal velocity
+        this.velocity.x = 0;
 
         //Play sound
         playSound(SFX_ID.Death);
@@ -1072,9 +1089,9 @@ class Wave extends PIXI.Graphics
         //Move the wave
         this.position.y -= WAVE_SPEED * timeSpeed;
 
-        //If the wave is too far below, move it up
-        const lowerBound = CAMERA.boundingRectangle.bottom + 100;
-        if(this.position.y > lowerBound) this.position.y = lowerBound;
+        //If the wave is too far below (when not aiming), move it up
+        if(PLAYER.playerState !== PLAYER_STATE.Aiming)
+            this.position.y = Math.min(this.position.y, CAMERA.boundingRectangle.bottom + 100)
 
         //Update the collider
         this.bounds.y = this.y;
@@ -1171,6 +1188,18 @@ const CAMERA_ZOOM_AIMING = CAMERA_ZOOM_DEFAULT * 1.5;
  * @type {number}
  */
 const CAMERA_EASING_FACTOR = 0.1;
+
+/**
+ * The factor to ease the camera by when aiming
+ * @type {number}
+ */
+const CAMERA_AIMING_EASING_FACTOR = 0.05;
+
+/**
+ * The factor to ease the camera by when player speed is too fast
+ * @type {number}
+ */
+const CAMERA_SPEEDING_EASING_FACTOR = 0.3;
 
 //#endregion
 
@@ -1713,8 +1742,10 @@ const initializeGameScene = gameScene =>
  */
 const updateGame = () =>
 {
-    //Follow player when not aiming
-    CAMERA.easeTo(PLAYER.vectorPosition, CAMERA_ZOOM_DEFAULT, CAMERA_EASING_FACTOR);
+    //Follow player when not aiming, speed up camera if player is going too fast
+    let easeFactor = CAMERA_EASING_FACTOR;
+    if(PLAYER.velocity.lengthSq() > 6000000) easeFactor  = CAMERA_SPEEDING_EASING_FACTOR;
+    CAMERA.easeTo(PLAYER.vectorPosition, CAMERA_ZOOM_DEFAULT, easeFactor);
     
     //Update camera
     CAMERA.update();
