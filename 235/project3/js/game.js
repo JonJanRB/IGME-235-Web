@@ -16,6 +16,12 @@
 let debugEnabled = false;
 
 /**
+ * The thickness of the collider outline
+ * @type {number}
+ */
+const DEBUG_COLLIDER_THICKNESS = 2;
+
+/**
  * An object that holds all the debug elements
  * Cleared each frame for frame based debug elements
  */
@@ -62,7 +68,7 @@ class Debug extends PIXI.Container
             //Draw circle outline
             const colliderGraphic = new PIXI.Graphics();
             colliderGraphic.beginFill(0x00000, 0);
-            colliderGraphic.lineStyle(2, 0xff0000);
+            colliderGraphic.lineStyle(DEBUG_COLLIDER_THICKNESS, 0xff0000);
             colliderGraphic.drawCircle(physObj.x, physObj.y, physObj.colliderRadius);
             colliderGraphic.endFill();
 
@@ -72,10 +78,18 @@ class Debug extends PIXI.Container
 
         //Draw player fling vector
         const aimingVisualization = new PIXI.Graphics();
-        aimingVisualization.lineStyle(2, 0x00ff00);
+        aimingVisualization.lineStyle(DEBUG_COLLIDER_THICKNESS, 0x00ff00);
         aimingVisualization.lineTo(PLAYER.flingForce.x, PLAYER.flingForce.y);
         aimingVisualization.position.set(PLAYER.x, PLAYER.y);
         this.addChild(aimingVisualization);
+
+        //Draw wave collider
+        const waveColliderGraphic = new PIXI.Graphics();
+        waveColliderGraphic.beginFill(0x00000, 0);
+        waveColliderGraphic.lineStyle(DEBUG_COLLIDER_THICKNESS, 0x00fff0);
+        waveColliderGraphic.drawRect(WAVE.bounds.x, WAVE.bounds.y, WAVE.bounds.width, WAVE.bounds.height);
+        waveColliderGraphic.endFill();
+        this.addChild(waveColliderGraphic);
     }
 }
 
@@ -178,7 +192,7 @@ class PhysicsObject extends PIXI.Graphics
      */
     isCollidingWithPoint(point)
     {
-        return isCollidingWithPoint(this.vectorPosition, this.colliderRadius, point);
+        return isCircleCollidingWithPoint(this.vectorPosition, this.colliderRadius, point);
     }
 
     /**
@@ -227,6 +241,21 @@ class Obstacle extends PhysicsObject
 
         //Add to obstacle list
         OBSTACLES.push(this);
+    }
+
+    /**
+     * Updates this obstacle
+     */
+    update()
+    {
+        this.updatePosition();
+        
+        //Check if too low
+        if(this.vectorPosition.y > WAVE.y + 100)
+        {
+            //Respawn
+            this.respawn(CAMERA.nextCameraBound);
+        }
     }
 
     /**
@@ -297,14 +326,6 @@ class Orb extends Obstacle
     }
 
     /**
-     * Updates this orb
-     */
-    update()
-    {
-        this.updatePosition();
-    }
-
-    /**
      * Destroys and respawns this orb
      * @param {PIXI.Rectangle} bounds The bounds to respawn the orb within
      */
@@ -358,14 +379,6 @@ class Spike extends Obstacle
 
         //Set a random rotation
         super.rotation = random(TWO_PI);
-    }
-
-    /**
-     * Updates this spike
-     */
-    update()
-    {
-        this.updatePosition();
     }
 
     /**
@@ -447,7 +460,7 @@ class Player extends PhysicsObject
          * The state of the player represented by the PLAYER_STATE enum
          * @type {number}
          */
-        this.playerState = PLAYER_STATE.Dead;
+        this.playerState = PLAYER_STATE.Tutorial;
 
         /**@type {number}*/this.flings = 0;
 
@@ -469,6 +482,19 @@ class Player extends PhysicsObject
         //Comput the collider radius
         this.setScale(1);
     }
+
+    /**
+     * Resets the player to the starting values
+     */
+    reset()
+    {
+        this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
+        this.velocity = Victor(0, 0);
+        this.setFlingAmount(5);
+        this.flingForce = PI_OVER_2;//Up
+    }
+
+    //#region Aim Indicator
 
     /**
      * Initializes the aiming indicator graphics
@@ -560,53 +586,7 @@ class Player extends PhysicsObject
         }
     }
 
-    /**
-     * Resets the player to the starting values
-     */
-    reset()
-    {
-        this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
-        this.velocity = Victor(0, 0);
-        this.setFlingAmount(5);
-        this.flingForce = PI_OVER_2;//Up
-    }
-
-    /**
-     * Updates this player
-     */
-    update()
-    {
-        //FSM kind of, but transitions are activated by events
-        switch(this.playerState)
-        {
-            case PLAYER_STATE.Dead:
-
-                break;
-            case PLAYER_STATE.Idle:
-                this.whenAlive();
-                break;
-            case PLAYER_STATE.Aiming:
-                this.whenAlive();
-                this.whenAim();
-                break;
-            case PLAYER_STATE.Tutorial:
-                this.whenAlive();
-                break;
-        }
-
-
-        //Apply gravity
-        this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(timeSpeed));
-
-        //Face where the player is moving
-        this.rotation = this.velocity.angle();
-
-        //Bounce off the walls
-        if(this.vectorPosition.x < CAMERA.boundingRectangle.left) this.bounce(CAMERA.boundingRectangle.left);
-        else if(this.vectorPosition.x > CAMERA.boundingRectangle.right) this.bounce(CAMERA.boundingRectangle.right);
-
-        super.update();
-    }
+    //#endregion
 
     /**
      * Bounces the player off the specified bound
@@ -635,62 +615,57 @@ class Player extends PhysicsObject
         this.aimingNumber.text = amount.toString();
     }
 
-    /**
-     * Tasks to be run every frame when the player is alive
-     */
-    whenAlive()
-    {
-        //Check collisions with obstacles
-        this.checkCollisions();
-    }
+    //#region FSM
 
     /**
-     * Checks collisions with obstacles (orbs and spikes) and reacts accordingly
+     * Updates this player
      */
-    checkCollisions()
+    update()
     {
-        //The next "frame" to respawn obstacles in
-        const nextCameraBound = CAMERA.boundingRectangle.clone();
-        nextCameraBound.y -= nextCameraBound.height;
+        //Face where the player is moving
+        this.rotation = this.velocity.angle();  
+        //Stretch based on speed
+        this.scale.set(1, lerp(0.65, 1, Math.min(Math.max(0, 1 - this.velocity.lengthSq() * 0.000001), 1)));  
 
-        //Orbs
-        for(const orb of ORBS)
+        //FSM kind of, but transitions are activated by events
+        switch(this.playerState)
         {
-            if(this.isColliding(orb))
-            {
-                //Get a lil boost
-                this.velocity = Victor(-this.velocity.x, -Math.abs(this.velocity.y) -500);
-
-                //Increase flings
-                this.setFlingAmount(this.flings + 1);
-
-                //Drestroy orb
-                orb.destroy(nextCameraBound);
-            }
+            case PLAYER_STATE.Dead:
+                this.whenDead();
+                break;
+            case PLAYER_STATE.Idle:
+                this.whenAlive();
+                break;
+            case PLAYER_STATE.Aiming:
+                this.whenAlive();
+                this.whenAim();
+                break;
+            case PLAYER_STATE.Tutorial:
+                this.whenTutorial();
+                break;
         }
 
-        //Spikes
-        for(const spike of SPIKES)
-        {
-            if(this.isColliding(spike))
-            {
-                //Knockback
-                this.velocity = this.velocity.clone().multiplyScalar(-0.5);
 
-                //Increase flings
-                this.setFlingAmount(this.flings - 1);
+        //Apply gravity
+        this.momentOfAcceleration.add(GRAVITY.clone().multiplyScalar(timeSpeed));
 
-                //Drestroy orb
-                spike.destroy(nextCameraBound);
-            }
-        }
+        //Bounce off the walls
+        if(this.vectorPosition.x < CAMERA.boundingRectangle.left) this.bounce(CAMERA.boundingRectangle.left);
+        else if(this.vectorPosition.x > CAMERA.boundingRectangle.right) this.bounce(CAMERA.boundingRectangle.right);
+
+        super.update();
     }
+
+    //#region Aim
 
     /**
      * Starts aiming the player, fsm transition
      */
     onAim()
     {
+        //If the player is dead, don't aim
+        if(this.playerState === PLAYER_STATE.Dead) return;
+
         //Play sound
         playSound(SFX_ID.Aim);
 
@@ -711,18 +686,25 @@ class Player extends PhysicsObject
     {
         //Calculate fling force for this frame
         this.flingForce = mouseDownCanvasPosition.clone().subtract(mouseCanvasPosition);
-        
-        //Update aiming indicators
-        this.updateAimingIndicator();
-        
-        //Ease to the number indicator position in world space (not container space)
+
+        //Ease to the last indicator ball position in world space (not container space)
         CAMERA.easeTo(
-            toVector(this.aimingNumber.position).add(this.vectorPosition),
+            toVector(this.aimingIndicatorList[this.aimingIndicatorList.length - 1]).add(this.vectorPosition),
             CAMERA_ZOOM_AIMING, CAMERA_EASING_FACTOR);
+
+        //Update aiming indicators, if invalid, return
+        if(this.updateAimingIndicator()) return;
+
+        //Set direction to fling
+        this.rotation = this.flingForce.angle();
+
+        //Stretch based on predicted speed
+        this.scale.set(1, lerp(0.65, 1, Math.min(Math.max(0, 1 - this.flingForce.lengthSq() * 0.00001), 1)));  
     }
 
     /**
      * Updates the aiming indicator for this frame
+     * @returns {boolean} TRUE if the fling is invalid
      */
     updateAimingIndicator()
     {
@@ -761,8 +743,69 @@ class Player extends PhysicsObject
 
         //If the fling force is too small, tint the number red
         this.aimingNumber.tint = 0xffffff;
-        if(this.flingForce.lengthSq() < FLING_FORCE_MIN || this.flings == 0)
-            this.styleInvalidFling();
+        const isInvalid = this.flingForce.lengthSq() < FLING_FORCE_MIN || this.flings == 0;
+        if(isInvalid) this.styleInvalidFling();
+
+        //Return if the fling is invalid
+        return isInvalid;
+    }
+
+    //#endregion
+
+    //#region Alive and Idle
+
+    /**
+     * Tasks to be run every frame when the player is alive
+     */
+    whenAlive()
+    {
+        //Check collision with wave
+        if(WAVE.isColliding(this.vectorPosition))
+        {
+            this.onDeath();
+            return;//Don't bounce if already dead
+        }
+
+        //Check collisions with obstacles
+        this.checkCollisions();
+    }
+
+    /**
+     * Checks collisions with obstacles (orbs and spikes) and reacts accordingly
+     */
+    checkCollisions()
+    {
+        //Orbs
+        for(const orb of ORBS)
+        {
+            if(this.isColliding(orb))
+            {
+                //Get a lil boost
+                this.velocity = Victor(-this.velocity.x, -Math.abs(this.velocity.y) -500);
+
+                //Increase flings
+                this.setFlingAmount(this.flings + 1);
+
+                //Drestroy orb
+                orb.destroy(CAMERA.nextCameraBound);
+            }
+        }
+
+        //Spikes
+        for(const spike of SPIKES)
+        {
+            if(this.isColliding(spike))
+            {
+                //Knockback
+                this.velocity = this.velocity.clone().multiplyScalar(-0.5);
+
+                //Increase flings
+                this.setFlingAmount(this.flings - 1);
+
+                //Drestroy orb
+                spike.destroy(CAMERA.nextCameraBound);
+            }
+        }
     }
 
     /**
@@ -773,12 +816,12 @@ class Player extends PhysicsObject
         //This could happen if you click outside of the canvas since I want it to be seamless for the player
         if(this.playerState !== PLAYER_STATE.Aiming) return;
 
+        //Hide aiming indicators
+        this.aimingIndicator.visible = false;
+
         //Time goes back to normal, also make it go back quicker so it feels more responsive
         currentGameSpeed = 0.5;
         targetGameSpeed = 1;
-
-        //Hide aiming indicators
-        this.aimingIndicator.visible = false;
 
         //Change state
         this.playerState = PLAYER_STATE.Idle;
@@ -799,6 +842,57 @@ class Player extends PhysicsObject
         this.velocity = this.flingForce.clone().multiplyScalar(5);
     }
 
+    //#endregion
+
+    //#region Death
+
+    /**
+     * Kills the player, fsm transition
+     */
+    onDeath()
+    {
+        //Change state
+        this.playerState = PLAYER_STATE.Dead;
+
+        //Time goes back to normal
+        currentGameSpeed = 0.5;
+        targetGameSpeed = 1;
+
+        //Play sound
+        playSound(SFX_ID.Death);
+
+        //Record death height
+        deathHeight = this.vectorPosition.y;
+    }
+
+    /**
+     * Tasks to be run every frame when the player is dead
+     */
+    whenDead()
+    {
+        //Check if whole screen is white
+        if(WAVE.y < CAMERA.boundingRectangle.top)
+        {
+            switchToScene(SCENE_ID.Menu);
+        }
+    }
+
+    //#endregion
+
+    //#region Tutorial
+
+    /**
+     * Update tasks for tutorial (only at beginning of each game)
+     */
+    whenTutorial()
+    {
+        //Completely stop time
+        targetGameSpeed = 0;
+    }
+
+    //#endregion
+
+    //#endregion
 }
 
 //#endregion
@@ -826,6 +920,12 @@ class Camera
          * @type {PIXI.Rectangle}
          */
         this.boundingRectangle = new PIXI.Rectangle(0, 0, 0, 0);
+
+        /**
+         * The camera bound next frame up to be computed
+         * @type {PIXI.Rectangle}
+         */
+        this.nextCameraBound = new PIXI.Rectangle(0, 0, 0, 0);
 
         /**
          * The bounds for the camera to stay within
@@ -905,6 +1005,10 @@ class Camera
         const topLeft = this.canvasToWorld(Victor(0, 0));
         const bottomRight = this.canvasToWorld(Victor(APP_SIZE.x, APP_SIZE.y));
         this.boundingRectangle = new PIXI.Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+
+        //The next "frame" to respawn obstacles in
+        this.nextCameraBound = CAMERA.boundingRectangle.clone();
+        this.nextCameraBound.y -= this.nextCameraBound.height;
     }
 
     /**
@@ -921,6 +1025,69 @@ class Camera
 
         //Update the bounding rectangle
         this.computeBoundingRectangle();
+    }
+}
+
+/**
+ * @type {number} The speed of the wave
+ */
+const WAVE_SPEED = 200;
+
+/**
+ * The white thing that approaches from below
+ */
+class Wave extends PIXI.Graphics
+{
+    /**
+     * Creates a new Wave
+     */
+    constructor()
+    {
+        super();
+
+        //Start below player
+        super.position.set(0, CAMERA_POSITION_DEFAULT.y + 300);
+
+        //Scale to width of app, height is 2 * app height
+        super.scale.set(APP_SIZE.x, APP_SIZE.y * 2);
+
+        //Rectangle is a single unit wide and high
+        super.beginFill(0xffffff);
+        super.drawRect(0, 0, 1, 1);
+        super.endFill();
+        STAGE.addChild(this);
+
+        /**
+         * The collider of the wave
+         * @type {PIXI.Rectangle}
+         */
+        this.bounds = new PIXI.Rectangle(this.x, this.y, super.scale.x, super.scale.y)
+    }
+
+    /**
+     * Updates the wave
+     */
+    update()
+    {
+        //Move the wave
+        this.position.y -= WAVE_SPEED * timeSpeed;
+
+        //If the wave is too far below, move it up
+        const lowerBound = CAMERA.boundingRectangle.bottom + 100;
+        if(this.position.y > lowerBound) this.position.y = lowerBound;
+
+        //Update the collider
+        this.bounds.y = this.y;
+    }
+
+    /**
+     * Returns whether the specified point is colliding with this wave
+     * @param {Victor} point The point to check collisions with
+     * @returns {boolean} TRUE if the point is colliding with this wave
+     */
+    isColliding(point)
+    {
+        return this.bounds.contains(point.x, point.y);
     }
 }
 
@@ -1027,13 +1194,21 @@ const TWO_PI = Math.PI * 2;
 
 /**
  * The style for bold text
+ * @type {PIXI.TextStyle}
  */
 let BOLD_TEXT_STYLE;
 
 /**
  * The style for bold text
+ * @type {PIXI.TextStyle}
  */
 let LIGHT_TEXT_STYLE;
+
+/**
+ * The last height which the player died at
+ * @type {number}
+ */
+let deathHeight = 0;
 
 //#endregion
 
@@ -1091,6 +1266,9 @@ const SPIKES = [];
 /**@type {Player} The player object */
 let PLAYER;
 
+/**@type {Wave} The wave */
+let WAVE;
+
 /**
  * Generates the specified amount of objects, should only be called once
  * @param {number} orbAmount Amount of orbs to generate
@@ -1103,6 +1281,12 @@ const initializeOjects = (orbAmount, spikeAmount) =>
 
     //Generate spikes
     for(let i = 0; i < spikeAmount; i++) new Spike();
+
+    //Initialize the player
+    PLAYER = new Player();
+
+    //Initialize the wave
+    WAVE = new Wave();
 }
 
 /**
@@ -1131,10 +1315,14 @@ const resetObjects = bounds =>
  */
 const updateObjects = () =>
 {
+    //Update all objects
     for(const object of OBJECTS)
     {
         object.update();
     }
+
+    //Update the wave
+    WAVE.update();
 }
 
 //#endregion
@@ -1240,6 +1428,13 @@ const SCENES = [];
 const SCENE_ID = Object.freeze({ Menu: 0, Game: 1 });
 
 /**
+ * The current scene based off the SCENE_ID enum. Should not be set outside of scene manager
+ * @type {number}
+ * @readonly
+ */
+let currentScene = SCENE_ID.Menu;
+
+/**
  * Initializes all scenes and adds them to the stage
  */
 const initializeScenes = () =>
@@ -1269,7 +1464,8 @@ const getScene = (sceneID) => SCENES[sceneID];
  */
 const switchToScene = (sceneID) =>
 {
-    for(const scene of SCENES) scene.visible = false;
+    SCENES[currentScene].visible = false;
+    currentScene = sceneID;
     SCENES[sceneID].visible = true;
 }
 
@@ -1458,8 +1654,16 @@ const start = () =>
  */
 const update = () =>
 {
-    //TODO FSM
-    updateGame();
+    //Scene fsm
+    switch(currentScene)
+    {
+        case SCENE_ID.Menu:
+            updateMenu();
+            break;
+        case SCENE_ID.Game:
+            updateGame();
+            break;
+    }
 
 
     /*-----Ending tasks of update, nothing past here-----*/
@@ -1472,7 +1676,13 @@ const update = () =>
 
 //#region Menu Scene
 
+/**
+ * Updates the menu scene
+ */
+const updateMenu = () =>
+{
 
+}
 
 //#endregion
 
@@ -1486,9 +1696,6 @@ const initializeGameScene = gameScene =>
 {
     //Initialize the objects
     initializeOjects(10, 7);
-
-    //Initialize the player
-    PLAYER = new Player();
 
     //Add all the objects to the scene
     for(const object of OBJECTS)
@@ -1617,7 +1824,7 @@ const isColliding = (p1, r1, p2, r2) =>
  * @param {Victor} targetPoint The point to check against
  * @returns {boolean} TRUE if the circle is colliding with the point
  */
-const isCollidingWithPoint = (position, radius, targetPoint) =>
+const isCircleCollidingWithPoint = (position, radius, targetPoint) =>
 {
     return position.distanceSq(targetPoint) < radius * radius;
 }
