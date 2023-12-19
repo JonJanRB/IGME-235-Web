@@ -172,6 +172,16 @@ class PhysicsObject extends PIXI.Graphics
     }
 
     /**
+     * Returns whether or not this object is colliding with the specified point
+     * @param {Victor} point The vector position of the point to check collision with
+     * @returns {boolean} TRUE if the point is colliding with this object
+     */
+    isCollidingWithPoint(point)
+    {
+        return isCollidingWithPoint(this.vectorPosition, this.colliderRadius, point);
+    }
+
+    /**
      * Sets the scale of the object and computes the collider radius
      * @param {number} scale The scale amount to set the object to
      */
@@ -404,6 +414,11 @@ const INV_TOTAL_AIM_INDICATORS = 1 / (AIMING_BALLS_AMOUNT + 1);
 const AIM_INDICATOR_SCALE_RANGE = Victor(0.2, 1.2);
 
 /**
+ * The minimum fling force to fling
+ */
+const FLING_FORCE_MIN = 3500;
+
+/**
  * The player of the game
  */
 class Player extends PhysicsObject
@@ -472,7 +487,7 @@ class Player extends PhysicsObject
          */
         this.aimingIndicator = new PIXI.Container();
         this.aimingIndicator.visible = false;
-        this.addChild(this.aimingIndicator);
+        STAGE.addChild(this.aimingIndicator);
 
         /**
          * The thing that goes between the aiming balls and shows how many flings you have left
@@ -532,13 +547,27 @@ class Player extends PhysicsObject
     }
 
     /**
+     * Styles the indicator when a fling is invalid
+     */
+    styleInvalidFling()
+    {
+        //Tint all indicators red
+        const invalidColor = 0xff0000;
+        for(const indicator of this.aimingIndicatorList)
+        {
+            indicator.tint = invalidColor;
+            indicator.alpha *= 0.5;
+        }
+    }
+
+    /**
      * Resets the player to the starting values
      */
     reset()
     {
         this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
         this.velocity = Victor(0, 0);
-        this.flings = 5;
+        this.setFlingAmount(5);
         this.flingForce = PI_OVER_2;//Up
     }
 
@@ -591,6 +620,22 @@ class Player extends PhysicsObject
     }
 
     /**
+     * Sets the fling amount to the specified amount
+     * @param {number} amount The amount of flings to set it to
+     */
+    setFlingAmount(amount)
+    {
+        //Clamp the amount
+        if(amount < 0) amount = 0;
+
+        //Set the amount
+        this.flings = amount;
+
+        //Update the number indicator
+        this.aimingNumber.text = amount.toString();
+    }
+
+    /**
      * Tasks to be run every frame when the player is alive
      */
     whenAlive()
@@ -617,7 +662,7 @@ class Player extends PhysicsObject
                 this.velocity = Victor(-this.velocity.x, -Math.abs(this.velocity.y) -500);
 
                 //Increase flings
-                this.flings++;
+                this.setFlingAmount(this.flings + 1);
 
                 //Drestroy orb
                 orb.destroy(nextCameraBound);
@@ -633,7 +678,7 @@ class Player extends PhysicsObject
                 this.velocity = this.velocity.clone().multiplyScalar(-0.5);
 
                 //Increase flings
-                this.flings--;
+                this.setFlingAmount(this.flings - 1);
 
                 //Drestroy orb
                 spike.destroy(nextCameraBound);
@@ -681,8 +726,8 @@ class Player extends PhysicsObject
      */
     updateAimingIndicator()
     {
-        //Since this container is a child of the player, it needs to rotate the opposite way to be upright
-        this.aimingIndicator.rotation = -this.rotation;
+        //Track to the player
+        this.aimingIndicator.position = this.position;
 
         //Scale the fling force to be more visible on screen
         const aimingVector = this.flingForce.clone().multiplyScalar(0.7);
@@ -705,11 +750,19 @@ class Player extends PhysicsObject
 
             //Lerp the alpha as well
             indicator.alpha = lerp(0.3, 0.9, 1 - lerpAmount);
+
+            //Tint color as normal
+            indicator.tint = 0xffff00;
         }
 
         //Make sure the aiming number isn't too small and is opaque
         this.aimingNumber.scale.set(Math.max(0.5, this.aimingNumber.scale.x * 1.75));
         this.aimingNumber.alpha = 1;
+
+        //If the fling force is too small, tint the number red
+        this.aimingNumber.tint = 0xffffff;
+        if(this.flingForce.lengthSq() < FLING_FORCE_MIN || this.flings == 0)
+            this.styleInvalidFling();
     }
 
     /**
@@ -718,13 +771,7 @@ class Player extends PhysicsObject
     onFling()
     {
         //This could happen if you click outside of the canvas since I want it to be seamless for the player
-        if(this.playerState !== PLAYER_STATE.Aiming)
-        {
-            return;
-        }
-
-        //Play sound
-        playSound(SFX_ID.Fling);
+        if(this.playerState !== PLAYER_STATE.Aiming) return;
 
         //Time goes back to normal, also make it go back quicker so it feels more responsive
         currentGameSpeed = 0.5;
@@ -733,11 +780,23 @@ class Player extends PhysicsObject
         //Hide aiming indicators
         this.aimingIndicator.visible = false;
 
-        //Fling the player
-        this.velocity = this.flingForce.clone().multiplyScalar(5);
-
         //Change state
         this.playerState = PLAYER_STATE.Idle;
+
+        //If the mouse is within the player's collider or no flings left, don't fling (cancel)
+        if(this.flingForce.lengthSq() < FLING_FORCE_MIN || this.flings == 0)
+        {
+            playSound(SFX_ID.Spike);
+            return;
+        }
+
+        this.setFlingAmount(this.flings - 1);
+
+        //Play sound
+        playSound(SFX_ID.Fling);
+
+        //Fling the player
+        this.velocity = this.flingForce.clone().multiplyScalar(5);
     }
 
 }
@@ -1549,6 +1608,18 @@ const isColliding = (p1, r1, p2, r2) =>
     //Use distance squared to avoid the square root
     const radiusTotal = r1 + r2;
     return p1.distanceSq(p2) < radiusTotal * radiusTotal;
+}
+
+/**
+ * Returns whether the specified circle is colliding with the specified point
+ * @param {Victor} position The position of the circle
+ * @param {number} radius The radius of the circle
+ * @param {Victor} targetPoint The point to check against
+ * @returns {boolean} TRUE if the circle is colliding with the point
+ */
+const isCollidingWithPoint = (position, radius, targetPoint) =>
+{
+    return position.distanceSq(targetPoint) < radius * radius;
 }
 
 //#endregion
