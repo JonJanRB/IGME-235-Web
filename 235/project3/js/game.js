@@ -1,7 +1,7 @@
 //These are used for the intellisense and then commented out to run
-// import * as PIXI from './lib/pixi.js';
-// import * as Victor from './lib/victor.js';
-// import {Howl, Howler} from './lib/howler.js';
+// import * as PIXI from "./lib/pixi.js";
+// import * as Victor from "./lib/victor.js";
+// import {Howl, Howler} from "./lib/howler.js";
 
 "use strict";
 
@@ -13,7 +13,7 @@
  * Whether or not debug mode is enabled
  * @type {boolean}
  */
-let debugEnabled = true;
+let debugEnabled = false;
 
 /**
  * An object that holds all the debug elements
@@ -56,6 +56,7 @@ class Debug extends PIXI.Container
      */
     drawColliders()
     {
+        //Draw colliders for all objects
         for(const physObj of OBJECTS)
         {
             //Draw circle outline
@@ -73,8 +74,7 @@ class Debug extends PIXI.Container
         const aimingVisualization = new PIXI.Graphics();
         aimingVisualization.lineStyle(2, 0x00ff00);
         aimingVisualization.lineTo(PLAYER.flingForce.x, PLAYER.flingForce.y);
-        aimingVisualization.x = PLAYER.x;
-        aimingVisualization.y = PLAYER.y;
+        aimingVisualization.position.set(PLAYER.x, PLAYER.y);
         this.addChild(aimingVisualization);
     }
 }
@@ -157,8 +157,7 @@ class PhysicsObject extends PIXI.Graphics
      */
     updatePosition()
     {
-        this.x = this.vectorPosition.x;
-        this.y = this.vectorPosition.y;
+        this.position.set(this.vectorPosition.x, this.vectorPosition.y);
     }
 
     /**
@@ -178,8 +177,7 @@ class PhysicsObject extends PIXI.Graphics
      */
     setScale(scale)
     {
-        super.scale.x = scale;
-        super.scale.y = scale;
+        super.scale.set(scale);
         this.colliderRadius = this.baseColliderRadius * scale;
     }
 
@@ -192,6 +190,8 @@ class PhysicsObject extends PIXI.Graphics
         return super.scale.x;
     }
 }
+
+//#region Obstacles
 
 /**
  * General physics objects that are procedurally placed such as orbs or spikes
@@ -280,9 +280,77 @@ class Orb extends Obstacle
 }
 
 /**
+ * A spike that subtracts flings and bounces the player back
+ */
+class Spike extends Obstacle
+{
+    /**
+     * Creates a new Spike with the specified values
+     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
+     * @param {number} scaleAmount The amount to scale the initial visual by
+     * @param {number} colliderRadius The radius for the collider
+     * @param {number} tint The color of the spike
+     */
+    constructor(vectorPosition = Victor(0, 0), scaleAmount = 75, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
+    {
+        super(phys =>
+        {
+            //Create a triangle centered around 0,0
+            const halfScale = scaleAmount * 0.5;
+            phys.beginFill(0xffffff);
+            phys.drawPolygon([0, -halfScale, -halfScale, scaleAmount*0.333, halfScale, scaleAmount*0.333]);
+            phys.endFill();
+        }, vectorPosition, colliderRadius, tint);
+
+        //Add to the list of spikes
+        SPIKES.push(this);
+    }
+
+    /**
+     * Respawns the spike at a random location within the specified bounds with a random scale
+     * @param {PIXI.Rectangle} bounds The bounds to position the spike in
+     */
+    respawn(bounds)
+    {
+        super.respawn(bounds, 0.5, 1);
+
+        //Set a random rotation
+        super.rotation = random(TWO_PI);
+    }
+
+    /**
+     * Updates this spike
+     */
+    update()
+    {
+        this.updatePosition();
+    }
+}
+
+//#endregion
+
+/**
  * An "enum" for the player states
  */
 const PLAYER_STATE = Object.freeze({ Dead: 0, Idle: 1, Aiming: 2 , Tutorial: 3});
+
+/**
+ * The amount of aiming balls to show.
+ * Should be an even number so that the middle is the indicator
+ * @type {number}
+ */
+const AIMING_BALLS_AMOUNT = 4;
+
+/**
+ * The inverse of the total aiming indicators. Used for quick lerping
+ * @type {number}
+ */
+const INV_TOTAL_AIM_INDICATORS = 1 / (AIMING_BALLS_AMOUNT + 1);
+
+/**
+ * The min (x) and max (y) scale for the aiming balls
+ */
+const AIM_INDICATOR_SCALE_RANGE = Victor(0.2, 1.2);
 
 /**
  * The player of the game
@@ -309,27 +377,107 @@ class Player extends PhysicsObject
         }, vectorPosition, tint);
 
         //Properties
-        /**@type {number}*/this.flings = 0;
-
-        /**
-         * The direction to fling
-         * @type {number}
-         */
-        this.flingForce = 0;
-
         /**
          * The state of the player represented by the PLAYER_STATE enum
          * @type {number}
          */
         this.playerState = PLAYER_STATE.Dead;
 
+        /**@type {number}*/this.flings = 0;
+
+        /**
+         * The direction to fling
+         * @type {Victor}
+         */
+        this.flingForce = Victor(0, 0);
+
+        //Initialize aiming indicators
+        this.initializeAimingIndicator();
+
         //Set position
         super.vectorPosition = vectorPosition;
 
         //Set the collider radius
         super.baseColliderRadius = colliderRadius;
+
         //Comput the collider radius
         this.setScale(1);
+    }
+
+    /**
+     * Initializes the aiming indicator graphics
+     */
+    initializeAimingIndicator()
+    {
+        /**
+         * The list of aiming indicators in the order they are lerped
+         * @type {any[]}
+         */
+        this.aimingIndicatorList = [];
+
+        /**
+         * The container for the little balls and number that are used to visualize your fling force
+         * @type {PIXI.Container}
+         */
+        this.aimingIndicator = new PIXI.Container();
+        this.aimingIndicator.visible = false;
+        this.addChild(this.aimingIndicator);
+
+        /**
+         * The thing that goes between the aiming balls and shows how many flings you have left
+         * @type {PIXI.Text}
+         */
+        this.aimingNumber = this.createAimingNumber();
+
+        //Calculate how many balls should be on each side of the number
+        const halfBalls = Math.floor(AIMING_BALLS_AMOUNT * 0.5);
+
+        //Initialize aiming indicators (balls, number, balls)
+        this.addAimingBalls(halfBalls);        
+        this.aimingIndicatorList.push(this.aimingNumber);
+        this.addAimingBalls(halfBalls);
+
+        //Add number to the container at the end so it is on top
+        this.aimingIndicator.addChild(this.aimingNumber);
+    }
+
+    /**
+     * Creates a new aiming ball graphic
+     * @returns {PIXI.Graphics} The aiming ball graphic
+     */
+    createAimingBall()
+    {
+        const ball = new PIXI.Graphics();
+        ball.beginFill(0x000fff, 0.5);
+        ball.drawCircle(0, 0, 10);
+        ball.endFill();
+        return ball;
+    }
+
+    /**
+     * Adds the specified amount of aiming balls to the indicator container and list
+     * @param {number} amount The amount of aiming balls to add
+     */
+    addAimingBalls(amount)
+    {
+        for(let i = 0; i < amount; i++)
+        {
+            const ball = this.createAimingBall();
+            this.aimingIndicator.addChild(ball);
+            this.aimingIndicatorList.push(ball);
+        }
+    }
+
+    /**
+     * Creates a new aiming number graphic
+     * @returns {PIXI.Text} The number graphic
+     */
+    createAimingNumber()
+    {
+        const numberGraphic = new PIXI.Text("0", BOLD_TEXT_STYLE);
+        numberGraphic.anchor.set(0.5);
+        numberGraphic.scale.set(0.01);
+        return numberGraphic;
     }
 
     /**
@@ -381,21 +529,53 @@ class Player extends PhysicsObject
     onAim()
     {
         //Play sound
-        SFX[SFX_ID.Aim].play();
+        playSound(SFX_ID.Aim);
 
         //Change time speed
         targetGameSpeed = 0.02;
+
+        //Show aiming indicators
+        this.aimingIndicator.visible = true;
 
         //Change state
         this.playerState = PLAYER_STATE.Aiming;
     }
 
+    /**
+     * Aiming tasks to be run every frame
+     */
     updateAim()
     {
         //Calculate fling force for this frame
         this.flingForce = mouseDownCanvasPosition.clone().subtract(mouseCanvasPosition);
+        
+        //Update aiming indicators
+        
+        //Since this container is a child of the player, it needs to rotate the opposite way to be upright
+        this.aimingIndicator.rotation = -this.rotation;
 
+        //Scale the fling force to be more visible on screen
+        const aimingVector = this.flingForce.clone().multiplyScalar(0.7);
 
+        for(let i = 0; i < this.aimingIndicatorList.length; i++)
+        {
+            const indicator = this.aimingIndicatorList[i];
+
+            //Calculate the lerp amount for this indicator
+            const lerpAmount = INV_TOTAL_AIM_INDICATORS * (i + 1);
+
+            //A proportional linear interpolation between the player and the fling force
+            const lerpPosition = lerp2D(Victor(0, 0), aimingVector, lerpAmount);
+            indicator.position.set(lerpPosition.x, lerpPosition.y);
+
+            //Scale the indicator based on the inverted lerp and also scale based on the fling force magnitude
+            indicator.scale.set(
+                lerp(AIM_INDICATOR_SCALE_RANGE.x, AIM_INDICATOR_SCALE_RANGE.y, 1 - lerpAmount) *
+                Math.min(2, aimingVector.magnitude() * 0.005));
+        }
+
+        //Make sure the aiming number isn't too small
+        this.aimingNumber.scale.set(Math.max(0.5, this.aimingNumber.scale.x));
     }
 
 
@@ -404,54 +584,6 @@ class Player extends PhysicsObject
 
     }
 
-}
-
-/**
- * A spike that subtracts flings and bounces the player back
- */
-class Spike extends Obstacle
-{
-    /**
-     * Creates a new Spike with the specified values
-     * @param {Victor} vectorPosition The initial position (not for the visual, for the entire object)
-     * @param {number} scaleAmount The amount to scale the initial visual by
-     * @param {number} colliderRadius The radius for the collider
-     * @param {number} tint The color of the spike
-     */
-    constructor(vectorPosition = Victor(0, 0), scaleAmount = 75, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
-    {
-        super(phys =>
-        {
-            //Create a triangle centered around 0,0
-            const halfScale = scaleAmount * 0.5;
-            phys.beginFill(0xffffff);
-            phys.drawPolygon([0, -halfScale, -halfScale, scaleAmount*0.333, halfScale, scaleAmount*0.333]);
-            phys.endFill();
-        }, vectorPosition, colliderRadius, tint);
-
-        //Add to the list of spikes
-        SPIKES.push(this);
-    }
-
-    /**
-     * Respawns the spike at a random location within the specified bounds with a random scale
-     * @param {PIXI.Rectangle} bounds The bounds to position the spike in
-     */
-    respawn(bounds)
-    {
-        super.respawn(bounds, 0.5, 1);
-
-        //Set a random rotation
-        super.rotation = random(TWO_PI);
-    }
-
-    /**
-     * Updates this spike
-     */
-    update()
-    {
-        this.updatePosition();
-    }
 }
 
 /**
@@ -671,6 +803,20 @@ const PI_OVER_2 = Math.PI * 0.5;
  * @type {number}
  */
 const TWO_PI = Math.PI * 2;
+
+//#endregion
+
+//#region Text and UI
+
+/**
+ * The style for bold text
+ */
+let BOLD_TEXT_STYLE;
+
+/**
+ * The style for bold text
+ */
+let LIGHT_TEXT_STYLE;
 
 //#endregion
 
@@ -967,6 +1113,12 @@ const importSfx = soundName =>
     SFX[SFX_ID[soundName]] = new Howl({src: [sfxDirectory + soundName + ".wav"]});
 }
 
+/**
+ * Plays the specified sound effect
+ * @param {number} soundID The sound id from the SFX_ID enum
+ */
+const playSound = soundID => SFX[soundID].play();
+
 //#endregion
 
 //#endregion
@@ -994,7 +1146,23 @@ const init = () =>
     //Load any assets
     loadAssets();
 }
-window.onload = init;
+
+/**
+ * Load fonts first before anything, then initialize the game
+ */
+const loadFonts = () =>
+{
+    WebFont.load
+    ({
+        google:
+        {
+            families: ["Comfortaa"]
+        },
+        active: init
+    });
+}
+
+window.onload = loadFonts;
 
 /**
  * Loads all the assets for the game. Called after the DOM is loaded
@@ -1008,6 +1176,27 @@ const loadAssets = async() =>
     //     move: 'images/move.png'
     //   });
     // ASSETS = await PIXI.Assets.loadBundle('sprites');
+
+    //Create fonts
+    BOLD_TEXT_STYLE = new PIXI.TextStyle
+    ({
+        fill: 0xffffff,
+        fontSize: 50,
+        fontFamily: "Comfortaa",
+        fontWeight: "bold",
+        align: "center",
+        justify: "center"
+    });
+
+    LIGHT_TEXT_STYLE = new PIXI.TextStyle
+    ({
+        fill: 0xffffff,
+        fontSize: 50,
+        fontFamily: "Comfortaa",
+        fontWeight: "light",
+        align: "center",
+        justify: "center"
+    });
 
     //Load audio
     loadAudio();
@@ -1067,11 +1256,11 @@ const update = () =>
  */
 const initializeGameScene = gameScene =>
 {
-    //Initialize the player
-    PLAYER = new Player();
-
     //Initialize the objects
     initializeOjects(10, 7);
+
+    //Initialize the player
+    PLAYER = new Player();
 
     //Add all the objects to the scene
     for(const object of OBJECTS)
@@ -1159,6 +1348,24 @@ const randomRange = (min, max) => random(max - min) + min;
  */
 const randomRange2D = bounds =>
     Victor(randomRange(bounds.x, bounds.right), randomRange(bounds.y, bounds.bottom));
+
+/**
+ * Linearly interpolates between two numbers
+ * @param {number} min The lower bound
+ * @param {number} max The upper bound
+ * @param {number} progress How far along the lerp it is (0-1)
+ * @returns {number} The lerped vector
+ */
+const lerp = (min, max, progress) => min + (max - min) * progress;
+
+/**
+ * Linearly interpolates between two vectors
+ * @param {Victor} min The lower bound of the lerp
+ * @param {Victor} max The upper bound of the lerp
+ * @param {number} progress How far along the lerp it is (0-1)
+ * @returns {Victor} The lerped vector
+ */
+const lerp2D = (min, max, progress) => min.clone().add(max.clone().subtract(min).multiplyScalar(progress));
 
 /**
  * Checks if the specified decomposed circles are colliding
