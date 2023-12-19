@@ -13,7 +13,7 @@
  * Whether or not debug mode is enabled
  * @type {boolean}
  */
-let debugEnabled = false;
+let debugEnabled = true;
 
 /**
  * An object that holds all the debug elements
@@ -61,13 +61,21 @@ class Debug extends PIXI.Container
             //Draw circle outline
             const colliderGraphic = new PIXI.Graphics();
             colliderGraphic.beginFill(0x00000, 0);
-            colliderGraphic.lineStyle(2, 0xff0000,0.5);
+            colliderGraphic.lineStyle(2, 0xff0000);
             colliderGraphic.drawCircle(physObj.x, physObj.y, physObj.colliderRadius);
             colliderGraphic.endFill();
 
             //Add drawing to the containter
             this.addChild(colliderGraphic);
         }
+
+        //Draw player fling vector
+        const aimingVisualization = new PIXI.Graphics();
+        aimingVisualization.lineStyle(2, 0x00ff00);
+        aimingVisualization.lineTo(PLAYER.flingForce.x, PLAYER.flingForce.y);
+        aimingVisualization.x = PLAYER.x;
+        aimingVisualization.y = PLAYER.y;
+        this.addChild(aimingVisualization);
     }
 }
 
@@ -301,10 +309,13 @@ class Player extends PhysicsObject
         }, vectorPosition, tint);
 
         //Properties
-        /**@type {boolean}*/this.isAlive = false;
         /**@type {number}*/this.flings = 0;
-        /**The direction to fling @type {number}*/
-        this.direction = 0;
+
+        /**
+         * The direction to fling
+         * @type {number}
+         */
+        this.flingForce = 0;
 
         /**
          * The state of the player represented by the PLAYER_STATE enum
@@ -328,9 +339,8 @@ class Player extends PhysicsObject
     {
         this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
         this.velocity = Victor(0, 0);
-        this.isAlive = true;
         this.flings = 5;
-        this.direction = PI_OVER_2;//Up
+        this.flingForce = PI_OVER_2;//Up
     }
 
     /**
@@ -338,7 +348,22 @@ class Player extends PhysicsObject
      */
     update()
     {
-        
+        //FSM kind of, but transitions are activated by events
+        switch(this.playerState)
+        {
+            case PLAYER_STATE.Dead:
+
+                break;
+            case PLAYER_STATE.Idle:
+                    
+                break;
+            case PLAYER_STATE.Aiming:
+                    this.updateAim();
+                break;
+            case PLAYER_STATE.Tutorial:
+                    
+                break;
+        }
 
 
         //Apply gravity
@@ -353,11 +378,32 @@ class Player extends PhysicsObject
     /**
      * Starts aiming the player
      */
-    aim()
+    onAim()
     {
-        this.playerState = PLAYER_STATE.Aiming;
+        //Play sound
         SFX[SFX_ID.Aim].play();
+
+        //Change time speed
+        targetGameSpeed = 0.02;
+
+        //Change state
+        this.playerState = PLAYER_STATE.Aiming;
     }
+
+    updateAim()
+    {
+        //Calculate fling force for this frame
+        this.flingForce = mouseDownCanvasPosition.clone().subtract(mouseCanvasPosition);
+
+
+    }
+
+
+    onFling()
+    {
+
+    }
+
 }
 
 /**
@@ -658,9 +704,9 @@ const TIME_EASING_FACTOR = 0.1;
 const updatePhysicsManager = () =>
 {
     //Ease to the target game speed
-    targetGameSpeed += (targetGameSpeed - currentGameSpeed) * TIME_EASING_FACTOR;
+    currentGameSpeed += (targetGameSpeed - currentGameSpeed) * TIME_EASING_FACTOR;
     //Compute the time speed, use elapsed SECONDS so convert from ms
-    timeSpeed = targetGameSpeed * APP.ticker.elapsedMS * 0.001;
+    timeSpeed = currentGameSpeed * APP.ticker.elapsedMS * 0.001;
 }
 
 //#endregion
@@ -788,7 +834,7 @@ const initializeInputManager = () =>
         mouseDownCanvasPosition = Victor(e.clientX, e.clientY).subtract(APP_CLIENT_POSITION);
 
         //Begin aiming
-        PLAYER.aim();
+        PLAYER.onAim();
     };
 
     //When mouse up
