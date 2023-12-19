@@ -229,9 +229,25 @@ class Obstacle extends PhysicsObject
     {
         //Set a random position within the bounds
         this.vectorPosition = randomRange2D(bounds);
+        //Update the base pixi pos or else there is a frame lag
+        this.updatePosition();
 
         //Set a random scale
         this.setScale(randomRange(scaleMin, scaleMax));
+    }
+
+    /**
+     * Destroys this obstacle then respawns it
+     * @param {PIXI.Rectangle} bounds The bounds to respawn this obstacle in
+     * @param {Function} particleEffect The particle effect to play when this obstacle is destroyed
+     */
+    destroy(bounds, particleEffect)
+    {
+        //Play particle effect
+        particleEffect(this);
+
+        //Respawn
+        this.respawn(bounds);
     }
 }
 
@@ -276,6 +292,22 @@ class Orb extends Obstacle
     update()
     {
         this.updatePosition();
+    }
+
+    /**
+     * Destroys and respawns this orb
+     * @param {PIXI.Rectangle} bounds The bounds to respawn the orb within
+     */
+    destroy(bounds)
+    {
+        //TODO: Particle effect
+        super.destroy(bounds, physObj =>
+        {
+            
+        });
+
+        //Play sound
+        playSound(SFX_ID.Orb);
     }
 }
 
@@ -325,9 +357,28 @@ class Spike extends Obstacle
     {
         this.updatePosition();
     }
+
+    /**
+     * Destroys and respawns this spike
+     * @param {PIXI.Rectangle} bounds The bounds to respawn the spike within
+     */
+    destroy(bounds)
+    {
+        //TODO: Particle effect
+        super.destroy(bounds, physObj =>
+        {
+            
+        });
+
+        //Play sound
+        playSound(SFX_ID.Orb);
+        playSound(SFX_ID.Spike);
+    }
 }
 
 //#endregion
+
+//#region Player
 
 /**
  * An "enum" for the player states
@@ -448,7 +499,7 @@ class Player extends PhysicsObject
     createAimingBall()
     {
         const ball = new PIXI.Graphics();
-        ball.beginFill(0x000fff, 0.5);
+        ball.beginFill(0xffff00);
         ball.drawCircle(0, 0, 10);
         ball.endFill();
         return ball;
@@ -503,13 +554,14 @@ class Player extends PhysicsObject
 
                 break;
             case PLAYER_STATE.Idle:
-                    
+                this.whenAlive();
                 break;
             case PLAYER_STATE.Aiming:
-                    this.updateAim();
+                this.whenAlive();
+                this.whenAim();
                 break;
             case PLAYER_STATE.Tutorial:
-                    
+                this.whenAlive();
                 break;
         }
 
@@ -520,11 +572,77 @@ class Player extends PhysicsObject
         //Face where the player is moving
         this.rotation = this.velocity.angle();
 
+        //Bounce off the walls
+        if(this.vectorPosition.x < CAMERA.boundingRectangle.left) this.bounce(CAMERA.boundingRectangle.left);
+        else if(this.vectorPosition.x > CAMERA.boundingRectangle.right) this.bounce(CAMERA.boundingRectangle.right);
+
         super.update();
     }
 
     /**
-     * Starts aiming the player
+     * Bounces the player off the specified bound
+     * @param {number} bound The bound to bounce off of
+     */
+    bounce(bound)
+    {
+        this.vectorPosition.x = bound;
+        this.velocity.x *= -1;
+        playSound(SFX_ID.Back);
+    }
+
+    /**
+     * Tasks to be run every frame when the player is alive
+     */
+    whenAlive()
+    {
+        //Check collisions with obstacles
+        this.checkCollisions();
+    }
+
+    /**
+     * Checks collisions with obstacles (orbs and spikes) and reacts accordingly
+     */
+    checkCollisions()
+    {
+        //The next "frame" to respawn obstacles in
+        const nextCameraBound = CAMERA.boundingRectangle.clone();
+        nextCameraBound.y -= nextCameraBound.height;
+
+        //Orbs
+        for(const orb of ORBS)
+        {
+            if(this.isColliding(orb))
+            {
+                //Get a lil boost
+                this.velocity = Victor(-this.velocity.x, -Math.abs(this.velocity.y) -500);
+
+                //Increase flings
+                this.flings++;
+
+                //Drestroy orb
+                orb.destroy(nextCameraBound);
+            }
+        }
+
+        //Spikes
+        for(const spike of SPIKES)
+        {
+            if(this.isColliding(spike))
+            {
+                //Knockback
+                this.velocity = this.velocity.clone().multiplyScalar(-0.5);
+
+                //Increase flings
+                this.flings--;
+
+                //Drestroy orb
+                spike.destroy(nextCameraBound);
+            }
+        }
+    }
+
+    /**
+     * Starts aiming the player, fsm transition
      */
     onAim()
     {
@@ -544,13 +662,25 @@ class Player extends PhysicsObject
     /**
      * Aiming tasks to be run every frame
      */
-    updateAim()
+    whenAim()
     {
         //Calculate fling force for this frame
         this.flingForce = mouseDownCanvasPosition.clone().subtract(mouseCanvasPosition);
         
         //Update aiming indicators
+        this.updateAimingIndicator();
         
+        //Ease to the number indicator position in world space (not container space)
+        CAMERA.easeTo(
+            toVector(this.aimingNumber.position).add(this.vectorPosition),
+            CAMERA_ZOOM_AIMING, CAMERA_EASING_FACTOR);
+    }
+
+    /**
+     * Updates the aiming indicator for this frame
+     */
+    updateAimingIndicator()
+    {
         //Since this container is a child of the player, it needs to rotate the opposite way to be upright
         this.aimingIndicator.rotation = -this.rotation;
 
@@ -571,20 +701,48 @@ class Player extends PhysicsObject
             //Scale the indicator based on the inverted lerp and also scale based on the fling force magnitude
             indicator.scale.set(
                 lerp(AIM_INDICATOR_SCALE_RANGE.x, AIM_INDICATOR_SCALE_RANGE.y, 1 - lerpAmount) *
-                Math.min(2, aimingVector.magnitude() * 0.005));
+                Math.min(1, aimingVector.magnitude() * 0.005));
+
+            //Lerp the alpha as well
+            indicator.alpha = lerp(0.3, 0.9, 1 - lerpAmount);
         }
 
-        //Make sure the aiming number isn't too small
-        this.aimingNumber.scale.set(Math.max(0.5, this.aimingNumber.scale.x));
+        //Make sure the aiming number isn't too small and is opaque
+        this.aimingNumber.scale.set(Math.max(0.5, this.aimingNumber.scale.x * 1.75));
+        this.aimingNumber.alpha = 1;
     }
 
-
+    /**
+     * Flings the player, fsm transition
+     */
     onFling()
     {
+        //This could happen if you click outside of the canvas since I want it to be seamless for the player
+        if(this.playerState !== PLAYER_STATE.Aiming)
+        {
+            return;
+        }
 
+        //Play sound
+        playSound(SFX_ID.Fling);
+
+        //Time goes back to normal, also make it go back quicker so it feels more responsive
+        currentGameSpeed = 0.5;
+        targetGameSpeed = 1;
+
+        //Hide aiming indicators
+        this.aimingIndicator.visible = false;
+
+        //Fling the player
+        this.velocity = this.flingForce.clone().multiplyScalar(5);
+
+        //Change state
+        this.playerState = PLAYER_STATE.Idle;
     }
 
 }
+
+//#endregion
 
 /**
  * A camera which can do basic panning and zooming
@@ -962,15 +1120,15 @@ let mouseUpCanvasPosition = Victor(0, 0);
  */
 const initializeInputManager = () =>
 {
-    //Update the mouse position on move
+    //Update the mouse position on move (over anything)
     document.onpointermove = e =>
     {
         mouseClientPosition = Victor(e.clientX, e.clientY);
         mouseCanvasPosition = mouseClientPosition.clone().subtract(APP_CLIENT_POSITION);
     };
 
-    //When mouse down
-    GAME_CONTAINER_ELEMENT.onpointerdown = e =>
+    //When mouse down (only over canvas)
+    APP.view.onpointerdown = e =>
     {
         //Stop from dragging on text
         e.preventDefault();
@@ -983,8 +1141,8 @@ const initializeInputManager = () =>
         PLAYER.onAim();
     };
 
-    //When mouse up
-    GAME_CONTAINER_ELEMENT.onpointerup = e =>
+    //When mouse up (over anything)
+    document.onpointerup = e =>
     {
         //Stop from dragging on text
         e.preventDefault();
@@ -992,6 +1150,9 @@ const initializeInputManager = () =>
 
         //Position when pressed
         mouseUpCanvasPosition = Victor(e.clientX, e.clientY).subtract(APP_CLIENT_POSITION);
+
+        //Fling the player
+        PLAYER.onFling();
     };
 }
 
@@ -1058,6 +1219,12 @@ const switchToScene = (sceneID) =>
 //#region Audio Manager
 
 /**
+ * The volume of all audio
+ * @type {number}
+ */
+const AUDIO_VOLUME = 0.2;
+
+/**
  * The sound effects in the game
  * @type {Howl[]}
  */
@@ -1083,6 +1250,8 @@ const SFX_ID = Object.freeze
  */
 const loadAudio = () =>
 {
+    Howler.volume(AUDIO_VOLUME);
+
     //Initialize sound effects
     for(const soundName in SFX_ID)
     {
