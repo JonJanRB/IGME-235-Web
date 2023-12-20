@@ -360,7 +360,7 @@ class Spike extends Obstacle
      * @param {number} colliderRadius The radius for the collider
      * @param {number} tint The color of the spike
      */
-    constructor(vectorPosition = Victor(0, 0), scaleAmount = 75, colliderRadius = scaleAmount*0.2, tint = 0xff4500)
+    constructor(vectorPosition = Victor(0, 0), scaleAmount = 75, colliderRadius = scaleAmount*0.3, tint = 0xff4500)
     {
         super(phys =>
         {
@@ -1138,9 +1138,10 @@ class MenuItem extends PIXI.Text
      * Creates a new menu item
      * @param {string} text The text label
      * @param {number} tint The color of the text
+     * @param {number} baseScale The original scale of the menu item
      * @param {Function} onClick The function to call when the button is clicked
      */
-    constructor(text, tint, onClick)
+    constructor(text, tint, baseScale, onClick)
     {
         super(text, BOLD_TEXT_STYLE);
 
@@ -1150,9 +1151,15 @@ class MenuItem extends PIXI.Text
         super.anchor.set(0.5);
 
         /**
+         * The base scale of the menu item. Used as reference for scaling
+         */
+        this.baseScale = baseScale;
+        super.scale.set(baseScale);
+
+        /**
          * The scale to ease to for tweeining
          */
-        this.targetScale = 1;
+        this.targetScale = baseScale;
 
         //Add the mouse events
         super.interactive = true;
@@ -1166,9 +1173,9 @@ class MenuItem extends PIXI.Text
         });
 
         //Tweening and sfx
-        super.on("pointerdown", () => this.targetScale = 0.9);
-        super.on("pointerover", () => this.interact(1.1, SFX_ID.Swipe));
-        super.on("pointerout", () => this.targetScale = 1);
+        super.on("pointerdown", () => this.targetScale = baseScale * 0.9);
+        super.on("pointerover", () => this.interact(baseScale * 1.1, SFX_ID.Swipe));
+        super.on("pointerout", () => this.targetScale = baseScale * 1);
 
         //Add to list
         MENU_ITEMS.push(this);
@@ -1702,6 +1709,12 @@ const playSound = soundID => SFX[soundID].play();
  */
 const MENU_ITEMS = [];
 
+/**
+ * Opens the specified url in a new tab
+ * @param {string} url url to be opened
+ */
+const openWebpage = url => window.open(url, "_blank");
+
 //#endregion
 
 //#endregion
@@ -1776,7 +1789,6 @@ const loadAssets = async() =>
         fill: 0xffffff,
         fontSize: 50,
         fontFamily: "Comfortaa",
-        fontWeight: "light",
         align: "center",
         justify: "center"
     });
@@ -1839,10 +1851,47 @@ const update = () =>
  */
 const initializeMenu = menuScene =>
 {
-    //DEBUG
-    const testButton = new MenuItem("Start", 0x000000, transitionToGame);
-    testButton.position.x = CAMERA_POSITION_DEFAULT.x;
-    menuScene.addChild(testButton);
+    //Add menu elements
+
+    //Title
+    const title = new PIXI.Text("Chrono-Fling", LIGHT_TEXT_STYLE);
+    title.position.set(CAMERA_POSITION_DEFAULT.x, CAMERA_POSITION_DEFAULT.y - APP_SIZE.y * 0.35);
+    title.tint = 0x000000;
+    title.anchor.set(0.5);
+    title.scale.set(1.25);
+    menuScene.addChild(title);
+
+    //Play
+    const playButton = new MenuItem("Play", 0x000000, 1, transitionToGame);
+    playButton.position.x = CAMERA_POSITION_DEFAULT.x;
+    menuScene.addChild(playButton);
+
+    //Documentation
+    const docButton = new MenuItem("Doc", 0x000000, 0.6, () => openWebpage("doc.html"));
+    docButton.position.set(CAMERA_POSITION_DEFAULT.x - APP_SIZE.x * 0.4,
+        CAMERA_POSITION_DEFAULT.y + APP_SIZE.y * 0.45);
+    docButton.tint = 0x000fff;
+    menuScene.addChild(docButton);
+
+    //Repo
+    const repoButton = new MenuItem("Repo", 0x000000, 0.6, () => openWebpage("https://github.com/JonJanRB/IGME-235-Web"));
+    repoButton.position.set(CAMERA_POSITION_DEFAULT.x + APP_SIZE.x * 0.4,
+        CAMERA_POSITION_DEFAULT.y + APP_SIZE.y * 0.45);
+        repoButton.tint = 0x000fff;
+    menuScene.addChild(repoButton);
+
+    //Proposal
+    const proposalButton = new MenuItem("Proposal", 0x000000, 0.6, () => openWebpage("proposal.html"));
+    proposalButton.position.set(CAMERA_POSITION_DEFAULT.x, CAMERA_POSITION_DEFAULT.y + APP_SIZE.y * 0.45);
+    proposalButton.tint = 0x000fff;
+    menuScene.addChild(proposalButton);
+    
+    //Author
+    const authorButton = new MenuItem("By Jonathan Jan", 0x000000, 0.4, () => openWebpage("../project1/"));
+    authorButton.position.set(CAMERA_POSITION_DEFAULT.x,
+        CAMERA_POSITION_DEFAULT.y - APP_SIZE.y * 0.25);
+        authorButton.tint = 0x000fff;
+    menuScene.addChild(authorButton);
 
     //Setup menu
     resetMenu();
