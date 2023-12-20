@@ -1,8 +1,3 @@
-//These are used for the intellisense and then commented out to run
-// import * as PIXI from "./lib/pixi.js";
-// import * as Victor from "./lib/victor.js";
-// import {Howl, Howler} from "./lib/howler.js";
-
 "use strict";
 
 //#region Classes (these are here, rather than another file, for intellisense)
@@ -1827,14 +1822,6 @@ window.onload = loadFonts;
  */
 const loadAssets = async() =>
 {
-    //DEBUG
-    // PIXI.Assets.addBundle('sprites', {
-    //     spaceship: 'images/spaceship.png',
-    //     explosions: 'images/explosions.png',
-    //     move: 'images/move.png'
-    //   });
-    // ASSETS = await PIXI.Assets.loadBundle('sprites');
-
     //Create fonts
     BOLD_TEXT_STYLE = new PIXI.TextStyle
     ({
