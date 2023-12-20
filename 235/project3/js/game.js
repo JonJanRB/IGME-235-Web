@@ -885,7 +885,7 @@ class Player extends PhysicsObject
         playSound(SFX_ID.Death);
 
         //Record death height
-        deathHeight = this.vectorPosition.y;
+        recordDeathHeight(Math.ceil(this.vectorPosition.y * -0.1) + 100);
     }
 
     /**
@@ -911,6 +911,7 @@ class Player extends PhysicsObject
     {
         //Completely stop time
         targetGameSpeed = 0;
+        currentGameSpeed = 0;
     }
 
     //#endregion
@@ -1334,7 +1335,65 @@ let LIGHT_TEXT_STYLE;
  * The last height which the player died at
  * @type {number}
  */
-let deathHeight = 0;
+let lastDeathHeight = 0;
+
+/**
+ * The highest height which the player died at
+ * @type {number}
+ */
+let highestDeathHeight = 0;
+
+/**
+ * The label for the highest death height
+ * @type {PIXI.Text}
+ */
+let HIGHEST_LABEL;
+
+/**
+ * The label for the most recent death height
+ * @type {PIXI.Text}
+ */
+let LAST_HEIGHT_LABEL;
+
+/**
+ * Sets the last death height to this one and overwrites highest if it is higher
+ * @param {number} newHeight The new death height
+ */
+const recordDeathHeight = newHeight =>
+{
+    lastDeathHeight = newHeight;
+    if(newHeight > highestDeathHeight) saveHighestsDeath(newHeight);
+}
+
+/**
+ * The prefix for local storage
+ * @type {string}
+ */
+const LS_PREFIX = "jmj2097-chronoFling-";
+
+/**
+ * The local storage key for the highest death height
+ */
+const LS_HIGHEST_DEATH = LS_PREFIX + "highestDeath";
+
+/**
+ * Saves the highest death height to local storage
+ * @param {number} height The height to save
+ */
+const saveHighestsDeath = height =>
+{
+    highestDeathHeight = height;
+    localStorage.setItem(LS_HIGHEST_DEATH, highestDeathHeight.toString());
+}
+
+/**
+ * Loads the highest death height from local storage
+ */
+const loadHighestDeath = () =>
+{
+    const saved = localStorage.getItem(LS_HIGHEST_DEATH);
+    if(saved) highestDeathHeight = parseInt(saved);
+}
 
 //#endregion
 
@@ -1739,6 +1798,9 @@ const init = () =>
     //Set the client center
     APP_CLIENT_CENTER = APP_CLIENT_POSITION.clone().add(APP_SIZE.clone().multiplyScalar(0.5));
 
+    //Load local storage
+    loadHighestDeath();
+
     //Load any assets
     loadAssets();
 }
@@ -1893,6 +1955,22 @@ const initializeMenu = menuScene =>
         authorButton.tint = 0x000fff;
     menuScene.addChild(authorButton);
 
+    //Highest death
+    HIGHEST_LABEL = new PIXI.Text(" ", LIGHT_TEXT_STYLE);
+    HIGHEST_LABEL.position.set(CAMERA_POSITION_DEFAULT.x, CAMERA_POSITION_DEFAULT.y + APP_SIZE.y * 0.25);
+    HIGHEST_LABEL.tint = 0x00bb00;
+    HIGHEST_LABEL.anchor.set(0.5);
+    HIGHEST_LABEL.scale.set(0.5);
+    menuScene.addChild(HIGHEST_LABEL);
+
+    //Recent death
+    LAST_HEIGHT_LABEL = new PIXI.Text(" ", LIGHT_TEXT_STYLE);
+    LAST_HEIGHT_LABEL.position.set(CAMERA_POSITION_DEFAULT.x, CAMERA_POSITION_DEFAULT.y + APP_SIZE.y * 0.15);
+    LAST_HEIGHT_LABEL.tint = 0xff0000;
+    LAST_HEIGHT_LABEL.anchor.set(0.5);
+    LAST_HEIGHT_LABEL.scale.set(0.5);
+    menuScene.addChild(LAST_HEIGHT_LABEL);
+
     //Setup menu
     resetMenu();
 }
@@ -1924,6 +2002,18 @@ const resetMenu = () =>
     //Transition camera
     CAMERA.zoom = CAMERA_ZOOM_DEFAULT;
     CAMERA.position = CAMERA_POSITION_DEFAULT.clone();
+
+    //Highest death
+    if(highestDeathHeight > 0)
+    {
+        HIGHEST_LABEL.text = `Farthest reached: ${highestDeathHeight}m`;
+    }
+
+    //Recent death
+    if(lastDeathHeight > 0)
+    {
+        LAST_HEIGHT_LABEL.text = `You just reached reached: ${lastDeathHeight}m`;
+    }
 }
 
 //#endregion
@@ -1944,8 +2034,17 @@ const initializeGameScene = gameScene =>
     {
         gameScene.addChild(object);
     }
+
     //Add wave to the scene
     gameScene.addChild(WAVE);
+
+    //Add tutorial text
+    const title = new PIXI.Text("Drag anywhere and\nrelease to fling", LIGHT_TEXT_STYLE);
+    title.position.set(CAMERA_POSITION_DEFAULT.x, CAMERA_POSITION_DEFAULT.y);
+    title.tint = 0xffffff;
+    title.anchor.set(0.5);
+    title.scale.set(0.5);
+    gameScene.addChild(title);
 }
 
 /**
