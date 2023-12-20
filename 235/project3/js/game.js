@@ -438,6 +438,11 @@ const AIM_INDICATOR_SCALE_RANGE = Victor(0.2, 1.2);
 const FLING_FORCE_MIN = 3500;
 
 /**
+ * The amount of flings to start with
+ */
+const STARTING_FLINGS = 5;
+
+/**
  * The player of the game
  */
 class Player extends PhysicsObject
@@ -466,7 +471,7 @@ class Player extends PhysicsObject
          * The state of the player represented by the PLAYER_STATE enum
          * @type {number}
          */
-        this.playerState = PLAYER_STATE.Tutorial;
+        this.playerState = PLAYER_STATE.Dead;
 
         /**@type {number}*/this.flings = 0;
 
@@ -494,10 +499,11 @@ class Player extends PhysicsObject
      */
     reset()
     {
+        this.playerState = PLAYER_STATE.Tutorial;
         this.vectorPosition = CAMERA_POSITION_DEFAULT.clone();
         this.velocity = Victor(0, 0);
-        this.setFlingAmount(5);
-        this.flingForce = PI_OVER_2;//Up
+        this.setFlingAmount(STARTING_FLINGS);
+        this.flingForce = Victor(0, 0);
     }
 
     //#region Aim Indicator
@@ -890,7 +896,7 @@ class Player extends PhysicsObject
         //Check if whole screen is white
         if(WAVE.y < CAMERA.boundingRectangle.top)
         {
-            switchToScene(SCENE_ID.Menu);
+            transitionToMenu();
         }
     }
 
@@ -974,8 +980,10 @@ class Camera
      */
     easeTo(targetPosition, targetZoom, easingFactor)
     {
-        this.panBy(targetPosition.clone().subtract(this.position).multiplyScalar(easingFactor));
-        this.zoomBy((targetZoom - this.zoom) * easingFactor);
+        this.position = lerp2D(this.position, targetPosition, easingFactor);
+        // this.panBy(targetPosition.clone().subtract(this.position).multiplyScalar(easingFactor));
+        this.zoom = lerp(this.zoom, targetZoom, easingFactor);
+        // this.zoomBy((targetZoom - this.zoom) * easingFactor);
     }
 
     /**
@@ -1062,8 +1070,8 @@ class Wave extends PIXI.Graphics
     {
         super();
 
-        //Start below player
-        super.position.set(0, CAMERA_POSITION_DEFAULT.y + 300);
+        //Preform any resetting
+        this.reset();
 
         //Scale to width of app, height is 2 * app height
         super.scale.set(APP_SIZE.x, APP_SIZE.y * 2);
@@ -1072,7 +1080,6 @@ class Wave extends PIXI.Graphics
         super.beginFill(0xffffff);
         super.drawRect(0, 0, 1, 1);
         super.endFill();
-        STAGE.addChild(this);
 
         /**
          * The collider of the wave
@@ -1105,6 +1112,89 @@ class Wave extends PIXI.Graphics
     isColliding(point)
     {
         return this.bounds.contains(point.x, point.y);
+    }
+
+    /**
+     * Resets this wave
+     */
+    reset()
+    {
+        //Start below player
+        super.position.set(0, CAMERA_POSITION_DEFAULT.y + 300);
+    }
+}
+
+/**
+ * The easing factor for menu item scaling
+ */
+const MENU_EASING_FACTOR = 0.25;
+
+/**
+ * Represents a clickable text UI button
+ */
+class MenuItem extends PIXI.Text
+{
+    /**
+     * Creates a new menu item
+     * @param {string} text The text label
+     * @param {number} tint The color of the text
+     * @param {Function} onClick The function to call when the button is clicked
+     */
+    constructor(text, tint, onClick)
+    {
+        super(text, BOLD_TEXT_STYLE);
+
+        super.tint = tint;
+
+        //Set the anchor to the center
+        super.anchor.set(0.5);
+
+        /**
+         * The scale to ease to for tweeining
+         */
+        this.targetScale = 1;
+
+        //Add the mouse events
+        super.interactive = true;
+        super.buttonMode = true;
+
+        //The action
+        super.on("pointerup", () =>
+        {
+            onClick();
+            playSound(SFX_ID.Select);
+        });
+
+        //Tweening and sfx
+        super.on("pointerdown", () => this.targetScale = 0.9);
+        super.on("pointerover", () => this.interact(1.1, SFX_ID.Swipe));
+        super.on("pointerout", () => this.targetScale = 1);
+
+        //Add to list
+        MENU_ITEMS.push(this);
+    }
+
+    /**
+     * Updates this menu item
+     */
+    update()
+    {
+        //Ease to target scale
+        super.scale.set(lerp(super.scale.x, this.targetScale, MENU_EASING_FACTOR));
+    }
+
+    /**
+     * The standard interaction with menu items
+     * @param {number} targetScale The target scale to ease to
+     * @param {number} sfxID The sound effect id to play
+     */
+    interact(targetScale, sfxID)
+    {
+        //Set target scale
+        this.targetScale = targetScale;
+
+        //Play sound
+        playSound(sfxID);
     }
 }
 
@@ -1271,7 +1361,7 @@ const TIME_EASING_FACTOR = 0.1;
 const updatePhysicsManager = () =>
 {
     //Ease to the target game speed
-    currentGameSpeed += (targetGameSpeed - currentGameSpeed) * TIME_EASING_FACTOR;
+    currentGameSpeed = lerp(currentGameSpeed, targetGameSpeed, TIME_EASING_FACTOR);
     //Compute the time speed, use elapsed SECONDS so convert from ms
     timeSpeed = currentGameSpeed * APP.ticker.elapsedMS * 0.001;
 }
@@ -1493,9 +1583,39 @@ const getScene = (sceneID) => SCENES[sceneID];
  */
 const switchToScene = (sceneID) =>
 {
-    SCENES[currentScene].visible = false;
+    getScene(currentScene).visible = false;
     currentScene = sceneID;
-    SCENES[sceneID].visible = true;
+    getScene(sceneID).visible = true;
+}
+
+/**
+ * How high the transition should start when easing into the menu
+ * @type {number}
+ */
+const MENU_TRANSITION_HEIGHT = -1000;
+
+/**
+ * Switches to menu and sets up the scene
+ */
+const transitionToMenu = () =>
+{
+    //Setup menu
+    resetMenu();
+
+    //Move camera up for transition
+    CAMERA.position.y = CAMERA_POSITION_DEFAULT.y + MENU_TRANSITION_HEIGHT;
+
+    //Switch scene
+    switchToScene(SCENE_ID.Menu);
+}
+
+/**
+ * Switches to game and sets up the scene
+ */
+const transitionToGame = () =>
+{
+    resetGame();
+    switchToScene(SCENE_ID.Game);
 }
 
 //#endregion
@@ -1571,6 +1691,16 @@ const importSfx = soundName =>
  * @param {number} soundID The sound id from the SFX_ID enum
  */
 const playSound = soundID => SFX[soundID].play();
+
+//#endregion
+
+//#region Menu Manager
+
+/**
+ * List of all menu items
+ * @type {MenuItem[]}
+ */
+const MENU_ITEMS = [];
 
 //#endregion
 
@@ -1668,8 +1798,9 @@ const start = () =>
 
     //Initialize the scenes
     initializeScenes();
-    switchToScene(SCENE_ID.Game);
     initializeGameScene(getScene(SCENE_ID.Game));
+    initializeMenu(getScene(SCENE_ID.Menu));
+    switchToScene(SCENE_ID.Menu);
 
     //Add debug to the stage to be visible over everything
     STAGE.addChild(DEBUG);
@@ -1693,9 +1824,6 @@ const update = () =>
             updateGame();
             break;
     }
-
-
-    /*-----Ending tasks of update, nothing past here-----*/
     
     //Update the debugger AFTER objects are updated so there is no lag in positioning
     DEBUG.update();
@@ -1706,11 +1834,47 @@ const update = () =>
 //#region Menu Scene
 
 /**
+ * Initialize the menu scene
+ * @param {PIXI.Container} menuScene The scene to initialize the menu into
+ */
+const initializeMenu = menuScene =>
+{
+    //DEBUG
+    const testButton = new MenuItem("Start", 0x000000, transitionToGame);
+    testButton.position.x = CAMERA_POSITION_DEFAULT.x;
+    menuScene.addChild(testButton);
+
+    //Setup menu
+    resetMenu();
+}
+
+/**
  * Updates the menu scene
  */
 const updateMenu = () =>
 {
+    //Ease to menu
+    CAMERA.easeTo(CAMERA_POSITION_DEFAULT, CAMERA_ZOOM_DEFAULT, CAMERA_AIMING_EASING_FACTOR);
 
+    //Update menu items
+    for(const item of MENU_ITEMS) item.update();
+    
+    //Update camera
+    CAMERA.update();
+    updateInputManager();
+}
+
+/**
+ * Resets everything in the menu to starting values
+ */
+const resetMenu = () =>
+{
+    //Set background
+    APP.renderer.backgroundColor = 0xffffff;
+
+    //Transition camera
+    CAMERA.zoom = CAMERA_ZOOM_DEFAULT;
+    CAMERA.position = CAMERA_POSITION_DEFAULT.clone();
 }
 
 //#endregion
@@ -1731,10 +1895,8 @@ const initializeGameScene = gameScene =>
     {
         gameScene.addChild(object);
     }
-
-    //DEBUG this should not be called here, rather it should be called when start is pressed
-    //Set the game up
-    resetGame();
+    //Add wave to the scene
+    gameScene.addChild(WAVE);
 }
 
 /**
@@ -1750,9 +1912,6 @@ const updateGame = () =>
     //Update camera
     CAMERA.update();
     updateInputManager();
-    
-
-    /*-----Ending tasks of update, nothing past here-----*/
 
     //Update physics manager
     updatePhysicsManager();
@@ -1766,18 +1925,24 @@ const updateGame = () =>
  */
 const resetGame = () =>
 {
+    //Set background
+    APP.renderer.backgroundColor = 0x000000;
+
     //Reset player
     PLAYER.reset();
 
     //Reset camera
     CAMERA.zoom = CAMERA_ZOOM_DEFAULT;
-    CAMERA.position = CAMERA_POSITION_DEFAULT;
+    CAMERA.position = CAMERA_POSITION_DEFAULT.clone();
 
     //Compute the matrix and bounding rectangle
     CAMERA.computeMatrix();
 
     //Reset other physics objects
     resetObjects(CAMERA.boundingRectangle);
+
+    //Reset the wave
+    WAVE.reset();
 }
 
 //#endregion
@@ -1816,10 +1981,11 @@ const randomRange2D = bounds =>
     Victor(randomRange(bounds.x, bounds.right), randomRange(bounds.y, bounds.bottom));
 
 /**
- * Linearly interpolates between two numbers
+ * Linearly interpolates between two numbers.
+ * If you set something to the lerp of itself, target, and easing, it is an easing function too
  * @param {number} min The lower bound
  * @param {number} max The upper bound
- * @param {number} progress How far along the lerp it is (0-1)
+ * @param {number} progress How far along the lerp it is (0-1) or easing factor
  * @returns {number} The lerped vector
  */
 const lerp = (min, max, progress) => min + (max - min) * progress;
@@ -1828,7 +1994,7 @@ const lerp = (min, max, progress) => min + (max - min) * progress;
  * Linearly interpolates between two vectors
  * @param {Victor} min The lower bound of the lerp
  * @param {Victor} max The upper bound of the lerp
- * @param {number} progress How far along the lerp it is (0-1)
+ * @param {number} progress How far along the lerp it is (0-1) or easing factor
  * @returns {Victor} The lerped vector
  */
 const lerp2D = (min, max, progress) => min.clone().add(max.clone().subtract(min).multiplyScalar(progress));
