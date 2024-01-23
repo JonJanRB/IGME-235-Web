@@ -1,0 +1,41 @@
+:root
+{
+    --contrast-color: #d6d6d6;
+    --ui-bg: #2c2c2c;
+    --bg: #1a1a1a;
+}
+
+body
+{
+    background-color: var(--bg);
+    color: var(--contrast-color);
+    font-family: 'Roboto', sans-serif;
+    padding: 2rem 10rem;
+}
+
+/* #region Links */
+a
+{
+
+}
+a:link
+{
+    color: #00c3ff;
+    text-decoration: none;
+}
+a:visited
+{
+    color: #b1d9ff;
+}
+a:focus,
+a:hover
+{
+    color: #00eeff;
+    text-decoration: underline;
+}
+a:active
+{
+    color: #0088ff;
+}
+
+/* #endregion */
