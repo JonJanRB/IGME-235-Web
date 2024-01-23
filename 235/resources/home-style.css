@@ -44,6 +44,8 @@ h2
     padding: 25px;
     margin: 0px;
     box-sizing: border-box;
+    overflow-y: auto;
+    max-height: 90vh;
 }
 
 #info
