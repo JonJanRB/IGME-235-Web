@@ -10,7 +10,11 @@ body
     background-color: var(--bg);
     color: var(--contrast-color);
     font-family: 'Roboto', sans-serif;
-    padding: 2rem 10rem;
+    padding: 2% 20%;
+    margin: 0px;
+    box-sizing: border-box;
+    width: 100vw;
+    height: 100vh;
 }
 
 /* #region Links */
